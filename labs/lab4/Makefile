@@ -5,7 +5,7 @@ ALEX_OPTS = -g
 HAPPY = happy
 HAPPY_OPTS=-agc
 
-SRC = ./neo
+SRC = src
 
 PROG = lex
 
@@ -29,4 +29,4 @@ clean:
 	rm -rf obj *.o *.hi lex \
 		*.alex.hs *.happy.hs
 test:
-	./$(PROG) < test.hs
+	@./$(PROG) < test.hs
