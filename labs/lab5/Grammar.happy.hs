@@ -174,7 +174,7 @@ happyReduction_1 (happy_x_6 `HappyStk`
 	case happyOut4 happy_x_4 of { happy_var_4 -> 
 	case happyOut4 happy_x_6 of { happy_var_6 -> 
 	happyIn4
-		 (App (Bind happy_var_2 happy_var_6) happy_var_4
+		 (Let happy_var_2 happy_var_4 happy_var_6
 	) `HappyStk` happyRest}}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -210,7 +210,7 @@ happyReduction_3 (happy_x_6 `HappyStk`
 	case happyOut4 happy_x_4 of { happy_var_4 -> 
 	case happyOut4 happy_x_6 of { happy_var_6 -> 
 	happyIn4
-		 (IfThenElse happy_var_2 happy_var_4 happy_var_6
+		 (If happy_var_2 happy_var_4 happy_var_6
 	) `HappyStk` happyRest}}}
 
 #if __GLASGOW_HASKELL__ >= 710
@@ -707,8 +707,8 @@ data AST
   | Float Float
   | Boolean Bool
   
-  | LetIn String AST AST
-  | IfThenElse AST AST AST
+  | Let String AST AST
+  | If AST AST AST
 
   | Lambda String AST TypeExp
 

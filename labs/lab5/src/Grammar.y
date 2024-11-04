@@ -142,9 +142,9 @@ AST :
 
 | var                                          { Variable $1 }-}
 
-Expr : let var '=' Expr in Expr                         { App (Bind $2 $6) $4 }
+Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      | '(' '\\' var "->" Expr ')' "::" TypeExp          { Lambda $3 $5 $8 }
-     | if Expr then Expr else Expr                      { IfThenElse $2 $4 $6 }
+     | if Expr then Expr else Expr                      { If $2 $4 $6 }
      
      | Expr "==" Expr              { Equals $1 $3 }
      | Expr ">=" Expr              { Or (Equals $1 $3) (Gt $1 $3) }
@@ -243,8 +243,8 @@ data AST
   | Float Float
   | Boolean Bool
   
-  | LetIn String AST AST
-  | IfThenElse AST AST AST
+  | Let String AST AST
+  | If AST AST AST
 
   | Lambda String AST TypeExp
 

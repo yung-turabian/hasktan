@@ -1,4 +1,6 @@
 module Main where
+import Control.Monad (unless)
+import System.IO
 import Grammar
 import Lexer
 
@@ -19,15 +21,28 @@ eval (Variable s) env = eval (envLookup s env) env
 eval (LetIn s e1 e2) env = eval e2 env'
  where env' = envBind s e1 env
 
-  
-
 
 run :: E AST -> Int
 run (Ok e) = eval e emptyEnv
 run (Failed err) = error ("Parsing failed: " ++ err)-}
 
+repl :: IO ()
+repl = do
+ putStr "$ "
+ input <- getLine
+ unless( input == ":quit" || input == "exit") $ do
+  print (parseHasquelito(scanTokens input))
+  repl
+
+main :: IO ()
 main = do
-  s <- getContents
-  let ast = parseHasquelito (scanTokens s)
+ hSetBuffering stdout NoBuffering
+ putStrLn "Welcome to the Hasktan REPL! Type :quit to leave."
+ repl
+
+
+{-
+  -- s <- getContents
   print ast
-  --print (run ast)
+	main
+  --print (run ast) -}

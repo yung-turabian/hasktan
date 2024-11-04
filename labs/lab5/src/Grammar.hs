@@ -26,7 +26,7 @@ data HappyAbsSyn t4 t5 t6 t7 t8 t9 t10 t11
 	| HappyAbsSyn11 t11
 
 happyExpList :: Happy_Data_Array.Array Int Int
-happyExpList = Happy_Data_Array.listArray (0,353) ([49152,8203,3331,0,4,0,0,0,4096,0,12288,2016,5,0,15,0,56,40960,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24064,6400,104,7168,0,80,14336,0,160,28672,0,320,57344,36901,1665,0,0,0,32768,3,2560,0,0,0,1,0,32768,0,188,53298,0,49152,24448,20,0,0,1,224,32768,2,448,0,5,0,0,0,16384,61464,643,0,0,0,7168,12800,80,14336,25600,160,28672,51200,320,57344,36864,641,49152,8203,3331,32768,16407,6662,0,32815,13324,0,94,26649,0,188,53298,0,376,41060,1,752,16584,3,1504,33168,6,3008,800,13,6016,1600,26,0,32,0,24064,6400,104,0,0,2560,0,0,5120,0,384,10240,0,768,20480,0,1536,40960,0,3072,16384,1,6144,32768,2,12288,0,5,0,0,10,0,0,20,0,0,0,0,0,0,0,192,0,0,384,0,12032,3200,52,0,0,0,0,0,0,0,16,0,0,0,0,0,0,0,49152,1,1280,0,0,0,0,32815,13324,0,12544,2016,5,24640,4032,10,376,41060,1,752,16584,3,0,32259,81,0,1,0,0,63500,321,0,61464,643,448,0,8,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,28672,0,512,0,512,2048,49152,1,2048,0,2048,0,0,0,0,0,0
+happyExpList = Happy_Data_Array.listArray (0,346) ([49152,8203,3331,0,4,0,0,0,4096,0,12288,2016,5,0,15,0,56,40960,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,24064,6400,104,7168,0,80,14336,0,160,28672,0,320,57344,36901,1665,0,0,0,32768,3,2560,0,0,0,1,0,32768,0,188,53298,0,49152,24448,20,0,0,1,224,32768,2,448,0,5,0,0,0,16384,61464,643,0,0,0,7168,12800,80,14336,25600,160,28672,51200,320,57344,36864,641,49152,8203,3331,32768,16407,6662,0,32815,13324,0,94,26649,0,188,53298,0,376,41060,1,752,16584,3,1504,33168,6,0,0,8,6016,1600,26,0,32,0,24064,6400,104,0,0,2560,0,0,0,0,384,10240,0,768,20480,0,1536,40960,0,3072,16384,1,6144,32768,2,12288,0,5,0,0,10,0,0,20,0,0,0,0,0,0,0,192,0,0,384,0,12032,3200,52,0,0,0,0,0,0,0,16,0,0,0,0,0,0,0,49152,1,1280,0,0,0,0,32815,13324,0,12544,2016,5,24640,4032,10,376,41060,1,752,16584,3,0,32259,81,0,1,0,0,63500,321,0,61464,643,448,0,8,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,28672,0,512,0,512,2048,49152,1,2048,0,2048,0,0,0,0,0,0
 	])
 
 {-# NOINLINE happyExpListPerState #-}
@@ -95,7 +95,7 @@ action_5 _ = happyReduce_20
 
 action_6 _ = happyReduce_25
 
-action_7 _ = happyReduce_14
+action_7 _ = happyReduce_12
 
 action_8 _ = happyReduce_27
 
@@ -444,22 +444,8 @@ action_39 (7) = happyGoto action_6
 action_39 (10) = happyGoto action_7
 action_39 _ = happyFail (happyExpListPerState 39)
 
-action_40 (15) = happyShift action_8
-action_40 (16) = happyShift action_9
-action_40 (17) = happyShift action_10
-action_40 (18) = happyShift action_2
-action_40 (20) = happyShift action_11
-action_40 (30) = happyShift action_12
-action_40 (33) = happyShift action_13
-action_40 (34) = happyShift action_14
-action_40 (41) = happyShift action_15
-action_40 (43) = happyShift action_16
 action_40 (44) = happyShift action_17
-action_40 (4) = happyGoto action_45
-action_40 (5) = happyGoto action_4
-action_40 (6) = happyGoto action_5
-action_40 (7) = happyGoto action_6
-action_40 (10) = happyGoto action_7
+action_40 (10) = happyGoto action_45
 action_40 _ = happyFail (happyExpListPerState 40)
 
 action_41 (15) = happyShift action_8
@@ -503,11 +489,9 @@ action_43 _ = happyFail (happyExpListPerState 43)
 
 action_44 (46) = happyShift action_40
 action_44 (48) = happyShift action_41
-action_44 _ = happyReduce_13
+action_44 _ = happyReduce_14
 
-action_45 (46) = happyShift action_40
-action_45 (48) = happyShift action_41
-action_45 _ = happyReduce_12
+action_45 _ = happyReduce_13
 
 action_46 (26) = happyShift action_32
 action_46 (27) = happyShift action_33
@@ -919,30 +903,30 @@ happyReduction_11 (HappyAbsSyn4  happy_var_3)
 	)
 happyReduction_11 _ _ _  = notHappyAtAll 
 
-happyReduce_12 = happySpecReduce_3  4 happyReduction_12
-happyReduction_12 (HappyAbsSyn4  happy_var_3)
+happyReduce_12 = happySpecReduce_1  4 happyReduction_12
+happyReduction_12 (HappyAbsSyn10  happy_var_1)
+	 =  HappyAbsSyn4
+		 (happy_var_1
+	)
+happyReduction_12 _  = notHappyAtAll 
+
+happyReduce_13 = happySpecReduce_3  4 happyReduction_13
+happyReduction_13 (HappyAbsSyn10  happy_var_3)
 	_
 	(HappyAbsSyn4  happy_var_1)
 	 =  HappyAbsSyn4
 		 (Cons happy_var_1 happy_var_3
 	)
-happyReduction_12 _ _ _  = notHappyAtAll 
+happyReduction_13 _ _ _  = notHappyAtAll 
 
-happyReduce_13 = happySpecReduce_3  4 happyReduction_13
-happyReduction_13 (HappyAbsSyn4  happy_var_3)
+happyReduce_14 = happySpecReduce_3  4 happyReduction_14
+happyReduction_14 (HappyAbsSyn4  happy_var_3)
 	_
 	(HappyAbsSyn4  happy_var_1)
 	 =  HappyAbsSyn4
 		 (Concat happy_var_1 happy_var_3
 	)
-happyReduction_13 _ _ _  = notHappyAtAll 
-
-happyReduce_14 = happySpecReduce_1  4 happyReduction_14
-happyReduction_14 (HappyAbsSyn10  happy_var_1)
-	 =  HappyAbsSyn4
-		 (happy_var_1
-	)
-happyReduction_14 _  = notHappyAtAll 
+happyReduction_14 _ _ _  = notHappyAtAll 
 
 happyReduce_15 = happySpecReduce_1  4 happyReduction_15
 happyReduction_15 (HappyAbsSyn5  happy_var_1)
