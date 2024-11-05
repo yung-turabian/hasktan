@@ -4,6 +4,7 @@ import System.IO
 import Grammar
 import Lexer
 
+
 {-
 type Env = String -> AST
 emptyEnv = error "Not found"
@@ -36,13 +37,10 @@ repl = do
 
 main :: IO ()
 main = do
- hSetBuffering stdout NoBuffering
- putStrLn "Welcome to the Hasktan REPL! Type :quit to leave."
- repl
+ --hSetBuffering stdout NoBuffering
+ --putStrLn "Welcome to the Hasktan REPL! Type :quit to leave."
+ --repl
 
-
-{-
-  -- s <- getContents
-  print ast
-	main
-  --print (run ast) -}
+  s <- getContents
+  let ast = parseHasquelito (scanTokens s)
+  print ast 

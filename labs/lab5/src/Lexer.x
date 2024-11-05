@@ -59,6 +59,7 @@ tokens :-
  "^"			{ \p s -> (POWER) p }
  quot			{ \p s -> (QUOT) p }
  rem			{ \p s -> (REM) p }
+ not                    { \p s -> (NOT) p }
 
  -- Types
  "->"			{ \p s -> (ARROW) p }
@@ -122,6 +123,7 @@ data Token
  | BIND     AlexPosn
  | POWER    AlexPosn
  | QUOT     AlexPosn
+ | NOT      AlexPosn
  | REM      AlexPosn
  | LAMBDA   AlexPosn
 

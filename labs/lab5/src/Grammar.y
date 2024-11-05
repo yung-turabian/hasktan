@@ -94,7 +94,7 @@ var { VAR p $$ }
 %nonassoc quot rem
 
 
-%left NEG-}
+%left NEG -}
 
 %right in "->" else
 %nonassoc '>' '<' "==" ">=" "<=" "/="
@@ -102,6 +102,8 @@ var { VAR p $$ }
 %right "++" ':'
 %left '+' '-'
 %left '*' '/'
+
+%left Quot
 
 
 %%
@@ -112,29 +114,29 @@ AST :
 | int                                          { Integer $1 }
 | float                                        { Float $1 }
 
-| let var '=' AST in AST                       { LetIn $2 $4 $6 }
-| if AST then AST else AST                     { IfThenElse $2 $4 $6 }
+| let var '=' AST in AST                       { Let $2 $4 $6 }
+| if AST then AST else AST                     { If $2 $4 $6 }
 | '(' '\\'var "->" AST ')' "::" TypeExp        { Lambda $3 $5 $8 }
 
-| AST AST %prec APP                            { App $1 $2 }
+| AST AST                                      { App $1 $2 }
 
 | AST "&&" AST                                 { And $1 $3 }
 | AST "||" AST                                 { Or $1 $3 }
 
-| AST '+' AST                                  { Plus $1 $3 }
-| AST '-' AST                                  { Minus $1 $3 }
-| AST '*' AST                                  { Times $1 $3 }
-| AST '/' AST                                  { Divide $1 $3 }
+| AST '+' AST                                  { Add $1 $3 }
+| AST '-' AST                                  { Sub $1 $3 }
+| AST '*' AST                                  { Mul $1 $3 }
+| AST '/' AST                                  { Div $1 $3 }
 
 | quot AST AST                                 { Quot $2 $3 }
 | rem AST AST                                  { Rem $2 $3 }
 
-| '-' AST %prec NEG                            { Negate $2 }
+| '-' AST                                      { Sub (Integer 0) $2  }
 
 | AST "==" AST                                 { Equals $1 $3 }
 | AST ">=" AST                                 { Or (Equals $1 $3) (Gt $1 $3) }
 | AST "<=" AST                                 { Or (Equals $1 $3) (Lt $1 $3) }
-| AST "/=" AST                                 { NotEq $1 $3 } 
+-- | AST "/=" AST                                 { NotEq $1 $3 } 
 | AST '>' AST                                  { Gt $1 $3 }
 | AST '<' AST                                  { Lt $1 $3 }
 
@@ -142,14 +144,15 @@ AST :
 
 | var                                          { Variable $1 }-}
 
+
 Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
-     | '(' '\\' var "->" Expr ')' "::" TypeExp          { Lambda $3 $5 $8 }
+     | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp         { Lambda $3 $5 $8 $10 }
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
      
      | Expr "==" Expr              { Equals $1 $3 }
      | Expr ">=" Expr              { Or (Equals $1 $3) (Gt $1 $3) }
      | Expr "<=" Expr              { Or (Equals $1 $3) (Lt $1 $3) }
-     | Expr "/=" Expr              { NotEq $1 $3 } 
+     | Expr "/=" Expr              { App (Not) (Equals $1 $3) } 
      | Expr '>' Expr               { Gt $1 $3 }
      | Expr '<' Expr               { Lt $1 $3 }
 
@@ -159,23 +162,21 @@ Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      | Expr ':' Expr               { Cons $1 $3 }
      | Expr "++" Expr              { Concat $1 $3 }
      | List                        { $1 }
-
      
      | Form                        { $1 }
 
 Form : Form '+' Form               { Add $1 $3 }
      | Form '-' Form               { Sub $1 $3 }
      | Form '*' Form               { Mul $1 $3 }
-     | Form '/' Form              { Div $1 $3 }
+     | Form '/' Form               { Div $1 $3 }
      
      | Juxt                        { $1 }
 
 Juxt : Juxt Atom                   { App $1 $2 }
      | quot Atom Atom              { Quot $2 $3 }
      | rem Atom Atom               { Rem $2 $3 }
-     | '-' Atom                    { Negate $2 }
+     | '-' Atom                    { Sub (Integer 0) $2 }
 
-     
      | Atom                        { $1 }
 
 Atom : '(' Expr ')'                { $2 }
@@ -199,7 +200,6 @@ List : '[' ListMembers ']'          { List $2 }
 ListMembers : {- empty -} { [] }
 | Atom  { [$1] }
 | Atom ',' ListMembers { $1 : $3 }
-
 
 
 {
@@ -239,17 +239,16 @@ data TypeExp
   deriving (Eq,Show)
 
 data AST
-  = Integer Int
+  = Boolean Bool
+  | Integer Int
   | Float Float
-  | Boolean Bool
   
   | Let String AST AST
   | If AST AST AST
 
-  | Lambda String AST TypeExp
+  | Lambda String AST TypeExp TypeExp
 
   | App AST AST
-  | Bind String AST
 
   | And AST AST
   | Or AST AST
@@ -266,17 +265,13 @@ data AST
   | Lt AST AST
   | Gt AST AST
 
-  | Negate AST
-  | NotEq AST AST
-  
   | Variable String
 
   | List [AST]
   | Cons AST AST
   | Concat AST AST
 
+  | Not
   deriving (Eq,Show)
-
-
 
 }

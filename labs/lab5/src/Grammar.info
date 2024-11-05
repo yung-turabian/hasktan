@@ -8,7 +8,7 @@ Grammar
 -----------------------------------------------------------------------------
 	%start_parseHasquelito -> Expr                     (0)
 	Expr -> let var '=' Expr in Expr                   (1)
-	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp    (2)
+	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   (2)
 	Expr -> if Expr then Expr else Expr                (3)
 	Expr -> Expr "==" Expr                             (4)
 	Expr -> Expr ">=" Expr                             (5)
@@ -18,9 +18,9 @@ Grammar
 	Expr -> Expr '<' Expr                              (9)
 	Expr -> Expr "&&" Expr                             (10)
 	Expr -> Expr "||" Expr                             (11)
-	Expr -> List                                       (12)
-	Expr -> Expr ':' List                              (13)
-	Expr -> Expr "++" Expr                             (14)
+	Expr -> Expr ':' Expr                              (12)
+	Expr -> Expr "++" Expr                             (13)
+	Expr -> List                                       (14)
 	Expr -> Form                                       (15)
 	Form -> Form '+' Form                              (16)
 	Form -> Form '-' Form                              (17)
@@ -150,8 +150,8 @@ State 3
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	"&&"           shift, and enter state 32
 	"||"           shift, and enter state 33
@@ -259,23 +259,23 @@ State 6
 
 State 7
 
-	Expr -> List .                                      (rule 12)
+	Expr -> List .                                      (rule 14)
 
-	in             reduce using rule 12
-	then           reduce using rule 12
-	else           reduce using rule 12
-	"&&"           reduce using rule 12
-	"||"           reduce using rule 12
-	"=="           reduce using rule 12
-	">="           reduce using rule 12
-	"<="           reduce using rule 12
-	"/="           reduce using rule 12
-	'>'            reduce using rule 12
-	'<'            reduce using rule 12
-	')'            reduce using rule 12
-	':'            reduce using rule 12
-	"++"           reduce using rule 12
-	%eof           reduce using rule 12
+	in             reduce using rule 14
+	then           reduce using rule 14
+	else           reduce using rule 14
+	"&&"           reduce using rule 14
+	"||"           reduce using rule 14
+	"=="           reduce using rule 14
+	">="           reduce using rule 14
+	"<="           reduce using rule 14
+	"/="           reduce using rule 14
+	'>'            reduce using rule 14
+	'<'            reduce using rule 14
+	')'            reduce using rule 14
+	':'            reduce using rule 14
+	"++"           reduce using rule 14
+	%eof           reduce using rule 14
 
 
 State 8
@@ -434,7 +434,7 @@ State 14
 
 State 15
 
-	Expr -> '(' . '\\' var "->" Expr ')' "::" TypeExp    (rule 2)
+	Expr -> '(' . '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
 	Atom -> '(' . Expr ')'                              (rule 26)
 
 	int            shift, and enter state 8
@@ -550,8 +550,8 @@ State 21
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 	Atom -> '(' Expr . ')'                              (rule 26)
 
 	"&&"           shift, and enter state 32
@@ -569,7 +569,7 @@ State 21
 
 State 22
 
-	Expr -> '(' '\\' . var "->" Expr ')' "::" TypeExp    (rule 2)
+	Expr -> '(' '\\' . var "->" Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
 
 	var            shift, and enter state 61
 
@@ -639,8 +639,8 @@ State 26
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	then           shift, and enter state 58
 	"&&"           shift, and enter state 32
@@ -931,15 +931,29 @@ State 39
 
 State 40
 
-	Expr -> Expr ':' . List                             (rule 13)
+	Expr -> Expr ':' . Expr                             (rule 12)
 
+	int            shift, and enter state 8
+	float          shift, and enter state 9
+	bool           shift, and enter state 10
+	let            shift, and enter state 2
+	if             shift, and enter state 11
+	'-'            shift, and enter state 12
+	quot           shift, and enter state 13
+	rem            shift, and enter state 14
+	'('            shift, and enter state 15
+	var            shift, and enter state 16
 	'['            shift, and enter state 17
 
-	List           goto state 45
+	Expr           goto state 45
+	Form           goto state 4
+	Juxt           goto state 5
+	Atom           goto state 6
+	List           goto state 7
 
 State 41
 
-	Expr -> Expr "++" . Expr                            (rule 14)
+	Expr -> Expr "++" . Expr                            (rule 13)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
@@ -998,30 +1012,9 @@ State 44
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
-	Expr -> Expr "++" Expr .                            (rule 14)
-
-	in             reduce using rule 14
-	then           reduce using rule 14
-	else           reduce using rule 14
-	"&&"           reduce using rule 14
-	"||"           reduce using rule 14
-	"=="           reduce using rule 14
-	">="           reduce using rule 14
-	"<="           reduce using rule 14
-	"/="           reduce using rule 14
-	'>'            reduce using rule 14
-	'<'            reduce using rule 14
-	')'            reduce using rule 14
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
-	%eof           reduce using rule 14
-
-
-State 45
-
-	Expr -> Expr ':' List .                             (rule 13)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
+	Expr -> Expr "++" Expr .                            (rule 13)
 
 	in             reduce using rule 13
 	then           reduce using rule 13
@@ -1035,9 +1028,40 @@ State 45
 	'>'            reduce using rule 13
 	'<'            reduce using rule 13
 	')'            reduce using rule 13
-	':'            reduce using rule 13
-	"++"           reduce using rule 13
+	':'            shift, and enter state 40
+	"++"           shift, and enter state 41
 	%eof           reduce using rule 13
+
+
+State 45
+
+	Expr -> Expr . "==" Expr                            (rule 4)
+	Expr -> Expr . ">=" Expr                            (rule 5)
+	Expr -> Expr . "<=" Expr                            (rule 6)
+	Expr -> Expr . "/=" Expr                            (rule 7)
+	Expr -> Expr . '>' Expr                             (rule 8)
+	Expr -> Expr . '<' Expr                             (rule 9)
+	Expr -> Expr . "&&" Expr                            (rule 10)
+	Expr -> Expr . "||" Expr                            (rule 11)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr ':' Expr .                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
+
+	in             reduce using rule 12
+	then           reduce using rule 12
+	else           reduce using rule 12
+	"&&"           reduce using rule 12
+	"||"           reduce using rule 12
+	"=="           reduce using rule 12
+	">="           reduce using rule 12
+	"<="           reduce using rule 12
+	"/="           reduce using rule 12
+	'>'            reduce using rule 12
+	'<'            reduce using rule 12
+	')'            reduce using rule 12
+	':'            shift, and enter state 40
+	"++"           shift, and enter state 41
+	%eof           reduce using rule 12
 
 
 State 46
@@ -1051,8 +1075,8 @@ State 46
 	Expr -> Expr '<' Expr .                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 9
 	then           reduce using rule 9
@@ -1082,8 +1106,8 @@ State 47
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 8
 	then           reduce using rule 8
@@ -1113,8 +1137,8 @@ State 48
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 7
 	then           reduce using rule 7
@@ -1144,8 +1168,8 @@ State 49
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 6
 	then           reduce using rule 6
@@ -1175,8 +1199,8 @@ State 50
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 5
 	then           reduce using rule 5
@@ -1206,8 +1230,8 @@ State 51
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 4
 	then           reduce using rule 4
@@ -1237,8 +1261,8 @@ State 52
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
 	Expr -> Expr "||" Expr .                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 11
 	then           reduce using rule 11
@@ -1268,8 +1292,8 @@ State 53
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr "&&" Expr .                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 10
 	then           reduce using rule 10
@@ -1488,7 +1512,7 @@ State 60
 
 State 61
 
-	Expr -> '(' '\\' var . "->" Expr ')' "::" TypeExp    (rule 2)
+	Expr -> '(' '\\' var . "->" Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
 
 	"->"           shift, and enter state 66
 
@@ -1569,7 +1593,7 @@ State 65
 
 State 66
 
-	Expr -> '(' '\\' var "->" . Expr ')' "::" TypeExp    (rule 2)
+	Expr -> '(' '\\' var "->" . Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
@@ -1600,8 +1624,8 @@ State 67
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	else           shift, and enter state 70
 	"&&"           shift, and enter state 32
@@ -1627,8 +1651,8 @@ State 68
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             shift, and enter state 69
 	"&&"           shift, and enter state 32
@@ -1689,7 +1713,7 @@ State 70
 
 State 71
 
-	Expr -> '(' '\\' var "->" Expr . ')' "::" TypeExp    (rule 2)
+	Expr -> '(' '\\' var "->" Expr . ')' "::" TypeExp "->" TypeExp    (rule 2)
 	Expr -> Expr . "==" Expr                            (rule 4)
 	Expr -> Expr . ">=" Expr                            (rule 5)
 	Expr -> Expr . "<=" Expr                            (rule 6)
@@ -1698,8 +1722,8 @@ State 71
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	"&&"           shift, and enter state 32
 	"||"           shift, and enter state 33
@@ -1716,7 +1740,7 @@ State 71
 
 State 72
 
-	Expr -> '(' '\\' var "->" Expr ')' . "::" TypeExp    (rule 2)
+	Expr -> '(' '\\' var "->" Expr ')' . "::" TypeExp "->" TypeExp    (rule 2)
 
 	"::"           shift, and enter state 75
 
@@ -1732,8 +1756,8 @@ State 73
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 3
 	then           reduce using rule 3
@@ -1763,8 +1787,8 @@ State 74
 	Expr -> Expr . '<' Expr                             (rule 9)
 	Expr -> Expr . "&&" Expr                            (rule 10)
 	Expr -> Expr . "||" Expr                            (rule 11)
-	Expr -> Expr . ':' List                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
+	Expr -> Expr . ':' Expr                             (rule 12)
+	Expr -> Expr . "++" Expr                            (rule 13)
 
 	in             reduce using rule 1
 	then           reduce using rule 1
@@ -1785,7 +1809,7 @@ State 74
 
 State 75
 
-	Expr -> '(' '\\' var "->" Expr ')' "::" . TypeExp    (rule 2)
+	Expr -> '(' '\\' var "->" Expr ')' "::" . TypeExp "->" TypeExp    (rule 2)
 
 	Int            shift, and enter state 78
 	Bool           shift, and enter state 79
@@ -1797,25 +1821,10 @@ State 75
 
 State 76
 
-	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp .    (rule 2)
+	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp . "->" TypeExp    (rule 2)
 	TypeExp -> TypeExp . "->" TypeExp                   (rule 32)
 
-	in             reduce using rule 2
-	then           reduce using rule 2
-	else           reduce using rule 2
 	"->"           shift, and enter state 83
-	"&&"           reduce using rule 2
-	"||"           reduce using rule 2
-	"=="           reduce using rule 2
-	">="           reduce using rule 2
-	"<="           reduce using rule 2
-	"/="           reduce using rule 2
-	'>'            reduce using rule 2
-	'<'            reduce using rule 2
-	')'            reduce using rule 2
-	':'            reduce using rule 2
-	"++"           reduce using rule 2
-	%eof           reduce using rule 2
 
 
 State 77
@@ -1923,12 +1932,13 @@ State 82
 	TypeExp -> TypeExp . "->" TypeExp                   (rule 32)
 	TypeExp -> '(' TypeExp . ')'                        (rule 33)
 
-	"->"           shift, and enter state 83
-	')'            shift, and enter state 85
+	"->"           shift, and enter state 85
+	')'            shift, and enter state 86
 
 
 State 83
 
+	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" . TypeExp    (rule 2)
 	TypeExp -> TypeExp "->" . TypeExp                   (rule 32)
 
 	Int            shift, and enter state 78
@@ -1941,28 +1951,41 @@ State 83
 
 State 84
 
+	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp .    (rule 2)
 	TypeExp -> TypeExp . "->" TypeExp                   (rule 32)
 	TypeExp -> TypeExp "->" TypeExp .                   (rule 32)
 
-	in             reduce using rule 32
-	then           reduce using rule 32
-	else           reduce using rule 32
-	"->"           shift, and enter state 83
-	"&&"           reduce using rule 32
-	"||"           reduce using rule 32
-	"=="           reduce using rule 32
-	">="           reduce using rule 32
-	"<="           reduce using rule 32
-	"/="           reduce using rule 32
-	'>'            reduce using rule 32
-	'<'            reduce using rule 32
-	')'            reduce using rule 32
-	':'            reduce using rule 32
-	"++"           reduce using rule 32
-	%eof           reduce using rule 32
+	in             reduce using rule 2
+	then           reduce using rule 2
+	else           reduce using rule 2
+	"->"           shift, and enter state 85
+	"&&"           reduce using rule 2
+	"||"           reduce using rule 2
+	"=="           reduce using rule 2
+	">="           reduce using rule 2
+	"<="           reduce using rule 2
+	"/="           reduce using rule 2
+	'>'            reduce using rule 2
+	'<'            reduce using rule 2
+	')'            reduce using rule 2
+	':'            reduce using rule 2
+	"++"           reduce using rule 2
+	%eof           reduce using rule 2
 
 
 State 85
+
+	TypeExp -> TypeExp "->" . TypeExp                   (rule 32)
+
+	Int            shift, and enter state 78
+	Bool           shift, and enter state 79
+	Float          shift, and enter state 80
+	'('            shift, and enter state 81
+
+	TypeExp        goto state 87
+	PrimType       goto state 77
+
+State 86
 
 	TypeExp -> '(' TypeExp ')' .                        (rule 33)
 
@@ -1984,10 +2007,33 @@ State 85
 	%eof           reduce using rule 33
 
 
+State 87
+
+	TypeExp -> TypeExp . "->" TypeExp                   (rule 32)
+	TypeExp -> TypeExp "->" TypeExp .                   (rule 32)
+
+	in             reduce using rule 32
+	then           reduce using rule 32
+	else           reduce using rule 32
+	"->"           shift, and enter state 85
+	"&&"           reduce using rule 32
+	"||"           reduce using rule 32
+	"=="           reduce using rule 32
+	">="           reduce using rule 32
+	"<="           reduce using rule 32
+	"/="           reduce using rule 32
+	'>'            reduce using rule 32
+	'<'            reduce using rule 32
+	')'            reduce using rule 32
+	':'            reduce using rule 32
+	"++"           reduce using rule 32
+	%eof           reduce using rule 32
+
+
 -----------------------------------------------------------------------------
 Grammar Totals
 -----------------------------------------------------------------------------
 Number of rules: 41
 Number of terminals: 37
 Number of non-terminals: 9
-Number of states: 86
+Number of states: 88
