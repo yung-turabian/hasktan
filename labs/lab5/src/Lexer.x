@@ -43,14 +43,14 @@ tokens :-
  @string		{ \p s -> STRING p (read s) }
 
  -- Keywords
- if			{ \p s -> IF p }
- then 			{ \p s -> THEN p }
- else 			{ \p s -> ELSE p }
- let	                { \p s -> LET p }
+ if			  { \p s -> IF p }
+ then 		{ \p s -> THEN p }
+ else 		{ \p s -> ELSE p }
+ let	    { \p s -> LET p }
  in            	        { \p s -> IN p }
 
  -- Arithmetic operators
- \\			{ \p s -> (LAMBDA) p }
+ \\			  { \p s -> (LAMBDA) p }
  "+"			{ \p s -> (PLUS) p }
  "-"			{ \p s -> (MINUS) p }
  "*"			{ \p s -> (TIMES) p }
@@ -59,7 +59,6 @@ tokens :-
  "^"			{ \p s -> (POWER) p }
  quot			{ \p s -> (QUOT) p }
  rem			{ \p s -> (REM) p }
- not                    { \p s -> (NOT) p }
 
  -- Types
  "->"			{ \p s -> (ARROW) p }
@@ -123,7 +122,6 @@ data Token
  | BIND     AlexPosn
  | POWER    AlexPosn
  | QUOT     AlexPosn
- | NOT      AlexPosn
  | REM      AlexPosn
  | LAMBDA   AlexPosn
 
