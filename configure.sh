@@ -5,8 +5,8 @@ OS=$(uname)
 if [[ "$OS" == "Darwin" ]]; then
   echo "Installing GHC, Happy, and Alex on macOS..."
 
-  brew install ghc cabal
-  cabal install happy alex
+  brew install ghc stack
+  stack install happy alex
 
 elif [[ "$OS" == "Linux" ]]; then
   echo "Installing GHC, Happy, and Alex on Linux..."
