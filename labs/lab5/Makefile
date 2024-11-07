@@ -8,7 +8,19 @@ HAPPY = happy
 HAPPY_OPTS=-agc
 
 SRC = src
-PROG = parser
+
+ifeq ($(OS),Windows_NT)
+	PROG = parserWIN64
+else
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Linux)
+	PROG = parserLINUX
+endif
+ifeq ($(UNAME_S), Darwin)
+	PROG = parserOSX
+endif
+endif
 
 TESTS := $(wildcard tests/*.hs)
 
@@ -36,7 +48,7 @@ all:
 
 clean:
 	rm -rf obj *.o *.hi *.info \
-		*.alex.hs *.happy.hs $(PROG)
+		*.alex.hs *.happy.hs parserLINUX parserOSX parserWIN64
 
 
 test: all

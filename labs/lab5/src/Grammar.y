@@ -75,7 +75,7 @@ var { VAR p $$ }
 "++"{ PLUSPLUS p } 
 
 
-{-
+{- OLD PRECEDENCE SYSTEM
 %nonassoc else in
 %nonassoc "->"
 %nonassoc "&&" "||"
@@ -94,7 +94,10 @@ var { VAR p $$ }
 %nonassoc quot rem
 
 
-%left NEG -}
+%left NEG
+
+-}
+
 
 %right in "->" else
 %nonassoc '>' '<' "==" ">=" "<=" "/="
@@ -103,12 +106,11 @@ var { VAR p $$ }
 %left '+' '-'
 %left '*' '/'
 
-%left Quot
-
 
 %%
 
-{-
+{- OLD AST BEFORE I DECIDED TO BREAK IT UP FOR READABILITY AND EASE OF USE
+    
 AST :
   bool                                         { Boolean $1 }
 | int                                          { Integer $1 }
@@ -142,8 +144,14 @@ AST :
 
 | '(' AST ')'                                  { $2 }
 
-| var                                          { Variable $1 }-}
+| var                                          { Variable $1 }
 
+-}
+
+-- I preferred this way because it shows precidence in its structure.
+-- Atoms are primitive types and are acted upon
+-- Then Juxtaposed atoms have the next highest precidence, functions, applications and negation
+-- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
 Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp         { Lambda $3 $5 $8 $10 }
@@ -165,17 +173,17 @@ Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      
      | Form                        { $1 }
 
-Form : Form '+' Form               { Add $1 $3 }
-     | Form '-' Form               { Sub $1 $3 }
-     | Form '*' Form               { Mul $1 $3 }
-     | Form '/' Form               { Div $1 $3 }
+Form : Form '+' Form               { Plus $1 $3 }
+     | Form '-' Form               { Minus $1 $3 }
+     | Form '*' Form               { Times $1 $3 }
+     | Form '/' Form               { Divide $1 $3 }
      
      | Juxt                        { $1 }
 
 Juxt : Juxt Atom                   { App $1 $2 }
      | quot Atom Atom              { Quot $2 $3 }
      | rem Atom Atom               { Rem $2 $3 }
-     | '-' Atom                    { Sub (Integer 0) $2 }
+     | '-' Atom                    { Minus (Integer 0) $2 }
 
      | Atom                        { $1 }
 
@@ -253,10 +261,10 @@ data AST
   | And AST AST
   | Or AST AST
   
-  | Add AST AST
-  | Sub AST AST
-  | Mul AST AST
-  | Div AST AST
+  | Plus AST AST
+  | Minus AST AST
+  | Times AST AST
+  | Divide AST AST
 
   | Quot AST AST
   | Rem AST AST
