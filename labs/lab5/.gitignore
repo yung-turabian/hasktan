@@ -1,0 +1,3 @@
+*.happy.hs
+*.alex.hs
+obj/
