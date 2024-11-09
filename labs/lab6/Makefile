@@ -1,13 +1,61 @@
-all : Interpreter
+HC = ghc
+HC_OPTS = --make -outputdir ./obj
 
-Lexer.hs : Lexer.x
-	alex Lexer.x
+ALEX = alex
+ALEX_OPTS = -g
 
-Grammar.hs : Grammar.y
-	happy Grammar.y 
+HAPPY = happy
+HAPPY_OPTS=-agc
 
-Interpreter : Lexer.hs Grammar.hs TypeChecker.hs Interpreter.hs
-	ghc --make Interpreter.hs
+SRC = src
 
-clean :
-	rm -f Interpreter Grammar.hs Lexer.hs *.o *.hi *.info
+ifeq ($(OS),Windows_NT)
+	PROG = interpreterWIN64
+else
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Linux)
+	PROG = interpreterLINUX
+endif
+ifeq ($(UNAME_S), Darwin)
+	PROG = interpreterOSX
+endif
+endif
+
+TESTS := $(wildcard tests/*.hs)
+
+
+
+%.alex.hs : $(SRC)/%.x
+	$(ALEX) $(ALEX_OPTS) $< -o $@
+
+%.happy.hs : $(SRC)/%.y
+	$(HAPPY) $(HAPPY_OPTS) $< -o $@
+
+$(PROG) : Lexer.alex.hs Grammar.happy.hs $(SRC)/TypeChecker.hs $(SRC)/Interpreter.hs
+	$(HC) $(HC_OPTS) -o $@ $^
+
+
+all: 
+	@if [ -f $(PROG) ] && [ "$$(find . -name $(PROG) -newer $(SRC)/Parser.hs)" ]; then \
+		$(HAPPY) $(SRC)/Grammar.y -i; \
+	else \
+		$(MAKE) $(PROG); \
+	fi
+
+
+.PHONY: clean test
+
+clean:
+	rm -rf obj *.o *.hi *.info \
+		*.alex.hs *.happy.hs parserLINUX parserOSX parserWIN64
+
+
+test: all
+	@for file in $(TESTS); do \
+		echo "\033[1;33;41m"; \
+		cat "$$file"; \
+		echo "\033[0m"; \
+		./$(PROG) < $$file; \
+		echo ""; \
+	done
