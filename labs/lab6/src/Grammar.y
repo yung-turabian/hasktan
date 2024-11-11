@@ -102,6 +102,7 @@ var { VAR p $$ }
 %right in "->" else
 %nonassoc '>' '<' "==" ">=" "<=" "/="
 %nonassoc "&&" "||"
+%nonassoc ')'
 %right "++" ':'
 %left '+' '-'
 %left '*' '/'
@@ -155,6 +156,7 @@ AST :
 
 Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp         { Lambda $3 $5 $8 $10 }
+		 | '\\' var "->" Expr { PolyLambda $2 $4 } 
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
      
      | Expr "==" Expr              { Equals $1 $3 }
@@ -243,6 +245,12 @@ data TypeExp
   = BoolType
   | IntType
   | FloatType
+	
+	| EmptyList
+  | IntList
+	| BoolList
+	| FloatList
+
   | Arrow TypeExp TypeExp
   deriving (Eq,Show)
 
@@ -255,6 +263,7 @@ data AST
   | If AST AST AST
 
   | Lambda String AST TypeExp TypeExp
+	| PolyLambda String AST
 
   | App AST AST
 

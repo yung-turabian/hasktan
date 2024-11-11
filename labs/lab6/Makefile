@@ -37,7 +37,7 @@ $(PROG) : Lexer.alex.hs Grammar.happy.hs $(SRC)/TypeChecker.hs $(SRC)/Interprete
 
 
 all: 
-	@if [ -f $(PROG) ] && [ "$$(find . -name $(PROG) -newer $(SRC)/Parser.hs)" ]; then \
+	@if [ -f $(PROG) ] && [ "$$(find . -name $(PROG) -newer $(SRC)/Interpreter.hs)" ]; then \
 		$(HAPPY) $(SRC)/Grammar.y -i; \
 	else \
 		$(MAKE) $(PROG); \
