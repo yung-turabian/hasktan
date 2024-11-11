@@ -8,8 +8,8 @@ Grammar
 -----------------------------------------------------------------------------
 	%start_parseHasquelito -> Expr                     (0)
 	Expr -> let var '=' Expr in Expr                   (1)
-	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   (2)
-	Expr -> '(' '\\' var "->" Expr ')'                 (3)
+	Expr -> '\\' var "->" Expr                         (2)
+	Expr -> Expr "::" TypeExp "->" TypeExp             (3)
 	Expr -> if Expr then Expr else Expr                (4)
 	Expr -> Expr "==" Expr                             (5)
 	Expr -> Expr ">=" Expr                             (6)
@@ -114,12 +114,13 @@ State 0
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
 	Expr           goto state 3
 	Form           goto state 4
@@ -137,12 +138,13 @@ State 2
 
 	Expr -> let . var '=' Expr in Expr                  (rule 1)
 
-	var            shift, and enter state 42
+	var            shift, and enter state 43
 
 
 State 3
 
 	%start_parseHasquelito -> Expr .                    (rule 0)
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -154,16 +156,17 @@ State 3
 	Expr -> Expr . ':' Expr                             (rule 13)
 	Expr -> Expr . "++" Expr                            (rule 14)
 
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           accept
 
 
@@ -178,6 +181,7 @@ State 4
 	in             reduce using rule 16
 	then           reduce using rule 16
 	else           reduce using rule 16
+	"::"           reduce using rule 16
 	"&&"           reduce using rule 16
 	"||"           reduce using rule 16
 	'+'            shift, and enter state 28
@@ -207,6 +211,7 @@ State 5
 	in             reduce using rule 21
 	then           reduce using rule 21
 	else           reduce using rule 21
+	"::"           reduce using rule 21
 	"&&"           reduce using rule 21
 	"||"           reduce using rule 21
 	'+'            reduce using rule 21
@@ -219,9 +224,9 @@ State 5
 	"/="           reduce using rule 21
 	'>'            reduce using rule 21
 	'<'            reduce using rule 21
-	'('            shift, and enter state 20
+	'('            shift, and enter state 16
 	')'            reduce using rule 21
-	var            shift, and enter state 16
+	var            shift, and enter state 17
 	':'            reduce using rule 21
 	"++"           reduce using rule 21
 	%eof           reduce using rule 21
@@ -238,6 +243,7 @@ State 6
 	in             reduce using rule 26
 	then           reduce using rule 26
 	else           reduce using rule 26
+	"::"           reduce using rule 26
 	"&&"           reduce using rule 26
 	"||"           reduce using rule 26
 	'+'            reduce using rule 26
@@ -265,6 +271,7 @@ State 7
 	in             reduce using rule 15
 	then           reduce using rule 15
 	else           reduce using rule 15
+	"::"           reduce using rule 15
 	"&&"           reduce using rule 15
 	"||"           reduce using rule 15
 	"=="           reduce using rule 15
@@ -289,6 +296,7 @@ State 8
 	in             reduce using rule 28
 	then           reduce using rule 28
 	else           reduce using rule 28
+	"::"           reduce using rule 28
 	"&&"           reduce using rule 28
 	"||"           reduce using rule 28
 	'+'            reduce using rule 28
@@ -321,6 +329,7 @@ State 9
 	in             reduce using rule 30
 	then           reduce using rule 30
 	else           reduce using rule 30
+	"::"           reduce using rule 30
 	"&&"           reduce using rule 30
 	"||"           reduce using rule 30
 	'+'            reduce using rule 30
@@ -353,6 +362,7 @@ State 10
 	in             reduce using rule 29
 	then           reduce using rule 29
 	else           reduce using rule 29
+	"::"           reduce using rule 29
 	"&&"           reduce using rule 29
 	"||"           reduce using rule 29
 	'+'            reduce using rule 29
@@ -384,12 +394,13 @@ State 11
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
 	Expr           goto state 26
 	Form           goto state 4
@@ -399,44 +410,49 @@ State 11
 
 State 12
 
+	Expr -> '\\' . var "->" Expr                        (rule 2)
+
+	var            shift, and enter state 25
+
+
+State 13
+
 	Juxt -> '-' . Atom                                  (rule 25)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Atom           goto state 25
+	Atom           goto state 24
 
-State 13
+State 14
 
 	Juxt -> quot . Atom Atom                            (rule 23)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Atom           goto state 24
+	Atom           goto state 23
 
-State 14
+State 15
 
 	Juxt -> rem . Atom Atom                             (rule 24)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Atom           goto state 23
+	Atom           goto state 22
 
-State 15
+State 16
 
-	Expr -> '(' . '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
-	Expr -> '(' . '\\' var "->" Expr ')'                (rule 3)
 	Atom -> '(' . Expr ')'                              (rule 27)
 
 	int            shift, and enter state 8
@@ -444,13 +460,13 @@ State 15
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'\\'           shift, and enter state 22
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
 	Expr           goto state 21
 	Form           goto state 4
@@ -458,7 +474,7 @@ State 15
 	Atom           goto state 6
 	List           goto state 7
 
-State 16
+State 17
 
 	Atom -> var .                                       (rule 31)
 
@@ -468,6 +484,7 @@ State 16
 	in             reduce using rule 31
 	then           reduce using rule 31
 	else           reduce using rule 31
+	"::"           reduce using rule 31
 	"&&"           reduce using rule 31
 	"||"           reduce using rule 31
 	'+'            reduce using rule 31
@@ -490,60 +507,39 @@ State 16
 	%eof           reduce using rule 31
 
 
-State 17
+State 18
 
 	List -> '[' . ListMembers ']'                       (rule 38)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 	']'            reduce using rule 39
 
-	Atom           goto state 18
-	ListMembers    goto state 19
+	Atom           goto state 19
+	ListMembers    goto state 20
 
-State 18
+State 19
 
 	ListMembers -> Atom .                               (rule 40)
 	ListMembers -> Atom . ',' ListMembers               (rule 41)
 
 	']'            reduce using rule 40
-	','            shift, and enter state 64
-
-
-State 19
-
-	List -> '[' ListMembers . ']'                       (rule 38)
-
-	']'            shift, and enter state 63
+	','            shift, and enter state 71
 
 
 State 20
 
-	Atom -> '(' . Expr ')'                              (rule 27)
+	List -> '[' ListMembers . ']'                       (rule 38)
 
-	int            shift, and enter state 8
-	float          shift, and enter state 9
-	bool           shift, and enter state 10
-	let            shift, and enter state 2
-	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	']'            shift, and enter state 70
 
-	Expr           goto state 21
-	Form           goto state 4
-	Juxt           goto state 5
-	Atom           goto state 6
-	List           goto state 7
 
 State 21
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -556,52 +552,45 @@ State 21
 	Expr -> Expr . "++" Expr                            (rule 14)
 	Atom -> '(' Expr . ')'                              (rule 27)
 
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	')'            shift, and enter state 62
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	')'            shift, and enter state 69
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 
 
 State 22
-
-	Expr -> '(' '\\' . var "->" Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
-	Expr -> '(' '\\' . var "->" Expr ')'                (rule 3)
-
-	var            shift, and enter state 61
-
-
-State 23
 
 	Juxt -> rem Atom . Atom                             (rule 24)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Atom           goto state 60
+	Atom           goto state 68
 
-State 24
+State 23
 
 	Juxt -> quot Atom . Atom                            (rule 23)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Atom           goto state 59
+	Atom           goto state 67
 
-State 25
+State 24
 
 	Juxt -> '-' Atom .                                  (rule 25)
 
@@ -611,6 +600,7 @@ State 25
 	in             reduce using rule 25
 	then           reduce using rule 25
 	else           reduce using rule 25
+	"::"           reduce using rule 25
 	"&&"           reduce using rule 25
 	"||"           reduce using rule 25
 	'+'            reduce using rule 25
@@ -631,8 +621,16 @@ State 25
 	%eof           reduce using rule 25
 
 
+State 25
+
+	Expr -> '\\' var . "->" Expr                        (rule 2)
+
+	"->"           shift, and enter state 66
+
+
 State 26
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> if Expr . then Expr else Expr               (rule 4)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
@@ -645,17 +643,18 @@ State 26
 	Expr -> Expr . ':' Expr                             (rule 13)
 	Expr -> Expr . "++" Expr                            (rule 14)
 
-	then           shift, and enter state 58
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	then           shift, and enter state 65
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 
 
 State 27
@@ -668,6 +667,7 @@ State 27
 	in             reduce using rule 22
 	then           reduce using rule 22
 	else           reduce using rule 22
+	"::"           reduce using rule 22
 	"&&"           reduce using rule 22
 	"||"           reduce using rule 22
 	'+'            reduce using rule 22
@@ -695,13 +695,13 @@ State 28
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Form           goto state 57
+	Form           goto state 64
 	Juxt           goto state 5
 	Atom           goto state 6
 
@@ -712,13 +712,13 @@ State 29
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Form           goto state 56
+	Form           goto state 63
 	Juxt           goto state 5
 	Atom           goto state 6
 
@@ -729,13 +729,13 @@ State 30
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Form           goto state 55
+	Form           goto state 62
 	Juxt           goto state 5
 	Atom           goto state 6
 
@@ -746,17 +746,29 @@ State 31
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 
-	Form           goto state 54
+	Form           goto state 61
 	Juxt           goto state 5
 	Atom           goto state 6
 
 State 32
+
+	Expr -> Expr "::" . TypeExp "->" TypeExp            (rule 3)
+
+	Int            shift, and enter state 57
+	Bool           shift, and enter state 58
+	Float          shift, and enter state 59
+	'('            shift, and enter state 60
+
+	TypeExp        goto state 55
+	PrimType       goto state 56
+
+State 33
 
 	Expr -> Expr "&&" . Expr                            (rule 11)
 
@@ -765,20 +777,21 @@ State 32
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 53
+	Expr           goto state 54
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 33
+State 34
 
 	Expr -> Expr "||" . Expr                            (rule 12)
 
@@ -787,20 +800,21 @@ State 33
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 52
+	Expr           goto state 53
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 34
+State 35
 
 	Expr -> Expr "==" . Expr                            (rule 5)
 
@@ -809,20 +823,21 @@ State 34
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 51
+	Expr           goto state 52
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 35
+State 36
 
 	Expr -> Expr ">=" . Expr                            (rule 6)
 
@@ -831,20 +846,21 @@ State 35
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 50
+	Expr           goto state 51
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 36
+State 37
 
 	Expr -> Expr "<=" . Expr                            (rule 7)
 
@@ -853,20 +869,21 @@ State 36
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 49
+	Expr           goto state 50
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 37
+State 38
 
 	Expr -> Expr "/=" . Expr                            (rule 8)
 
@@ -875,20 +892,21 @@ State 37
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 48
+	Expr           goto state 49
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 38
+State 39
 
 	Expr -> Expr '>' . Expr                             (rule 9)
 
@@ -897,20 +915,21 @@ State 38
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 47
+	Expr           goto state 48
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 39
+State 40
 
 	Expr -> Expr '<' . Expr                             (rule 10)
 
@@ -919,20 +938,21 @@ State 39
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 46
+	Expr           goto state 47
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 40
+State 41
 
 	Expr -> Expr ':' . Expr                             (rule 13)
 
@@ -941,20 +961,21 @@ State 40
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 45
+	Expr           goto state 46
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 41
+State 42
 
 	Expr -> Expr "++" . Expr                            (rule 14)
 
@@ -963,27 +984,28 @@ State 41
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 44
+	Expr           goto state 45
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 42
+State 43
 
 	Expr -> let var . '=' Expr in Expr                  (rule 1)
 
-	'='            shift, and enter state 43
+	'='            shift, and enter state 44
 
 
-State 43
+State 44
 
 	Expr -> let var '=' . Expr in Expr                  (rule 1)
 
@@ -992,21 +1014,23 @@ State 43
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 68
+	Expr           goto state 77
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 44
+State 45
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1022,6 +1046,7 @@ State 44
 	in             reduce using rule 14
 	then           reduce using rule 14
 	else           reduce using rule 14
+	"::"           reduce using rule 14
 	"&&"           reduce using rule 14
 	"||"           reduce using rule 14
 	"=="           reduce using rule 14
@@ -1031,13 +1056,14 @@ State 44
 	'>'            reduce using rule 14
 	'<'            reduce using rule 14
 	')'            reduce using rule 14
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 14
 
 
-State 45
+State 46
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1053,6 +1079,7 @@ State 45
 	in             reduce using rule 13
 	then           reduce using rule 13
 	else           reduce using rule 13
+	"::"           reduce using rule 13
 	"&&"           reduce using rule 13
 	"||"           reduce using rule 13
 	"=="           reduce using rule 13
@@ -1062,13 +1089,14 @@ State 45
 	'>'            reduce using rule 13
 	'<'            reduce using rule 13
 	')'            reduce using rule 13
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 13
 
 
-State 46
+State 47
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1084,8 +1112,9 @@ State 46
 	in             reduce using rule 10
 	then           reduce using rule 10
 	else           reduce using rule 10
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
 	"=="           fail
 	">="           fail
 	"<="           fail
@@ -1093,13 +1122,14 @@ State 46
 	'>'            fail
 	'<'            fail
 	')'            reduce using rule 10
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 10
 
 
-State 47
+State 48
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1115,8 +1145,9 @@ State 47
 	in             reduce using rule 9
 	then           reduce using rule 9
 	else           reduce using rule 9
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
 	"=="           fail
 	">="           fail
 	"<="           fail
@@ -1124,13 +1155,14 @@ State 47
 	'>'            fail
 	'<'            fail
 	')'            reduce using rule 9
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 9
 
 
-State 48
+State 49
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1146,8 +1178,9 @@ State 48
 	in             reduce using rule 8
 	then           reduce using rule 8
 	else           reduce using rule 8
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
 	"=="           fail
 	">="           fail
 	"<="           fail
@@ -1155,13 +1188,14 @@ State 48
 	'>'            fail
 	'<'            fail
 	')'            reduce using rule 8
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 8
 
 
-State 49
+State 50
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1177,8 +1211,9 @@ State 49
 	in             reduce using rule 7
 	then           reduce using rule 7
 	else           reduce using rule 7
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
 	"=="           fail
 	">="           fail
 	"<="           fail
@@ -1186,13 +1221,14 @@ State 49
 	'>'            fail
 	'<'            fail
 	')'            reduce using rule 7
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 7
 
 
-State 50
+State 51
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr ">=" Expr .                            (rule 6)
@@ -1208,8 +1244,9 @@ State 50
 	in             reduce using rule 6
 	then           reduce using rule 6
 	else           reduce using rule 6
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
 	"=="           fail
 	">="           fail
 	"<="           fail
@@ -1217,13 +1254,14 @@ State 50
 	'>'            fail
 	'<'            fail
 	')'            reduce using rule 6
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 6
 
 
-State 51
+State 52
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr "==" Expr .                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
@@ -1239,8 +1277,9 @@ State 51
 	in             reduce using rule 5
 	then           reduce using rule 5
 	else           reduce using rule 5
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
 	"=="           fail
 	">="           fail
 	"<="           fail
@@ -1248,13 +1287,14 @@ State 51
 	'>'            fail
 	'<'            fail
 	')'            reduce using rule 5
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 5
 
 
-State 52
+State 53
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1270,6 +1310,7 @@ State 52
 	in             reduce using rule 12
 	then           reduce using rule 12
 	else           reduce using rule 12
+	"::"           shift, and enter state 32
 	"&&"           fail
 	"||"           fail
 	"=="           reduce using rule 12
@@ -1279,13 +1320,14 @@ State 52
 	'>'            reduce using rule 12
 	'<'            reduce using rule 12
 	')'            reduce using rule 12
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 12
 
 
-State 53
+State 54
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1301,6 +1343,7 @@ State 53
 	in             reduce using rule 11
 	then           reduce using rule 11
 	else           reduce using rule 11
+	"::"           shift, and enter state 32
 	"&&"           fail
 	"||"           fail
 	"=="           reduce using rule 11
@@ -1310,12 +1353,124 @@ State 53
 	'>'            reduce using rule 11
 	'<'            reduce using rule 11
 	')'            reduce using rule 11
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 11
 
 
-State 54
+State 55
+
+	Expr -> Expr "::" TypeExp . "->" TypeExp            (rule 3)
+	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
+
+	"->"           shift, and enter state 76
+
+
+State 56
+
+	TypeExp -> PrimType .                               (rule 32)
+
+	in             reduce using rule 32
+	then           reduce using rule 32
+	else           reduce using rule 32
+	"->"           reduce using rule 32
+	"::"           reduce using rule 32
+	"&&"           reduce using rule 32
+	"||"           reduce using rule 32
+	"=="           reduce using rule 32
+	">="           reduce using rule 32
+	"<="           reduce using rule 32
+	"/="           reduce using rule 32
+	'>'            reduce using rule 32
+	'<'            reduce using rule 32
+	')'            reduce using rule 32
+	':'            reduce using rule 32
+	"++"           reduce using rule 32
+	%eof           reduce using rule 32
+
+
+State 57
+
+	PrimType -> Int .                                   (rule 36)
+
+	in             reduce using rule 36
+	then           reduce using rule 36
+	else           reduce using rule 36
+	"->"           reduce using rule 36
+	"::"           reduce using rule 36
+	"&&"           reduce using rule 36
+	"||"           reduce using rule 36
+	"=="           reduce using rule 36
+	">="           reduce using rule 36
+	"<="           reduce using rule 36
+	"/="           reduce using rule 36
+	'>'            reduce using rule 36
+	'<'            reduce using rule 36
+	')'            reduce using rule 36
+	':'            reduce using rule 36
+	"++"           reduce using rule 36
+	%eof           reduce using rule 36
+
+
+State 58
+
+	PrimType -> Bool .                                  (rule 35)
+
+	in             reduce using rule 35
+	then           reduce using rule 35
+	else           reduce using rule 35
+	"->"           reduce using rule 35
+	"::"           reduce using rule 35
+	"&&"           reduce using rule 35
+	"||"           reduce using rule 35
+	"=="           reduce using rule 35
+	">="           reduce using rule 35
+	"<="           reduce using rule 35
+	"/="           reduce using rule 35
+	'>'            reduce using rule 35
+	'<'            reduce using rule 35
+	')'            reduce using rule 35
+	':'            reduce using rule 35
+	"++"           reduce using rule 35
+	%eof           reduce using rule 35
+
+
+State 59
+
+	PrimType -> Float .                                 (rule 37)
+
+	in             reduce using rule 37
+	then           reduce using rule 37
+	else           reduce using rule 37
+	"->"           reduce using rule 37
+	"::"           reduce using rule 37
+	"&&"           reduce using rule 37
+	"||"           reduce using rule 37
+	"=="           reduce using rule 37
+	">="           reduce using rule 37
+	"<="           reduce using rule 37
+	"/="           reduce using rule 37
+	'>'            reduce using rule 37
+	'<'            reduce using rule 37
+	')'            reduce using rule 37
+	':'            reduce using rule 37
+	"++"           reduce using rule 37
+	%eof           reduce using rule 37
+
+
+State 60
+
+	TypeExp -> '(' . TypeExp ')'                        (rule 34)
+
+	Int            shift, and enter state 57
+	Bool           shift, and enter state 58
+	Float          shift, and enter state 59
+	'('            shift, and enter state 60
+
+	TypeExp        goto state 75
+	PrimType       goto state 56
+
+State 61
 
 	Form -> Form . '+' Form                             (rule 17)
 	Form -> Form . '-' Form                             (rule 18)
@@ -1326,6 +1481,7 @@ State 54
 	in             reduce using rule 20
 	then           reduce using rule 20
 	else           reduce using rule 20
+	"::"           reduce using rule 20
 	"&&"           reduce using rule 20
 	"||"           reduce using rule 20
 	'+'            reduce using rule 20
@@ -1344,7 +1500,7 @@ State 54
 	%eof           reduce using rule 20
 
 
-State 55
+State 62
 
 	Form -> Form . '+' Form                             (rule 17)
 	Form -> Form . '-' Form                             (rule 18)
@@ -1355,6 +1511,7 @@ State 55
 	in             reduce using rule 19
 	then           reduce using rule 19
 	else           reduce using rule 19
+	"::"           reduce using rule 19
 	"&&"           reduce using rule 19
 	"||"           reduce using rule 19
 	'+'            reduce using rule 19
@@ -1373,7 +1530,7 @@ State 55
 	%eof           reduce using rule 19
 
 
-State 56
+State 63
 
 	Form -> Form . '+' Form                             (rule 17)
 	Form -> Form . '-' Form                             (rule 18)
@@ -1384,6 +1541,7 @@ State 56
 	in             reduce using rule 18
 	then           reduce using rule 18
 	else           reduce using rule 18
+	"::"           reduce using rule 18
 	"&&"           reduce using rule 18
 	"||"           reduce using rule 18
 	'+'            reduce using rule 18
@@ -1402,7 +1560,7 @@ State 56
 	%eof           reduce using rule 18
 
 
-State 57
+State 64
 
 	Form -> Form . '+' Form                             (rule 17)
 	Form -> Form '+' Form .                             (rule 17)
@@ -1413,6 +1571,7 @@ State 57
 	in             reduce using rule 17
 	then           reduce using rule 17
 	else           reduce using rule 17
+	"::"           reduce using rule 17
 	"&&"           reduce using rule 17
 	"||"           reduce using rule 17
 	'+'            reduce using rule 17
@@ -1431,7 +1590,7 @@ State 57
 	%eof           reduce using rule 17
 
 
-State 58
+State 65
 
 	Expr -> if Expr then . Expr else Expr               (rule 4)
 
@@ -1440,20 +1599,44 @@ State 58
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 67
+	Expr           goto state 74
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 59
+State 66
+
+	Expr -> '\\' var "->" . Expr                        (rule 2)
+
+	int            shift, and enter state 8
+	float          shift, and enter state 9
+	bool           shift, and enter state 10
+	let            shift, and enter state 2
+	if             shift, and enter state 11
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
+
+	Expr           goto state 73
+	Form           goto state 4
+	Juxt           goto state 5
+	Atom           goto state 6
+	List           goto state 7
+
+State 67
 
 	Juxt -> quot Atom Atom .                            (rule 23)
 
@@ -1463,6 +1646,7 @@ State 59
 	in             reduce using rule 23
 	then           reduce using rule 23
 	else           reduce using rule 23
+	"::"           reduce using rule 23
 	"&&"           reduce using rule 23
 	"||"           reduce using rule 23
 	'+'            reduce using rule 23
@@ -1483,7 +1667,7 @@ State 59
 	%eof           reduce using rule 23
 
 
-State 60
+State 68
 
 	Juxt -> rem Atom Atom .                             (rule 24)
 
@@ -1493,6 +1677,7 @@ State 60
 	in             reduce using rule 24
 	then           reduce using rule 24
 	else           reduce using rule 24
+	"::"           reduce using rule 24
 	"&&"           reduce using rule 24
 	"||"           reduce using rule 24
 	'+'            reduce using rule 24
@@ -1513,15 +1698,7 @@ State 60
 	%eof           reduce using rule 24
 
 
-State 61
-
-	Expr -> '(' '\\' var . "->" Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
-	Expr -> '(' '\\' var . "->" Expr ')'                (rule 3)
-
-	"->"           shift, and enter state 66
-
-
-State 62
+State 69
 
 	Atom -> '(' Expr ')' .                              (rule 27)
 
@@ -1531,6 +1708,7 @@ State 62
 	in             reduce using rule 27
 	then           reduce using rule 27
 	else           reduce using rule 27
+	"::"           reduce using rule 27
 	"&&"           reduce using rule 27
 	"||"           reduce using rule 27
 	'+'            reduce using rule 27
@@ -1553,13 +1731,14 @@ State 62
 	%eof           reduce using rule 27
 
 
-State 63
+State 70
 
 	List -> '[' ListMembers ']' .                       (rule 38)
 
 	in             reduce using rule 38
 	then           reduce using rule 38
 	else           reduce using rule 38
+	"::"           reduce using rule 38
 	"&&"           reduce using rule 38
 	"||"           reduce using rule 38
 	"=="           reduce using rule 38
@@ -1574,52 +1753,63 @@ State 63
 	%eof           reduce using rule 38
 
 
-State 64
+State 71
 
 	ListMembers -> Atom ',' . ListMembers               (rule 41)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
-	'('            shift, and enter state 20
-	var            shift, and enter state 16
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
 	']'            reduce using rule 39
 
-	Atom           goto state 18
-	ListMembers    goto state 65
+	Atom           goto state 19
+	ListMembers    goto state 72
 
-State 65
+State 72
 
 	ListMembers -> Atom ',' ListMembers .               (rule 41)
 
 	']'            reduce using rule 41
 
 
-State 66
+State 73
 
-	Expr -> '(' '\\' var "->" . Expr ')' "::" TypeExp "->" TypeExp    (rule 2)
-	Expr -> '(' '\\' var "->" . Expr ')'                (rule 3)
+	Expr -> '\\' var "->" Expr .                        (rule 2)
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
+	Expr -> Expr . "==" Expr                            (rule 5)
+	Expr -> Expr . ">=" Expr                            (rule 6)
+	Expr -> Expr . "<=" Expr                            (rule 7)
+	Expr -> Expr . "/=" Expr                            (rule 8)
+	Expr -> Expr . '>' Expr                             (rule 9)
+	Expr -> Expr . '<' Expr                             (rule 10)
+	Expr -> Expr . "&&" Expr                            (rule 11)
+	Expr -> Expr . "||" Expr                            (rule 12)
+	Expr -> Expr . ':' Expr                             (rule 13)
+	Expr -> Expr . "++" Expr                            (rule 14)
 
-	int            shift, and enter state 8
-	float          shift, and enter state 9
-	bool           shift, and enter state 10
-	let            shift, and enter state 2
-	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	in             reduce using rule 2
+	then           reduce using rule 2
+	else           reduce using rule 2
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	')'            reduce using rule 2
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
+	%eof           reduce using rule 2
 
-	Expr           goto state 71
-	Form           goto state 4
-	Juxt           goto state 5
-	Atom           goto state 6
-	List           goto state 7
 
-State 67
+State 74
 
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> if Expr then Expr . else Expr               (rule 4)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
@@ -1632,22 +1822,46 @@ State 67
 	Expr -> Expr . ':' Expr                             (rule 13)
 	Expr -> Expr . "++" Expr                            (rule 14)
 
-	else           shift, and enter state 70
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	else           shift, and enter state 82
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 
 
-State 68
+State 75
+
+	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
+	TypeExp -> '(' TypeExp . ')'                        (rule 34)
+
+	"->"           shift, and enter state 80
+	')'            shift, and enter state 81
+
+
+State 76
+
+	Expr -> Expr "::" TypeExp "->" . TypeExp            (rule 3)
+	TypeExp -> TypeExp "->" . TypeExp                   (rule 33)
+
+	Int            shift, and enter state 57
+	Bool           shift, and enter state 58
+	Float          shift, and enter state 59
+	'('            shift, and enter state 60
+
+	TypeExp        goto state 79
+	PrimType       goto state 56
+
+State 77
 
 	Expr -> let var '=' Expr . in Expr                  (rule 1)
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1659,20 +1873,21 @@ State 68
 	Expr -> Expr . ':' Expr                             (rule 13)
 	Expr -> Expr . "++" Expr                            (rule 14)
 
-	in             shift, and enter state 69
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	in             shift, and enter state 78
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 
 
-State 69
+State 78
 
 	Expr -> let var '=' Expr in . Expr                  (rule 1)
 
@@ -1681,78 +1896,31 @@ State 69
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
 	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
 
-	Expr           goto state 74
+	Expr           goto state 85
 	Form           goto state 4
 	Juxt           goto state 5
 	Atom           goto state 6
 	List           goto state 7
 
-State 70
+State 79
 
-	Expr -> if Expr then Expr else . Expr               (rule 4)
-
-	int            shift, and enter state 8
-	float          shift, and enter state 9
-	bool           shift, and enter state 10
-	let            shift, and enter state 2
-	if             shift, and enter state 11
-	'-'            shift, and enter state 12
-	quot           shift, and enter state 13
-	rem            shift, and enter state 14
-	'('            shift, and enter state 15
-	var            shift, and enter state 16
-	'['            shift, and enter state 17
-
-	Expr           goto state 73
-	Form           goto state 4
-	Juxt           goto state 5
-	Atom           goto state 6
-	List           goto state 7
-
-State 71
-
-	Expr -> '(' '\\' var "->" Expr . ')' "::" TypeExp "->" TypeExp    (rule 2)
-	Expr -> '(' '\\' var "->" Expr . ')'                (rule 3)
-	Expr -> Expr . "==" Expr                            (rule 5)
-	Expr -> Expr . ">=" Expr                            (rule 6)
-	Expr -> Expr . "<=" Expr                            (rule 7)
-	Expr -> Expr . "/=" Expr                            (rule 8)
-	Expr -> Expr . '>' Expr                             (rule 9)
-	Expr -> Expr . '<' Expr                             (rule 10)
-	Expr -> Expr . "&&" Expr                            (rule 11)
-	Expr -> Expr . "||" Expr                            (rule 12)
-	Expr -> Expr . ':' Expr                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
-
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	')'            shift, and enter state 72
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
-
-
-State 72
-
-	Expr -> '(' '\\' var "->" Expr ')' . "::" TypeExp "->" TypeExp    (rule 2)
-	Expr -> '(' '\\' var "->" Expr ')' .                (rule 3)
+	Expr -> Expr "::" TypeExp "->" TypeExp .            (rule 3)
+	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
+	TypeExp -> TypeExp "->" TypeExp .                   (rule 33)
 
 	in             reduce using rule 3
 	then           reduce using rule 3
 	else           reduce using rule 3
-	"::"           shift, and enter state 75
+	"->"           shift, and enter state 80
+	"::"           reduce using rule 3
 	"&&"           reduce using rule 3
 	"||"           reduce using rule 3
 	"=="           reduce using rule 3
@@ -1767,8 +1935,67 @@ State 72
 	%eof           reduce using rule 3
 
 
-State 73
+State 80
 
+	TypeExp -> TypeExp "->" . TypeExp                   (rule 33)
+
+	Int            shift, and enter state 57
+	Bool           shift, and enter state 58
+	Float          shift, and enter state 59
+	'('            shift, and enter state 60
+
+	TypeExp        goto state 84
+	PrimType       goto state 56
+
+State 81
+
+	TypeExp -> '(' TypeExp ')' .                        (rule 34)
+
+	in             reduce using rule 34
+	then           reduce using rule 34
+	else           reduce using rule 34
+	"->"           reduce using rule 34
+	"::"           reduce using rule 34
+	"&&"           reduce using rule 34
+	"||"           reduce using rule 34
+	"=="           reduce using rule 34
+	">="           reduce using rule 34
+	"<="           reduce using rule 34
+	"/="           reduce using rule 34
+	'>'            reduce using rule 34
+	'<'            reduce using rule 34
+	')'            reduce using rule 34
+	':'            reduce using rule 34
+	"++"           reduce using rule 34
+	%eof           reduce using rule 34
+
+
+State 82
+
+	Expr -> if Expr then Expr else . Expr               (rule 4)
+
+	int            shift, and enter state 8
+	float          shift, and enter state 9
+	bool           shift, and enter state 10
+	let            shift, and enter state 2
+	if             shift, and enter state 11
+	'\\'           shift, and enter state 12
+	'-'            shift, and enter state 13
+	quot           shift, and enter state 14
+	rem            shift, and enter state 15
+	'('            shift, and enter state 16
+	var            shift, and enter state 17
+	'['            shift, and enter state 18
+
+	Expr           goto state 83
+	Form           goto state 4
+	Juxt           goto state 5
+	Atom           goto state 6
+	List           goto state 7
+
+State 83
+
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
 	Expr -> if Expr then Expr else Expr .               (rule 4)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
@@ -1784,252 +2011,22 @@ State 73
 	in             reduce using rule 4
 	then           reduce using rule 4
 	else           reduce using rule 4
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
 	')'            reduce using rule 4
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
 	%eof           reduce using rule 4
 
 
-State 74
-
-	Expr -> let var '=' Expr in Expr .                  (rule 1)
-	Expr -> Expr . "==" Expr                            (rule 5)
-	Expr -> Expr . ">=" Expr                            (rule 6)
-	Expr -> Expr . "<=" Expr                            (rule 7)
-	Expr -> Expr . "/=" Expr                            (rule 8)
-	Expr -> Expr . '>' Expr                             (rule 9)
-	Expr -> Expr . '<' Expr                             (rule 10)
-	Expr -> Expr . "&&" Expr                            (rule 11)
-	Expr -> Expr . "||" Expr                            (rule 12)
-	Expr -> Expr . ':' Expr                             (rule 13)
-	Expr -> Expr . "++" Expr                            (rule 14)
-
-	in             reduce using rule 1
-	then           reduce using rule 1
-	else           reduce using rule 1
-	"&&"           shift, and enter state 32
-	"||"           shift, and enter state 33
-	"=="           shift, and enter state 34
-	">="           shift, and enter state 35
-	"<="           shift, and enter state 36
-	"/="           shift, and enter state 37
-	'>'            shift, and enter state 38
-	'<'            shift, and enter state 39
-	')'            reduce using rule 1
-	':'            shift, and enter state 40
-	"++"           shift, and enter state 41
-	%eof           reduce using rule 1
-
-
-State 75
-
-	Expr -> '(' '\\' var "->" Expr ')' "::" . TypeExp "->" TypeExp    (rule 2)
-
-	Int            shift, and enter state 78
-	Bool           shift, and enter state 79
-	Float          shift, and enter state 80
-	'('            shift, and enter state 81
-
-	TypeExp        goto state 76
-	PrimType       goto state 77
-
-State 76
-
-	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp . "->" TypeExp    (rule 2)
-	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
-
-	"->"           shift, and enter state 83
-
-
-State 77
-
-	TypeExp -> PrimType .                               (rule 32)
-
-	in             reduce using rule 32
-	then           reduce using rule 32
-	else           reduce using rule 32
-	"->"           reduce using rule 32
-	"&&"           reduce using rule 32
-	"||"           reduce using rule 32
-	"=="           reduce using rule 32
-	">="           reduce using rule 32
-	"<="           reduce using rule 32
-	"/="           reduce using rule 32
-	'>'            reduce using rule 32
-	'<'            reduce using rule 32
-	')'            reduce using rule 32
-	':'            reduce using rule 32
-	"++"           reduce using rule 32
-	%eof           reduce using rule 32
-
-
-State 78
-
-	PrimType -> Int .                                   (rule 36)
-
-	in             reduce using rule 36
-	then           reduce using rule 36
-	else           reduce using rule 36
-	"->"           reduce using rule 36
-	"&&"           reduce using rule 36
-	"||"           reduce using rule 36
-	"=="           reduce using rule 36
-	">="           reduce using rule 36
-	"<="           reduce using rule 36
-	"/="           reduce using rule 36
-	'>'            reduce using rule 36
-	'<'            reduce using rule 36
-	')'            reduce using rule 36
-	':'            reduce using rule 36
-	"++"           reduce using rule 36
-	%eof           reduce using rule 36
-
-
-State 79
-
-	PrimType -> Bool .                                  (rule 35)
-
-	in             reduce using rule 35
-	then           reduce using rule 35
-	else           reduce using rule 35
-	"->"           reduce using rule 35
-	"&&"           reduce using rule 35
-	"||"           reduce using rule 35
-	"=="           reduce using rule 35
-	">="           reduce using rule 35
-	"<="           reduce using rule 35
-	"/="           reduce using rule 35
-	'>'            reduce using rule 35
-	'<'            reduce using rule 35
-	')'            reduce using rule 35
-	':'            reduce using rule 35
-	"++"           reduce using rule 35
-	%eof           reduce using rule 35
-
-
-State 80
-
-	PrimType -> Float .                                 (rule 37)
-
-	in             reduce using rule 37
-	then           reduce using rule 37
-	else           reduce using rule 37
-	"->"           reduce using rule 37
-	"&&"           reduce using rule 37
-	"||"           reduce using rule 37
-	"=="           reduce using rule 37
-	">="           reduce using rule 37
-	"<="           reduce using rule 37
-	"/="           reduce using rule 37
-	'>'            reduce using rule 37
-	'<'            reduce using rule 37
-	')'            reduce using rule 37
-	':'            reduce using rule 37
-	"++"           reduce using rule 37
-	%eof           reduce using rule 37
-
-
-State 81
-
-	TypeExp -> '(' . TypeExp ')'                        (rule 34)
-
-	Int            shift, and enter state 78
-	Bool           shift, and enter state 79
-	Float          shift, and enter state 80
-	'('            shift, and enter state 81
-
-	TypeExp        goto state 82
-	PrimType       goto state 77
-
-State 82
-
-	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
-	TypeExp -> '(' TypeExp . ')'                        (rule 34)
-
-	"->"           shift, and enter state 85
-	')'            shift, and enter state 86
-
-
-State 83
-
-	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" . TypeExp    (rule 2)
-	TypeExp -> TypeExp "->" . TypeExp                   (rule 33)
-
-	Int            shift, and enter state 78
-	Bool           shift, and enter state 79
-	Float          shift, and enter state 80
-	'('            shift, and enter state 81
-
-	TypeExp        goto state 84
-	PrimType       goto state 77
-
 State 84
-
-	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp .    (rule 2)
-	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
-	TypeExp -> TypeExp "->" TypeExp .                   (rule 33)
-
-	in             reduce using rule 2
-	then           reduce using rule 2
-	else           reduce using rule 2
-	"->"           shift, and enter state 85
-	"&&"           reduce using rule 2
-	"||"           reduce using rule 2
-	"=="           reduce using rule 2
-	">="           reduce using rule 2
-	"<="           reduce using rule 2
-	"/="           reduce using rule 2
-	'>'            reduce using rule 2
-	'<'            reduce using rule 2
-	')'            reduce using rule 2
-	':'            reduce using rule 2
-	"++"           reduce using rule 2
-	%eof           reduce using rule 2
-
-
-State 85
-
-	TypeExp -> TypeExp "->" . TypeExp                   (rule 33)
-
-	Int            shift, and enter state 78
-	Bool           shift, and enter state 79
-	Float          shift, and enter state 80
-	'('            shift, and enter state 81
-
-	TypeExp        goto state 87
-	PrimType       goto state 77
-
-State 86
-
-	TypeExp -> '(' TypeExp ')' .                        (rule 34)
-
-	in             reduce using rule 34
-	then           reduce using rule 34
-	else           reduce using rule 34
-	"->"           reduce using rule 34
-	"&&"           reduce using rule 34
-	"||"           reduce using rule 34
-	"=="           reduce using rule 34
-	">="           reduce using rule 34
-	"<="           reduce using rule 34
-	"/="           reduce using rule 34
-	'>'            reduce using rule 34
-	'<'            reduce using rule 34
-	')'            reduce using rule 34
-	':'            reduce using rule 34
-	"++"           reduce using rule 34
-	%eof           reduce using rule 34
-
-
-State 87
 
 	TypeExp -> TypeExp . "->" TypeExp                   (rule 33)
 	TypeExp -> TypeExp "->" TypeExp .                   (rule 33)
@@ -2037,7 +2034,8 @@ State 87
 	in             reduce using rule 33
 	then           reduce using rule 33
 	else           reduce using rule 33
-	"->"           shift, and enter state 85
+	"->"           shift, and enter state 80
+	"::"           reduce using rule 33
 	"&&"           reduce using rule 33
 	"||"           reduce using rule 33
 	"=="           reduce using rule 33
@@ -2052,10 +2050,43 @@ State 87
 	%eof           reduce using rule 33
 
 
+State 85
+
+	Expr -> let var '=' Expr in Expr .                  (rule 1)
+	Expr -> Expr . "::" TypeExp "->" TypeExp            (rule 3)
+	Expr -> Expr . "==" Expr                            (rule 5)
+	Expr -> Expr . ">=" Expr                            (rule 6)
+	Expr -> Expr . "<=" Expr                            (rule 7)
+	Expr -> Expr . "/=" Expr                            (rule 8)
+	Expr -> Expr . '>' Expr                             (rule 9)
+	Expr -> Expr . '<' Expr                             (rule 10)
+	Expr -> Expr . "&&" Expr                            (rule 11)
+	Expr -> Expr . "||" Expr                            (rule 12)
+	Expr -> Expr . ':' Expr                             (rule 13)
+	Expr -> Expr . "++" Expr                            (rule 14)
+
+	in             reduce using rule 1
+	then           reduce using rule 1
+	else           reduce using rule 1
+	"::"           shift, and enter state 32
+	"&&"           shift, and enter state 33
+	"||"           shift, and enter state 34
+	"=="           shift, and enter state 35
+	">="           shift, and enter state 36
+	"<="           shift, and enter state 37
+	"/="           shift, and enter state 38
+	'>'            shift, and enter state 39
+	'<'            shift, and enter state 40
+	')'            reduce using rule 1
+	':'            shift, and enter state 41
+	"++"           shift, and enter state 42
+	%eof           reduce using rule 1
+
+
 -----------------------------------------------------------------------------
 Grammar Totals
 -----------------------------------------------------------------------------
 Number of rules: 42
 Number of terminals: 37
 Number of non-terminals: 9
-Number of states: 88
+Number of states: 86

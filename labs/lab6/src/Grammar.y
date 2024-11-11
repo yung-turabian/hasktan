@@ -75,34 +75,11 @@ var { VAR p $$ }
 "++"{ PLUSPLUS p } 
 
 
-{- OLD PRECEDENCE SYSTEM
-%nonassoc else in
-%nonassoc "->"
-%nonassoc "&&" "||"
-%nonassoc '>' '<' "==" ">=" "<=" "/="
-
-%left '+' '-'
-%left '*' '/'
-%nonassoc let
-%right if then
-%nonassoc int float bool
-%nonassoc var '(' '\\' '='
-
-   
-
-%nonassoc APP
-%nonassoc quot rem
-
-
-%left NEG
-
--}
-
 
 %right in "->" else
 %nonassoc '>' '<' "==" ">=" "<=" "/="
 %nonassoc "&&" "||"
-%nonassoc ')'
+%nonassoc ')' "::"
 %right "++" ':'
 %left '+' '-'
 %left '*' '/'
@@ -110,53 +87,14 @@ var { VAR p $$ }
 
 %%
 
-{- OLD AST BEFORE I DECIDED TO BREAK IT UP FOR READABILITY AND EASE OF USE
-    
-AST :
-  bool                                         { Boolean $1 }
-| int                                          { Integer $1 }
-| float                                        { Float $1 }
-
-| let var '=' AST in AST                       { Let $2 $4 $6 }
-| if AST then AST else AST                     { If $2 $4 $6 }
-| '(' '\\'var "->" AST ')' "::" TypeExp        { Lambda $3 $5 $8 }
-
-| AST AST                                      { App $1 $2 }
-
-| AST "&&" AST                                 { And $1 $3 }
-| AST "||" AST                                 { Or $1 $3 }
-
-| AST '+' AST                                  { Add $1 $3 }
-| AST '-' AST                                  { Sub $1 $3 }
-| AST '*' AST                                  { Mul $1 $3 }
-| AST '/' AST                                  { Div $1 $3 }
-
-| quot AST AST                                 { Quot $2 $3 }
-| rem AST AST                                  { Rem $2 $3 }
-
-| '-' AST                                      { Sub (Integer 0) $2  }
-
-| AST "==" AST                                 { Equals $1 $3 }
-| AST ">=" AST                                 { Or (Equals $1 $3) (Gt $1 $3) }
-| AST "<=" AST                                 { Or (Equals $1 $3) (Lt $1 $3) }
--- | AST "/=" AST                                 { NotEq $1 $3 } 
-| AST '>' AST                                  { Gt $1 $3 }
-| AST '<' AST                                  { Lt $1 $3 }
-
-| '(' AST ')'                                  { $2 }
-
-| var                                          { Variable $1 }
-
--}
-
 -- I preferred this way because it shows precidence in its structure.
 -- Atoms are primitive types and are acted upon
 -- Then Juxtaposed atoms have the next highest precidence, functions, applications and negation
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
 Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
-     | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp         { Lambda $3 $5 $8 $10 }
-		 | '\\' var "->" Expr { PolyLambda $2 $4 } 
+     | '\\' var "->" Expr                               { Lambda $2 $4 }
+		 | Expr "::" TypeExp "->" TypeExp                   { TypeSig $1 $3 $5 }
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
      
      | Expr "==" Expr              { Equals $1 $3 }
@@ -262,8 +200,8 @@ data AST
   | Let String AST AST
   | If AST AST AST
 
-  | Lambda String AST TypeExp TypeExp
-	| PolyLambda String AST
+  | Lambda String AST
+	| TypeSig AST TypeExp TypeExp
 
   | App AST AST
 

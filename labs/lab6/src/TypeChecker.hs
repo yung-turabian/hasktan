@@ -13,6 +13,7 @@ lookup s  []                    = error ("Type " ++ s ++ " not defined in the cu
 lookup s1 ((s2,t):l) | s1 == s2 = t
 lookup s  (_:l)                 = TypeChecker.lookup s l
 
+
 -- Please complete the definition of typeChecker for the rest of the abstract syntax.
 
 typeChecker:: E AST -> TypeEnv -> TypeExp
@@ -38,26 +39,36 @@ typeChecker (Ok (If e1 e2 e3) ) env
   t1 = typeChecker (Ok e2) env
   t2 = typeChecker (Ok e3) env
 
-
-typeChecker (Ok (Lambda s e t1 t2) ) env
- | (t1 == IntType || t1 == BoolType || t1 == FloatType 
-  || t1 == IntList || t1 == BoolList || t2 == FloatList) 
- && (t2 == IntType || t2 == BoolType || t2 == FloatType 
-  || t2 == IntList || t2 == BoolList || t2 == FloatList) = typeChecker (Ok e) env
-
- | otherwise = error ("Failure to check : \\" ++ (show s) ++ " -> " ++ (show e)) 
- where
-  env = (s, t1) : env
-
-typeChecker (Ok (PolyLambda s e) ) env
- | typeChecker (Ok e) intEnv == IntType = IntType
-
- | otherwise = error ("Failure to check : \\" ++ (show s) ++ " -> " ++ (show e)) 
- where
-  intEnv = (s, IntType) : env
+-- TODO Correctly infer types from `e` or if App is used than accept the type of the argument for `s`
+typeChecker (Ok (Lambda s e) ) env = typeChecker (Ok e) ( (s, (typeChecker (Ok e) env )) : env )
 
 
-typeChecker (Ok (App e1 e2) ) env = typeChecker (Ok e1) env
+typeChecker (Ok (TypeSig e t1 t2) ) env = 
+ let inferredType = typeChecker (Ok e) env 
+
+ in if inferredType == t2 then t2 
+ else error ("Couldn't match expected `" ++ (show t2) ++ "` with actual `" ++ (show t1) ++ "`.")
+
+
+-- TODO Go over this again, typesig and lambda are confusing
+typeChecker (Ok (App e1 e2) ) env = 
+ let functionType = typeChecker (Ok e1) env
+     argumentType = typeChecker (Ok e2) env
+ in case e1 of
+
+   Lambda s e -> 
+    typeChecker (Ok e) ((s, argumentType) : env)
+
+       
+   TypeSig _ takesType returnsType ->
+     if takesType == argumentType then takesType
+     else error ("Function expected type `" ++ (show takesType) ++ "` but got `" ++ (show argumentType) ++ "` for argument.")
+
+
+   _ -> -- No type signature
+     if functionType == argumentType
+     then functionType
+     else error ("No instance for " ++ (show argumentType) ++ " -> " ++ (show functionType) ++ ".")
 
 
 typeChecker (Ok (And e1 e2 ) ) env | typeChecker (Ok (e1)) env == BoolType && typeChecker (Ok (e2)) env == BoolType = BoolType
