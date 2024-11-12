@@ -93,8 +93,7 @@ var { VAR p $$ }
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
 Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
-     | '\\' var "->" Expr                               { Lambda $2 $4 }
-		 | Expr "::" TypeExp "->" TypeExp                   { TypeSig $1 $3 $5 }
+     | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   { Lambda $3 $5 $8 $10 }
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
      
      | Expr "==" Expr              { Equals $1 $3 }
@@ -200,8 +199,7 @@ data AST
   | Let String AST AST
   | If AST AST AST
 
-  | Lambda String AST
-	| TypeSig AST TypeExp TypeExp
+  | Lambda String AST TypeExp TypeExp
 
   | App AST AST
 

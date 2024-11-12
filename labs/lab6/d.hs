@@ -1,1 +1,2 @@
-((\x -> x + 2) :: Float -> Int) 2.0
+let y = ((\x -> x + 2) :: Int -> Int) 2
+ in y + 2
