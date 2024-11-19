@@ -8,4 +8,4 @@ main = do
   s <- getContents
   let ast = parseHasquelito (scanTokens s)
   let t = typeChecker ast []
-  print (ast,t)  
+  print (ast, t)  

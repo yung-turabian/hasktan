@@ -17,7 +17,7 @@ lookup s  (_:l)                 = TypeChecker.lookup s l
 
 -- Please complete the definition of typeChecker for the rest of the abstract syntax.
 
-typeChecker:: E AST -> TypeEnv -> TypeExp
+typeChecker :: E AST -> TypeEnv -> TypeExp
 
 -- Constants
 typeChecker (Ok (Boolean _) ) _ = BoolType
@@ -31,6 +31,7 @@ typeChecker (Ok (Variable s) ) env = TypeChecker.lookup s env
 typeChecker (Ok(Plus e1 e2)) env 
  | t1 == IntType && t2 == IntType = IntType 
  | t1 == FloatType && t2 == FloatType = FloatType 
+ | otherwise = error ("type mismatch:\n\t" ++(show t1) ++ "\n\t" ++ (show t2))
  where
   t1 = typeChecker (Ok e1) env
   t2 = typeChecker (Ok e2) env
@@ -194,7 +195,8 @@ typeChecker (Ok (Not) ) env = BoolType
 
 
 
-typeChecker _ _ = error "Failed to type-check"
+typeChecker _ _ = error "Unknown type."
+
 -- http://www.zvon.org/other/haskell/Outputprelude/all_f.html
 -- Rewrote `all`, just passes a condition to all children
 hwAll :: (a -> Bool) -> [a] -> Bool

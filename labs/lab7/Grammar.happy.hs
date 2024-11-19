@@ -685,10 +685,8 @@ parseHasquelito tks = happySomeParser where
 happySeq = happyDontSeq
 
 
-data E a
-  = Ok a
-  | Failed String
-  deriving(Eq,Show)
+data E a = Ok a | Failed String 
+ deriving(Eq,Show)
 
 thenE :: E a -> (a -> E b) -> E b
 m `thenE` k =
