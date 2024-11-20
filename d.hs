@@ -1,1 +1,1 @@
-True && 7 == 2 * 2 + 3
+if 2 == 5 then 5 else 3

@@ -100,6 +100,14 @@ interpreter (Ok(Times e1 e2)) env =
       (Integer n1, Integer n2) -> Ok (Integer (n1 * n2))
       (Float n1, Float n2) -> Ok (Float (n1 * n2))
 
+interpreter (Ok(Power e1 e2)) env =
+    let
+       Ok t1 = interpreter (Ok e1) env
+       Ok t2 = interpreter (Ok e2) env
+    in case (t1, t2) of
+      (Integer n1, Integer n2) -> Ok (Integer (n1 ^ n2))
+      (Float n1, Integer n2) -> Ok (Float (n1 ^ n2))
+
 interpreter (Ok(Quot e1 e2)) env =
     let
        (Ok(Integer n1)) = interpreter (Ok e1) env
@@ -117,34 +125,82 @@ interpreter (Ok(Rem e1 e2)) env =
 
 
 interpreter (Ok(And e _)) env
- | n == False = (Ok(Boolean False))
+ | b == False = (Ok(Boolean False))
  where
-   (Ok (Boolean n)) = interpreter (Ok e) env
+   (Ok (Boolean b)) = interpreter (Ok e) env
 
 interpreter (Ok(And e1 e2)) env
- | (n1 == True) = (Ok(Boolean n2))
+ | (b1 == True) = (Ok(Boolean b2))
  where
-   (Ok(Boolean n1)) = interpreter (Ok e1) env
-   (Ok(Boolean n2)) = interpreter (Ok e2) env
+   (Ok(Boolean b1)) = interpreter (Ok e1) env
+   (Ok(Boolean b2)) = interpreter (Ok e2) env
+
+interpreter (Ok(Or e _)) env
+ | b == True = (Ok(Boolean True))
+ where
+   (Ok (Boolean b)) = interpreter (Ok e) env
+
+interpreter (Ok(Or e1 e2)) env
+ | (b1 == False) = (Ok(Boolean b2))
+ where
+   (Ok(Boolean b1)) = interpreter (Ok e1) env
+   (Ok(Boolean b2)) = interpreter (Ok e2) env
 
 
-
+-- Predicates
 
 interpreter (Ok(Equals e1 e2)) env
- | n1 == n2 = Ok(Boolean(True))
+ | v1 == v2 = Ok(Boolean(True))
  where
-   (Ok(Integer n1)) = interpreter (Ok e1) env
-   (Ok(Integer n2)) = interpreter (Ok e2) env
+   Ok v1 = interpreter (Ok e1) env
+   Ok v2 = interpreter (Ok e2) env
 
 interpreter (Ok(Equals e1 e2)) env
- | n1 /= n2 = Ok(Boolean(False))
+ | v1 /= v2 = Ok(Boolean(False))
  where
-   (Ok (Integer n1)) = interpreter (Ok e1) env
-   (Ok (Integer n2)) = interpreter (Ok e2) env
+   Ok v1 = interpreter (Ok e1) env
+   Ok v2 = interpreter (Ok e2) env
 
 
- 
+interpreter (Ok(Gt e1 e2)) env
+ | v1 > v2 = Ok(Boolean(True))
+ where
+   Ok v1 = interpreter (Ok e1) env
+   Ok v2 = interpreter (Ok e2) env
 
+interpreter (Ok(Gt e1 e2)) env
+ | v1 <= v2 = Ok(Boolean(False))
+ where
+   Ok v1 = interpreter (Ok e1) env
+   Ok v2 = interpreter (Ok e2) env
+
+interpreter (Ok(Lt e1 e2)) env
+ | v1 < v2 = Ok(Boolean(True))
+ where
+   Ok v1 = interpreter (Ok e1) env
+   Ok v2 = interpreter (Ok e2) env
+
+interpreter (Ok(Gt e1 e2)) env
+ | v1 >= v2 = Ok(Boolean(False))
+ where
+   Ok v1 = interpreter (Ok e1) env
+   Ok v2 = interpreter (Ok e2) env
+
+
+-- If expressions
+interpreter (Ok(If e1 e2 e3)) env
+ | interpreter (Ok e1) env == Ok(Boolean(True)) = Ok v
+ where
+   Ok v = interpreter (Ok e2) env
+
+interpreter (Ok(If e1 e2 e3)) env
+ | interpreter (Ok e1) env == Ok(Boolean(False)) = Ok v
+ where
+   Ok v = interpreter (Ok e3) env
+
+
+-- Let expressions
+-- interpreter (Ok(Let x e1 e2)) env =
 
 
 main = do

@@ -34,7 +34,7 @@ tokens :-
  -- Type definitions
  Bool			{ \p s -> (BOOL) p }
  Int			{ \p s -> (INT) p }
- Float			{ \p s -> (FLOAT) p }
+ Float	  { \p s -> (FLOAT) p }
 
  -- Constants
  True | False           { \p s -> BOOLVAL p (read s) }
@@ -43,14 +43,14 @@ tokens :-
  @string		{ \p s -> STRING p (read s) }
 
  -- Keywords
- if			{ \p s -> IF p }
- then 			{ \p s -> THEN p }
- else 		       	{ \p s -> ELSE p }
- let	    	       	{ \p s -> LET p }
- in            	        { \p s -> IN p }
+ if			  { \p s -> IF p }
+ then 	  { \p s -> THEN p }
+ else 		{ \p s -> ELSE p }
+ let	    { \p s -> LET p }
+ in       { \p s -> IN p }
 
  -- Arithmetic operators
- \\			{ \p s -> (LAMBDA) p }
+ \\			  { \p s -> (LAMBDA) p }
  "+"			{ \p s -> (PLUS) p }
  "-"			{ \p s -> (MINUS) p }
  "*"			{ \p s -> (TIMES) p }

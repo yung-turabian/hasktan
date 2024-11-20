@@ -190,7 +190,7 @@ data TypeExp
 	| FloatList
 
   | Arrow TypeExp TypeExp
-  deriving (Eq,Show)
+  deriving (Eq,Ord,Show)
 
 data AST
   = Boolean Bool
@@ -227,6 +227,6 @@ data AST
   | Concat AST AST
 
   | Not -- Using the haskell `not`, this is simply a placeholder.
-  deriving (Eq,Show)
+  deriving (Eq,Ord,Show)
 
 }
