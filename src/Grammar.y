@@ -78,10 +78,10 @@ var { VAR p $$ }
 
 
 %right in "->" else
-%nonassoc '>' '<' "==" ">=" "<=" "/="
-%nonassoc "&&" "||"
-%nonassoc ')' "::"
 %right "++" ':'
+%nonassoc "&&" "||"
+%nonassoc '>' '<' "==" ">=" "<=" "/="
+%nonassoc ')' "::"
 %left '+' '-'
 %left '*' '/'
 %left '^'

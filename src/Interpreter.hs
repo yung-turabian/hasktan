@@ -77,7 +77,7 @@ interpreter (Ok(Variable v)) env =
 
 interpreter (Ok(Plus e1 e2)) env =
     let
-       Ok t1  = interpreter (Ok e1) env
+       Ok t1 = interpreter (Ok e1) env
        Ok t2 = interpreter (Ok e2) env
     in case (t1, t2) of
       (Integer n1, Integer n2) -> Ok (Integer (n1 + n2))
@@ -86,17 +86,65 @@ interpreter (Ok(Plus e1 e2)) env =
 
 interpreter (Ok(Minus e1 e2)) env =
     let
-       Ok (Integer n1) = interpreter (Ok e1) env
-       Ok (Integer n2) = interpreter (Ok e2) env
-    in
-      Ok (Integer (n1 - n2))
+       Ok t1 = interpreter (Ok e1) env
+       Ok t2 = interpreter (Ok e2) env
+    in case (t1, t2) of
+      (Integer n1, Integer n2) -> Ok (Integer (n1 - n2))
+      (Float n1, Float n2) -> Ok (Float (n1 - n2))
 
 interpreter (Ok(Times e1 e2)) env =
     let
-       Ok (Integer n1) = interpreter (Ok e1) env
-       Ok (Integer n2) = interpreter (Ok e2) env
-    in
-      Ok (Integer (n1 * n2))
+       Ok t1 = interpreter (Ok e1) env
+       Ok t2 = interpreter (Ok e2) env
+    in case (t1, t2) of
+      (Integer n1, Integer n2) -> Ok (Integer (n1 * n2))
+      (Float n1, Float n2) -> Ok (Float (n1 * n2))
+
+interpreter (Ok(Quot e1 e2)) env =
+    let
+       (Ok(Integer n1)) = interpreter (Ok e1) env
+       (Ok(Integer n2)) = interpreter (Ok e2) env
+    in 
+      Ok(Integer(quot n1 n2))
+
+
+interpreter (Ok(Rem e1 e2)) env =
+    let
+       (Ok(Integer n1)) = interpreter (Ok e1) env
+       (Ok(Integer n2)) = interpreter (Ok e2) env
+    in 
+      Ok(Integer(rem n1 n2))
+
+
+interpreter (Ok(And e _)) env
+ | n == False = (Ok(Boolean False))
+ where
+   (Ok (Boolean n)) = interpreter (Ok e) env
+
+interpreter (Ok(And e1 e2)) env
+ | (n1 == True) = (Ok(Boolean n2))
+ where
+   (Ok(Boolean n1)) = interpreter (Ok e1) env
+   (Ok(Boolean n2)) = interpreter (Ok e2) env
+
+
+
+
+interpreter (Ok(Equals e1 e2)) env
+ | n1 == n2 = Ok(Boolean(True))
+ where
+   (Ok(Integer n1)) = interpreter (Ok e1) env
+   (Ok(Integer n2)) = interpreter (Ok e2) env
+
+interpreter (Ok(Equals e1 e2)) env
+ | n1 /= n2 = Ok(Boolean(False))
+ where
+   (Ok (Integer n1)) = interpreter (Ok e1) env
+   (Ok (Integer n2)) = interpreter (Ok e2) env
+
+
+ 
+
 
 
 main = do
