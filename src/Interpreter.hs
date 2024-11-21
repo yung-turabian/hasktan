@@ -1,4 +1,6 @@
 module Main where
+import Control.Exception
+
 import TypeChecker
 import Grammar
 import Lexer
@@ -66,14 +68,20 @@ subst ((x,e):env) ast =
 -- Please complete the definition of interpreter.
 
 interpreter:: E AST -> OpEnv -> E AST
-interpreter (Ok(Boolean b)) _ = Ok (Boolean b)
-interpreter (Ok(Integer n)) _ = Ok (Integer n)
-interpreter (Ok(Float f)) _ = Ok (Float f)
+interpreter (Ok(Boolean b)) _ = Ok(Boolean b)
+interpreter (Ok(Integer n)) _ = Ok(Integer n)
+
+-- Extra types
+interpreter (Ok(List l)) _ = Ok(List l)
+interpreter (Ok(Float f)) _ = Ok(Float f)
+
 interpreter (Ok(Variable v)) env =
     let
         e = TypeChecker.lookup v env
     in
         interpreter (Ok e) env
+
+
 
 interpreter (Ok(Plus e1 e2)) env =
     let
@@ -82,7 +90,6 @@ interpreter (Ok(Plus e1 e2)) env =
     in case (t1, t2) of
       (Integer n1, Integer n2) -> Ok (Integer (n1 + n2))
       (Float n1, Float n2) -> Ok (Float (n1 + n2))
-      _ -> Failed "Type mismatch."
 
 interpreter (Ok(Minus e1 e2)) env =
     let
@@ -200,10 +207,10 @@ interpreter (Ok(If e1 e2 e3)) env
 
 -- Lambda expressions
 interpreter (Ok(Lambda x e s t)) env =
- (Ok (Lambda x interpE s t))
+ (Ok (Lambda x e s t))
  where
-   newEnv = remove_var x env
-   Ok interpE = interpreter (Ok e) newEnv
+   env = remove_var x env
+   Ok e = interpreter (Ok(Lambda x e s t)) env
 
 -- Let expressions
 interpreter (Ok(Let x e1 e2)) env = 
@@ -213,25 +220,55 @@ interpreter (Ok(Let x e1 e2)) env =
    env = (x, interpE1) : env
 
 -- Function Application
-{-interpreter (Ok(App e1 e2)) env = 
-   let
-      Ok (Lambda x e s t) = interpreter (Ok e1) env
-      Ok interpE2 = interpreter (Ok e2) env
-      env = (x, interpE2) : env
-   in interpreter (Ok (subst_var x e interpE2)) env
--}
-
-interpreter (Ok(App e1 e2)) env =
- error ("> " ++ show(interpreter (Ok (subst_var x e1 interpE2)) env) )
+interpreter (Ok(App (Lambda x e _ _) e2)) env = 
+ interpreter (Ok(subst ((x, interpE2) : env) e)) env
  where
-   Ok (Lambda x e _ _) = interpreter (Ok e1) env
    Ok interpE2 = interpreter (Ok e2) env
 
+-- General application (for not)
+interpreter (Ok(App _ b)) env = 
+ Ok(Boolean(not ret))
+ where
+   Ok(Boolean ret) = interpreter(Ok b) env 
+
+
+-- List manipulation
+interpreter (Ok(Cons e1 e2)) env =
+    let
+       t1 = interpreter (Ok e1) env
+       Ok (List l) = interpreter (Ok e2) env
+    in case t1 of
+      (Ok (Integer n)) -> Ok (List (Integer n : l))
+      (Ok (Float n)) -> Ok (List (Float n : l))
+      (Ok (Boolean n)) -> Ok (List (Boolean n : l))
+
+interpreter (Ok(Concat e1 e2)) env =
+    let
+       Ok (List l1) = interpreter (Ok e1) env
+       Ok (List l2) = interpreter (Ok e2) env
+    in Ok (List (l1 ++ l2))
 
 main = do
-  s <- getContents
-  let ast = parseHasquelito (scanTokens s)
-  let t = typeChecker ast []
-  let val = interpreter ast []
-  --print (ast,t,val)  
-  print(val)
+    let handler :: SomeException -> IO Bool
+        handler e = do
+            putStrLn "Exception caught: "
+            print e
+            return False
+
+    s <- getContents
+
+    let ast = parseHasquelito (scanTokens s)
+    let t = typeChecker ast []
+    let val = interpreter ast []
+
+    parseResult <- ((evaluate (ast) >> return True) `catch` handler)
+    if not parseResult then return () else do
+      typeCheckResult <- (evaluate (t) >> return True) `catch` handler
+      if not typeCheckResult then return () else do
+         res <- (evaluate (val) >> return True) `catch` handler
+         if not res
+            then return ()
+            else print val
+
+    return ()
+

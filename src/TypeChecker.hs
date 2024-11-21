@@ -172,10 +172,10 @@ typeChecker (Ok(Cons e1 e2)) env
  | otherwise = error "List construction type mismatch."
  where 
   t1 = typeChecker (Ok (e1)) env
-  t2 = typeChecker (Ok (e2)) env
+  t2 = typeChecker (Ok(e2)) env
 
 
-typeChecker (Ok (Concat e1 e2) ) env 
+typeChecker (Ok(Concat e1 e2)) env 
  | t1 == EmptyList && t2 == EmptyList = EmptyList
  | (t1 == BoolType || t1 == EmptyList) && (t2 == BoolType || t2 == EmptyList) = BoolList
  | (t1 == IntList || t1 == EmptyList) && (t2 == IntList || t2 == EmptyList) = IntList
@@ -190,7 +190,7 @@ typeChecker (Ok (Concat e1 e2) ) env
   t2 = typeChecker (Ok (e2)) env
 
 
-typeChecker (Ok (Not) ) env = BoolType
+typeChecker (Ok(Not)) env = BoolType
 
 
 

@@ -85,8 +85,6 @@ var { VAR p $$ }
 %left '+' '-'
 %left '*' '/'
 %left '^'
-
-
 %%
 
 -- I preferred this way because it shows precidence in its structure.
