@@ -16,7 +16,7 @@ remove_var x ((y,ast):env) =
 
 -- Substitute an AST for a variable in an AST.
 
-subst_var:: String -> AST -> AST -> AST
+subst_var :: String -> AST -> AST -> AST
 subst_var _ _ (Boolean b) = Boolean b
 subst_var _ _ (Integer n) = Integer n
 subst_var x e (Variable v) | x == v = e
@@ -58,7 +58,7 @@ subst_var x e (Lambda y ast t1 t2) =
 
 -- Treat an environment as a variable substitution.
 
-subst:: OpEnv -> AST -> AST
+subst :: OpEnv -> AST -> AST
 subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (subst_var x e ast)
@@ -198,9 +198,34 @@ interpreter (Ok(If e1 e2 e3)) env
  where
    Ok v = interpreter (Ok e3) env
 
+-- Lambda expressions
+interpreter (Ok(Lambda x e s t)) env =
+ (Ok (Lambda x interpE s t))
+ where
+   newEnv = remove_var x env
+   Ok interpE = interpreter (Ok e) newEnv
 
 -- Let expressions
--- interpreter (Ok(Let x e1 e2)) env =
+interpreter (Ok(Let x e1 e2)) env = 
+ interpreter (Ok e2) env
+ where
+   Ok interpE1 = interpreter (Ok e1) env
+   env = (x, interpE1) : env
+
+-- Function Application
+{-interpreter (Ok(App e1 e2)) env = 
+   let
+      Ok (Lambda x e s t) = interpreter (Ok e1) env
+      Ok interpE2 = interpreter (Ok e2) env
+      env = (x, interpE2) : env
+   in interpreter (Ok (subst_var x e interpE2)) env
+-}
+
+interpreter (Ok(App e1 e2)) env =
+ error ("> " ++ show(interpreter (Ok (subst_var x e1 interpE2)) env) )
+ where
+   Ok (Lambda x e _ _) = interpreter (Ok e1) env
+   Ok interpE2 = interpreter (Ok e2) env
 
 
 main = do
@@ -208,4 +233,5 @@ main = do
   let ast = parseHasquelito (scanTokens s)
   let t = typeChecker ast []
   let val = interpreter ast []
-  print (ast,t,val)  
+  --print (ast,t,val)  
+  print(val)

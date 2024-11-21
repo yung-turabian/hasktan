@@ -1,1 +1,1 @@
-if 2 == 5 then 5 else 3
+((\y -> y + 4) :: Int -> Int) 6*2
