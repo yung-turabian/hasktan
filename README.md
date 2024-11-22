@@ -14,6 +14,11 @@ Build with make and spits out the executable.
 $ make
 ```
 
+**Note**:
+  Until I figure out monads and how IO works in Haskell, interpreting a file works as such
+```bash
+$ hasktan < file.hs
+```
 
 # Employed the use of...
 + [Haskell](https://www.haskell.org/)
