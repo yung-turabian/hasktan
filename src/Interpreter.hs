@@ -232,13 +232,6 @@ interpreter (Ok(App (Lambda x e _ _) e2)) env =
  where
    Ok interpE2 = interpreter (Ok e2) env
 
--- General application (for not)
-interpreter (Ok(App _ b)) env = 
- Ok(Boolean(not ret))
- where
-   Ok(Boolean ret) = interpreter(Ok b) env 
-
-
 -- List manipulation
 interpreter (Ok(Cons e1 e2)) env =
     let

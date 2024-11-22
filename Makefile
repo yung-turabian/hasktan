@@ -48,8 +48,7 @@ all:
 
 clean:
 	rm -rf obj *.o *.hi *.info \
-		*.alex.hs *.happy.hs parserLINUX parserOSX parserWIN64
-
+		*.alex.hs *.happy.hs $(PROG)
 
 test: all
 	@for file in $(TESTS); do \
