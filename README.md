@@ -2,6 +2,17 @@
 
 A small, interpreted Haskell-derived toy language.
 
+# How to build & run
+
+Configure your enviroment with this script, or setup GHC along with Alex and Happy.
+```bash
+$ chmod +x configure.sh && ./configure.sh
+```
+
+Build with make and spits out the executable.
+```bash
+$ make
+```
 
 
 # Employed the use of...
@@ -10,4 +21,4 @@ A small, interpreted Haskell-derived toy language.
 + [Happy Manual](https://haskell-happy.readthedocs.io/en/latest/using.html)
 
 # License
-[BSD-3 Licens](LICENSE)
+[BSD-3 License](LICENSE)
