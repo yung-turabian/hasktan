@@ -231,7 +231,7 @@ interpreter (Ok(Let x e1 e2)) env =
 
 -- Function Application
 interpreter (Ok(App e1 e2)) env = 
-  interpreter (Ok(subst ((x, interpE2) : env) e)) env
+  interpreter (Ok(subst [(x, interpE2)] e)) env
    where
       Ok (Lambda x e _ _) = interpreter (Ok e1) env
       Ok interpE2 = interpreter (Ok e2) env
