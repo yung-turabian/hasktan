@@ -2,7 +2,7 @@
 
 A small, interpreted Haskell-derived toy language.
 
-# How to build & run
+# How to Build & Run
 
 Configure your enviroment with this script, or setup GHC along with Alex and Happy.
 ```bash
@@ -14,8 +14,7 @@ Build with make and spits out the executable.
 $ make
 ```
 
-**Note**:
-  Until I figure out monads and how IO works in Haskell, interpreting a file works as such
+**Note**: Until I figure out monads and how IO works in Haskell, interpreting a file works as such
 ```bash
 $ hasktan < file.hs
 ```
