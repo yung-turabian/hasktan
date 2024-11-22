@@ -47,7 +47,7 @@ all:
 .PHONY: clean test
 
 clean:
-	rm -rf obj *.o *.hi *.info \
+	rm -rf obj *.o *.hi $(SRC)/*.info $(SRC)/Grammar.hs \
 		*.alex.hs *.happy.hs $(PROG)
 
 test: all
