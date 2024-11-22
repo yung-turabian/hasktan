@@ -138,6 +138,8 @@ Atom : '(' Expr ')'                { $2 }
 TypeExp : PrimType { $1 }
 | TypeExp "->" TypeExp {Arrow $1 $3}
 | '(' TypeExp ')' { $2 }
+| '[' TypeExp ']' { ListType $2 }
+| '[' {- empty -} ']' { EmptyList }
 
 
 PrimType : Bool { BoolType } | Int { IntType } | Float { FloatType }
@@ -182,12 +184,10 @@ data TypeExp
   | IntType
   | FloatType
    
-	| EmptyList
-  | IntList
-	| BoolList
-	| FloatList
-
   | Arrow TypeExp TypeExp
+  
+  | EmptyList
+  | ListType TypeExp
   deriving (Eq,Ord,Show)
 
 data AST

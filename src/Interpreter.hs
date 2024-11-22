@@ -57,6 +57,12 @@ subst_var x e (Lambda y ast t1 t2) | x == y =
     Lambda y ast t1 t2
 subst_var x e (Lambda y ast t1 t2) =
     Lambda y (subst_var x e ast) t1 t2
+subst_var x e (List ast) =
+    List (map (subst_var x e) ast)
+subst_var x e (Cons ast1 ast2) =
+    Cons (subst_var x e ast1) (subst_var x e ast2)
+subst_var x e (Concat ast1 ast2) =
+    Concat (subst_var x e ast1) (subst_var x e ast2)
 
 -- Treat an environment as a variable substitution.
 

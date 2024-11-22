@@ -151,23 +151,24 @@ typeChecker (Ok(App e1 e2)) env
   (Arrow s1 t) = typeChecker (Ok e1) env
   s2 = typeChecker(Ok e2) env
 
+typeChecker (Ok(Not)) env = Arrow BoolType BoolType
 
 
-
+-- List manipulation
 typeChecker (Ok(List e)) env
  | len types == 0 = EmptyList
- | hwAll (== IntType) types = IntList
- | hwAll (== BoolType) types = BoolList
- | hwAll (== FloatType) types = FloatList
+ | hwAll (== IntType) types = ListType IntType
+ | hwAll (== BoolType) types = ListType BoolType
+ | hwAll (== FloatType) types = ListType FloatType
  | otherwise = error "List of mixed types is not allowed"
  where
   types = map (\e -> typeChecker (Ok e) env) e
 
 
 typeChecker (Ok(Cons e1 e2)) env
- | t1 == IntType && (t2 == IntList || t2 == EmptyList) = IntList
- | t1 == FloatType && (t2 == FloatList || t2 == EmptyList) = FloatList
- | t1 == BoolType && (t2 == BoolList || t2 == EmptyList) = BoolList
+ | t1 == IntType && (t2 == ListType IntType || t2 == EmptyList) = ListType IntType
+ | t1 == FloatType && (t2 == ListType FloatType || t2 == EmptyList) = ListType FloatType
+ | t1 == BoolType && (t2 == ListType BoolType || t2 == EmptyList) = ListType BoolType
  | otherwise = error "List construction type mismatch."
  where 
   t1 = typeChecker (Ok (e1)) env
@@ -176,12 +177,12 @@ typeChecker (Ok(Cons e1 e2)) env
 
 typeChecker (Ok(Concat e1 e2)) env 
  | t1 == EmptyList && t2 == EmptyList = EmptyList
- | (t1 == BoolType || t1 == EmptyList) && (t2 == BoolType || t2 == EmptyList) = BoolList
- | (t1 == IntList || t1 == EmptyList) && (t2 == IntList || t2 == EmptyList) = IntList
- | t1 == FloatList && (t2 == IntList || t2 == FloatList || t2 == EmptyList) = FloatList
- | t1 == IntList && t2 == FloatList = FloatList
- | t1 == EmptyList && t2 == FloatList = FloatList
- | t1 == EmptyList && t2 == IntList = IntList
+ | (t1 == BoolType || t1 == EmptyList) && (t2 == BoolType || t2 == EmptyList) = ListType BoolType
+ | (t1 == ListType IntType || t1 == EmptyList) && (t2 == ListType IntType || t2 == EmptyList) = ListType IntType
+ | t1 == ListType FloatType && (t2 == ListType IntType || t2 == ListType FloatType || t2 == EmptyList) = ListType FloatType
+ | t1 == ListType IntType && t2 == ListType FloatType = ListType FloatType
+ | t1 == EmptyList && t2 == ListType FloatType = ListType FloatType
+ | t1 == EmptyList && t2 == ListType IntType = ListType IntType
  
  | otherwise = error "List concatenation type mismatch."
  where 
@@ -189,7 +190,6 @@ typeChecker (Ok(Concat e1 e2)) env
   t2 = typeChecker (Ok (e2)) env
 
 
-typeChecker (Ok(Not)) env = Arrow BoolType BoolType
 
 
 
