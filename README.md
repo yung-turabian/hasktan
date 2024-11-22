@@ -1,4 +1,4 @@
-# hasktan η
+# hasktan ל
 
 A small Haskell derivative language.
 
