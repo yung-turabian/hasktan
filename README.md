@@ -1,4 +1,4 @@
-# hasktan חסקטן
+# hasktan ח
 
 A small Haskell derivative language.
 
