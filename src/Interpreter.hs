@@ -35,8 +35,8 @@ subst_var x e (Quot ast1 ast2) =
     Quot (subst_var x e ast1) (subst_var x e ast2)
 subst_var x e (And ast1 ast2) =
     And (subst_var x e ast1) (subst_var x e ast2)
---subst_var x e (Not ast) =
---    Not (subst_var x e ast)
+subst_var x e Not =
+    (subst_var x e (Lambda "b" (If (Variable "b") (Boolean False) (Boolean True)) BoolType BoolType))
 subst_var x e (Or ast1 ast2) =
     Or (subst_var x e ast1) (subst_var x e ast2)
 subst_var x e (Equals ast1 ast2) =
@@ -64,6 +64,10 @@ subst :: OpEnv -> AST -> AST
 subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (subst_var x e ast)
+
+hwNot :: Bool -> Bool
+hwNot True = False
+hwNot False = True
 
 -- Please complete the definition of interpreter.
 
@@ -217,7 +221,6 @@ interpreter (Ok(Lambda x e s t)) env =
  (Ok (Lambda x e s t))
  where
    env = remove_var x env
-   Ok e = interpreter (Ok(Lambda x e s t)) env
 
 -- Let expressions
 interpreter (Ok(Let x e1 e2)) env = 
@@ -227,10 +230,15 @@ interpreter (Ok(Let x e1 e2)) env =
    env = (x, interpE1) : env
 
 -- Function Application
-interpreter (Ok(App (Lambda x e _ _) e2)) env = 
- interpreter (Ok(subst ((x, interpE2) : env) e)) env
- where
-   Ok interpE2 = interpreter (Ok e2) env
+interpreter (Ok(App e1 e2)) env = 
+  interpreter (Ok(subst ((x, interpE2) : env) e)) env
+   where
+      Ok (Lambda x e _ _) = interpreter (Ok e1) env
+      Ok interpE2 = interpreter (Ok e2) env
+
+interpreter (Ok(Not)) env = Ok(Lambda "b" (If (Variable "b") (Boolean False) (Boolean True)) BoolType BoolType)
+
+
 
 -- List manipulation
 interpreter (Ok(Cons e1 e2)) env =
@@ -247,6 +255,9 @@ interpreter (Ok(Concat e1 e2)) env =
        Ok (List l1) = interpreter (Ok e1) env
        Ok (List l2) = interpreter (Ok e2) env
     in Ok (List (l1 ++ l2))
+
+
+interpreter e _ = error ("Unable to interpret: " ++ show(e))
 
 main = do
     let handler :: SomeException -> IO Bool

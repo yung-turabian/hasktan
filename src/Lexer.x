@@ -61,7 +61,7 @@ tokens :-
  rem			{ \p s -> (REM) p }
 
  -- Types
- "->"			{ \p s -> (ARROW) p }
+ "->" | "→"  { \p s -> (ARROW) p }
  ":"			{ \p s -> (COLON) p }
  "::"			{ \p s -> (COLONS) p }
 

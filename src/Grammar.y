@@ -224,7 +224,7 @@ data AST
   | Cons AST AST
   | Concat AST AST
 
-  | Not -- Using the haskell `not`, this is simply a placeholder.
+  | Not
   deriving (Eq,Ord,Show)
 
 }

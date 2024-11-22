@@ -137,7 +137,7 @@ typeChecker (Ok(If e1 e2 e3)) env
 
 -- Lambda expressions
 typeChecker (Ok(Lambda x e s t1)) env
- | t2 == s = (Arrow s t1)
+ | t2 == t1 = (Arrow s t1)
  | otherwise = error ("Couldn't match expected: \n\t" ++ (show s) ++ "\n With actual type: \n\t" ++ (show t2) )
  where
   t2 = typeChecker (Ok e) env
@@ -189,12 +189,12 @@ typeChecker (Ok(Concat e1 e2)) env
   t2 = typeChecker (Ok (e2)) env
 
 
-typeChecker (Ok(Not)) env = BoolType
+typeChecker (Ok(Not)) env = Arrow BoolType BoolType
 
 
 
 
-typeChecker _ _ = error "Unknown type."
+typeChecker e _ = error ("Unknown type: " ++ show(e))
 
 -- http://www.zvon.org/other/haskell/Outputprelude/all_f.html
 -- Rewrote `all`, just passes a condition to all children
