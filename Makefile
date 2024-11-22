@@ -15,7 +15,7 @@ else
 
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Linux)
-	PROG = interpreterLINUX
+	PROG = hasktan
 endif
 ifeq ($(UNAME_S), Darwin)
 	PROG = interpreterOSX

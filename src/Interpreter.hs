@@ -107,6 +107,13 @@ interpreter (Ok(Times e1 e2)) env =
       (Integer n1, Integer n2) -> Ok (Integer (n1 * n2))
       (Float n1, Float n2) -> Ok (Float (n1 * n2))
 
+interpreter (Ok(Divide e1 e2)) env =
+    let
+       Ok (Float n1) = interpreter (Ok e1) env
+       Ok (Float n2) = interpreter (Ok e2) env
+    in 
+      Ok (Float (n1 / n2))
+
 interpreter (Ok(Power e1 e2)) env =
     let
        Ok t1 = interpreter (Ok e1) env

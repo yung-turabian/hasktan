@@ -52,8 +52,7 @@ typeChecker (Ok(Times e1 e2)) env
 
 -- Returns a float no matter what
 typeChecker (Ok(Divide e1 e2)) env 
- | t1 == IntType || t1 == FloatType && 
-   t2 == IntType || t2 == FloatType = FloatType 
+ | t1 == FloatType && t2 == FloatType = FloatType 
  where
   t1 = typeChecker (Ok e1) env
   t2 = typeChecker (Ok e2) env
