@@ -55,6 +55,6 @@ test: all
 		echo "\033[1;33;41m"; \
 		cat "$$file"; \
 		echo "\033[0m"; \
-		./$(PROG) < $$file; \
+		./$(PROG) $$file; \
 		echo ""; \
 	done

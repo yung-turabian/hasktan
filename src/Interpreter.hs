@@ -279,7 +279,7 @@ main = do
     case args of
       [file] -> do
          if takeExtension file == ".hs" 
-         then putStrLn "!ח"
+         then putStr "ח "
          else error ("Please use a .hs file.")
       _ -> error ("Usage: hasktan <file.hs>")
 
