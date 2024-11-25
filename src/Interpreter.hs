@@ -1,5 +1,8 @@
 module Main where
 import Control.Exception
+import System.Environment (getArgs)
+import System.FilePath (takeExtension)
+import System.IO
 
 import TypeChecker
 import Grammar
@@ -70,12 +73,6 @@ subst :: OpEnv -> AST -> AST
 subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (subst_var x e ast)
-
-hwNot :: Bool -> Bool
-hwNot True = False
-hwNot False = True
-
--- Please complete the definition of interpreter.
 
 interpreter:: E AST -> OpEnv -> E AST
 interpreter (Ok(Boolean b)) _ = Ok(Boolean b)
@@ -265,18 +262,38 @@ interpreter (Ok(Concat e1 e2)) env =
 
 interpreter e _ = error ("Unable to interpret: " ++ show(e))
 
+prettyPrint :: AST -> String
+prettyPrint (Boolean b) = show b
+prettyPrint (Integer n) = show n
+prettyPrint (Float f) = show f
+prettyPrint (List l) = "[" ++ prettyList l ++ "]"
+ where
+   prettyList [] = ""
+   prettyList [l] = prettyPrint l
+   prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
+prettyPrint _ = "Unsupported for pretty print :("
+
+
 main = do
+    args <- getArgs
+    case args of
+      [file] -> do
+         if takeExtension file == ".hs" 
+         then putStrLn "!ח"
+         else error ("Please use a .hs file.")
+      _ -> error ("Usage: hasktan <file.hs>")
+
     let handler :: SomeException -> IO Bool
         handler e = do
             putStrLn "Exception caught: "
             print e
             return False
-
-    s <- getContents
+    
+    s <- readFile (head args) 
 
     let ast = parseHasquelito (scanTokens s)
     let t = typeChecker ast []
-    let val = interpreter ast []
+    let Ok val = interpreter ast []
 
     parseResult <- ((evaluate (ast) >> return True) `catch` handler)
     if not parseResult then return () else do
@@ -285,7 +302,7 @@ main = do
          res <- (evaluate (val) >> return True) `catch` handler
          if not res
             then return ()
-            else print val
+            else putStrLn (prettyPrint val)
 
     return ()
 

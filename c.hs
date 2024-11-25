@@ -1,1 +1,1 @@
-((\x -> x : [False]) :: Bool -> [Bool]) True
+((\x -> x : [2]) :: Int -> [Int]) 3
