@@ -27,3 +27,4 @@ lex
 hasktan
 Grammar.happy.hs  
 Lexer.alex.hs
+src/Grammar.hs

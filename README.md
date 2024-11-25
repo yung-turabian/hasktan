@@ -24,5 +24,7 @@ $ hasktan < file.hs
 + [Alex Manual](https://haskell-alex.readthedocs.io/en/latest/introduction.html)
 + [Happy Manual](https://haskell-happy.readthedocs.io/en/latest/using.html)
 
++ [Readline library](https://hackage.haskell.org/package/readline-1.0.3.0/docs/System-Console-Readline.html)
+
 # License
 [BSD-3 License](LICENSE)

@@ -1,8 +1,13 @@
 module Main where
 import Control.Exception
-import System.Environment (getArgs)
-import System.FilePath (takeExtension)
+import System.Environment
+
+import System.Exit
+import System.FilePath (takeExtension, hasExtension)
 import System.IO
+
+-- External dependency
+import System.Console.Readline
 
 import TypeChecker
 import Grammar
@@ -273,23 +278,19 @@ prettyPrint (List l) = "[" ++ prettyList l ++ "]"
    prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
 prettyPrint _ = "Unsupported for pretty print :("
 
+usage = putStrLn "Usage: hasktan <file.hs>"
+version = putStrLn "Hasktan -- An interpreted language - 0.1"
+exit = exitWith ExitSuccess
+exitBad = exitWith (ExitFailure 1)
 
-main = do
-    args <- getArgs
-    case args of
-      [file] -> do
-         if takeExtension file == ".hs" 
-         then putStr "ח "
-         else error ("Please use a .hs file.")
-      _ -> error ("Usage: hasktan <file.hs>")
 
+interpret :: String -> IO ()
+interpret s = do
     let handler :: SomeException -> IO Bool
         handler e = do
             putStrLn "Exception caught: "
             print e
             return False
-    
-    s <- readFile (head args) 
 
     let ast = parseHasquelito (scanTokens s)
     let t = typeChecker ast []
@@ -303,6 +304,41 @@ main = do
          if not res
             then return ()
             else putStrLn (prettyPrint val)
+
+
+
+repl :: IO ()
+repl = do
+   maybeLine <- readline "ח> "
+   case maybeLine of
+      Nothing -> return () -- EOF / Ctrl-d
+      Just "" -> repl
+      Just ":q" -> putStrLn "Exiting REPL." >> return ()
+
+      Just line -> do addHistory line
+                      interpret line 
+                      repl
+
+
+main = do
+    args <- getArgs
+    ret <- case args of
+      ["-h"] -> usage >> exit 
+      ["--version"] -> version >> exit
+      ["-v"] -> version >> exit
+      ["-i"] -> do
+                  putStrLn "Welcome to Hasktan REPL. Type ':q' to exit or 'Ctrl-D'."
+                  repl 
+      [file] | hasExtension file -> do
+         if takeExtension file == ".hs" 
+         then do 
+            contents <- readFile file
+            interpret contents
+         else die "Please use a .hs file."
+      _ -> usage >> exitBad
+
+
+    
 
     return ()
 
