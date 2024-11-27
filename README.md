@@ -1,4 +1,4 @@
-# hasktan ח
+# hasktan 🌿
 
 A small, interpreted Haskell-derived toy language.
 
