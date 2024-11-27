@@ -18,7 +18,7 @@ jobs:
       run: chmod +x build_tools/conf_env.sh ; ./build_tools/conf_env.sh
 
     - name: Install dependencies (lab5)
-      run: cd labs/lab5/ ; make
+      run: make
 
     - name: Run check (lab5)
-      run: cd labs/lab5/ ; make test
+      run: make test
