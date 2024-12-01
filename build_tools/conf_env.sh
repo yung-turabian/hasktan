@@ -5,7 +5,7 @@ OS=$(uname)
 if [[ "$OS" == "Darwin" ]]; then
   echo "Installing GHC, Happy, and Alex on macOS..."
 
-  brew install cabal-install ghc
+  brew install cabal-install ghc readline
   cabal update
   cabal install happy alex readline
 
