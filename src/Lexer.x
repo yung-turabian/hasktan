@@ -32,62 +32,62 @@ tokens :-
 
 
  -- Type definitions
- Bool			{ \p s -> (BOOL) p }
- Int			{ \p s -> (INT) p }
- Float	  { \p s -> (FLOAT) p }
+ Bool			                   { \p s -> (BOOL) p }
+ Int			                    { \p s -> (INT) p }
+ Float	                    { \p s -> (FLOAT) p }
 
  -- Constants
- True | False           { \p s -> BOOLVAL p (read s) }
- $digit+       	        { \p s -> INTVAL p (read s) }
- $digit+ \. $digit+	{ \p s -> FLOATVAL p (read s) }
- @string		{ \p s -> STRING p (read s) }
+ True | False              { \p s -> BOOLVAL p (read s) }
+ $digit+       	           { \p s -> INTVAL p (read s) }
+ $digit+ \. $digit+	       { \p s -> FLOATVAL p (read s) }
+ @string		                 { \p s -> STRING p (read s) }
 
  -- Keywords
- if			  { \p s -> IF p }
- then 	  { \p s -> THEN p }
- else 		{ \p s -> ELSE p }
- let	    { \p s -> LET p }
- in       { \p s -> IN p }
+ if			                     { \p s -> IF p }
+ then 	                    { \p s -> THEN p }
+ else 		                   { \p s -> ELSE p }
+ let	                      { \p s -> LET p }
+ in                        { \p s -> IN p }
 
  -- Arithmetic operators
- \\			  { \p s -> (LAMBDA) p }
- "+"			{ \p s -> (PLUS) p }
- "-"			{ \p s -> (MINUS) p }
- "*"			{ \p s -> (TIMES) p }
- "/"			{ \p s -> (DIVIDE) p }
- "="			{ \p s -> (BIND) p }
- "^"			{ \p s -> (POWER) p }
- quot			{ \p s -> (QUOT) p }
- rem			{ \p s -> (REM) p }
+ \\			                     { \p s -> LAMBDA p }
+ "+"			                    { \p s -> PLUS p }
+ "-"			                    { \p s -> MINUS p }
+ "*"			                    { \p s -> TIMES p }
+ "/"			                    { \p s -> DIVIDE p }
+ "="			                    { \p s -> BIND p }
+ "^"			                    { \p s -> POWER p }
+ quot			                   { \p s -> QUOT p }
+ rem			                    { \p s -> REM p }
 
  -- Types
- "->" | "→"  { \p s -> (ARROW) p }
- ":"			{ \p s -> (COLON) p }
- "::"			{ \p s -> (COLONS) p }
+ "->" | "→"                { \p s -> ARROW p }
+ ":"			                    { \p s -> COLON p }
+ "::"			                   { \p s -> COLONS p }
 
  -- Comparison
- "=="			{ \p s -> (EQUALS) p }
- "&&"			{ \p s -> (AND) p }
- "||"			{ \p s -> (OR) p }
- "<=" | "≤"		{ \p s -> (LTEQ) p }
- ">=" | "≥" 		{ \p s -> (GTEQ) p }
- "/=" | "≠"		{ \p s -> (NOTEQ) p }
- "<"			{ \p s -> (LT') p }
- ">"			{ \p s -> (GT') p }
+ "=="			                   { \p s -> (EQUALS) p }
+ "&&"			                   { \p s -> (AND) p }
+ "||"			                   { \p s -> (OR) p }
+ "<=" | "≤"		              { \p s -> (LTEQ) p }
+ ">=" | "≥" 		             { \p s -> (GTEQ) p }
+ "/=" | "≠"		              { \p s -> (NOTEQ) p }
+ "<"			                    { \p s -> (LT') p }
+ ">"			                    { \p s -> (GT') p }
 
  -- Parenthesis
- "("			{ \p s -> (LPAREN) p }
- ")"			{ \p s -> (RPAREN) p }
+ "("			                    { \p s -> (LPAREN) p }
+ ")"			                    { \p s -> (RPAREN) p }
  
  -- Lists
- "["	     		{ \p s -> LBRACK p }
- "]"			{ \p s -> RBRACK p }
- ","			{ \p s -> COMMA p }
- "."			{ \p s -> PERIOD p }
- "++"                   { \p s -> PLUSPLUS p }
+ "["	     		               { \p s -> LBRACK p }
+ "]"			                    { \p s -> RBRACK p }
+ ","			                    { \p s -> COMMA p }
+ "."			                    { \p s -> PERIOD p }
+ "++"                      { \p s -> PLUSPLUS p }
 
 
- @id   			{ \p s -> VAR p s }
+ @id   			                 { \p s -> VAR p s }
 
 {
 
