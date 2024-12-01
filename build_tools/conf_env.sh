@@ -7,11 +7,8 @@ if [[ "$OS" == "Darwin" ]]; then
 
   brew install cabal-install ghc readline
   cabal update
-  cabal install happy alex
-  cabal install readline --extra-include-dirs=/opt/local/include \
---extra-lib-dirs=/opt/local/lib \
---configure-option=--with-readline-includes=/opt/local/include \
---configure-option=--with-readline-libraries=/opt/local/lib
+  cabal install happy alex 
+  cabal install --lib readline
 
 
 elif [[ "$OS" == "Linux" ]]; then
