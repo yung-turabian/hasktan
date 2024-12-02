@@ -28,7 +28,7 @@ jobs:
     - run: brew install readline
 
     - name: Install readline
-      run: cabal install readline
+      run: cabal install --lib readline
 
     - name: Install dependencies (lab5)
       run: make
