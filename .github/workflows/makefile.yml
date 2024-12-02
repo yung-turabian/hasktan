@@ -25,9 +25,9 @@ jobs:
     - name: Install Alex & Happy
       run: cabal install alex happy
 
-    - run: brew install readline \
-           export LDFLAGS="-L/usr/local/opt/readline/lib" \
-           export CFLAGS="-I/usr/local/opt/readline/include"
+    - run: brew install readline
+    - run: export LDFLAGS="-L/usr/local/opt/readline/lib"
+    - run: export CFLAGS="-I/usr/local/opt/readline/include"
 
     - name: Install readline
       run: cabal install readline \ 
