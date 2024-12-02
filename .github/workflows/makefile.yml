@@ -28,7 +28,11 @@ jobs:
     - run: brew install readline
 
     - name: Install readline
-      run: cabal install --lib readline
+      run: cabal install readline --extra-include-dirs=/opt/local/include \
+           --extra-lib-dirs=/opt/local/lib \
+           --configure-option=--with-readline-includes=/opt/local/include \
+           --configure-option=--with-readline-libraries=/opt/local/lib
+
 
     - name: Install dependencies (lab5)
       run: make
