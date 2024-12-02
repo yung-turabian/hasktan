@@ -32,8 +32,6 @@ jobs:
            export C_INCLUDE_PATH=/usr/local/opt/readline/include:$C_INCLUDE_PATH
            export LD_LIBRARY_PATH=/usr/local/opt/readline/lib:$LD_LIBRARY_PATH
 
-      
-
     - name: Install readline
       run: cabal install --lib readline -v
 
