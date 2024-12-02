@@ -35,10 +35,7 @@ jobs:
       
 
     - name: Install readline
-      run: cabal install --lib readline --extra-include-dirs=/opt/local/include \
-           --extra-lib-dirs=/opt/local/lib \
-           --configure-option=--with-readline-includes=/opt/local/include \
-           --configure-option=--with-readline-libraries=/opt/local/lib -v
+      run: cabal install --lib readline -v
 
 
     - name: Install dependencies (lab5)
