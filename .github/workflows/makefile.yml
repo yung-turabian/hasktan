@@ -29,11 +29,7 @@ jobs:
       run: brew install readline
 
     - name: Install readline
-      run: cabal install readline \
-        --extra-include-dirs=/usr/local/opt/readline/include \
-        --extra-lib-dirs=/usr/local/opt/readline/lib \
-        --configure-option=--with-readline-includes=/usr/local/opt/readline/include \
-        --configure-option=--with-readline-libraries=/usr/local/opt/readline/lib
+      run: cabal install readline --extra-include-dirs=/usr/local/Cellar/readline/6.2.4/include/ --extra-lib-dirs=/usr/local/Cellar/readline/6.2.4/lib/ --configure-option=--with-readline-includes=/usr/local/Cellar/readline/6.2.4/include/ --configure-option=--with-readline-libraries=/usr/local/Cellar/readline/6.2.4/lib/
 
     - name: Install dependencies (lab5)
       run: make
