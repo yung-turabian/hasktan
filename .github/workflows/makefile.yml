@@ -25,13 +25,22 @@ jobs:
     - name: Install Alex & Happy
       run: cabal install alex happy
 
-    - run: brew install readline
-    - run: export LDFLAGS="-L/usr/local/opt/readline/lib"
-    - run: export CFLAGS="-I/usr/local/opt/readline/include"
+    - name: Install GNU readline
+      run: brew install readline
+      
+    - name: Configure environment for readline
+      run: |
+        echo "::add-path::/usr/local/opt/readline/lib"
+        echo "::add-path::/usr/local/opt/readline/include"
+        export LDFLAGS="-L/usr/local/opt/readline/lib"
+        export CPPFLAGS="-I/usr/local/opt/readline/include"
 
     - name: Install readline
-      run: cabal install readline --extra-include-dirs=/opt/local/include --extra-lib-dirs=/opt/local/lib --configure-option=--with-readline-includes=/opt/local/include --configure-option=--with-readline-libraries=/opt/local/lib
-
+      run: cabal install readline \
+        --extra-include-dirs=/usr/local/opt/readline/include \
+        --extra-lib-dirs=/usr/local/opt/readline/lib \
+        --configure-option=--with-readline-includes=/usr/local/opt/readline/include \
+        --configure-option=--with-readline-libraries=/usr/local/opt/readline/lib
 
     - name: Install dependencies (lab5)
       run: make
