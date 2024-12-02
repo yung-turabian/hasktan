@@ -27,13 +27,6 @@ jobs:
 
     - name: Install GNU readline
       run: brew install readline
-      
-    - name: Configure environment for readline
-      run: |
-        echo "::add-path::/usr/local/opt/readline/lib"
-        echo "::add-path::/usr/local/opt/readline/include"
-        export LDFLAGS="-L/usr/local/opt/readline/lib"
-        export CPPFLAGS="-I/usr/local/opt/readline/include"
 
     - name: Install readline
       run: cabal install readline \
