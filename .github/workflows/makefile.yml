@@ -26,11 +26,14 @@ jobs:
       run: cabal install alex happy
 
     - name: Install GNU readline
-      run: sudo port install readline
+      run: brew install readline
 
     - name: Install readline
-      run: cabal install readline --extra-include-dirs=/opt/local/include --extra-lib-dirs=/opt/local/lib
-    
+      run: cabal install --lib readline --extra-include-dirs=/opt/local/include \
+           --extra-lib-dirs=/opt/local/lib \
+           --configure-option=--with-readline-includes=/opt/local/include \
+           --configure-option=--with-readline-libraries=/opt/local/lib
+
     - name: Install dependencies (lab5)
       run: make
 
