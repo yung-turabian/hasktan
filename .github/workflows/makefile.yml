@@ -30,9 +30,8 @@ jobs:
     - run: export CFLAGS="-I/usr/local/opt/readline/include"
 
     - name: Install readline
-      run: cabal install readline \ 
-          --extra-include-dirs=/usr/local/opt/readline/include \ 
-          --extra-lib-dirs=/usr/local/opt/readline/lib
+      run: cabal install readline --extra-include-dirs=/opt/local/include --extra-lib-dirs=/opt/local/lib --configure-option=--with-readline-includes=/opt/local/include --configure-option=--with-readline-libraries=/opt/local/lib
+
 
     - name: Install dependencies (lab5)
       run: make
