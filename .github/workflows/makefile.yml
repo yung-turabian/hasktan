@@ -27,14 +27,7 @@ jobs:
 
     - name: Install GNU readline
       run: |
-           brew install readline
-           export LIBRARY_PATH=/usr/local/opt/readline/lib:$LIBRARY_PATH
-           export C_INCLUDE_PATH=/usr/local/opt/readline/include:$C_INCLUDE_PATH
-           export LD_LIBRARY_PATH=/usr/local/opt/readline/lib:$LD_LIBRARY_PATH
-           
-           brew switch readline 8.0.1
-           cd /usr/local/opt/readline/lib
-           ln -s libreadline.8.dylib libreadline.7.dylib
+           brew install with-readline
 
     - name: Install readline
       run: cabal install --lib readline -v
