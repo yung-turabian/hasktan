@@ -31,6 +31,8 @@ jobs:
     - name: Install dependencies
       run: |
         cabal update
+        brew update
+        brew install readline
         cabal build --only-dependencies --enable-tests --enable-benchmarks
         brew install alex happy
     - name: Build
