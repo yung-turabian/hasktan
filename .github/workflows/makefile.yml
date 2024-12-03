@@ -33,6 +33,7 @@ jobs:
         cabal update
         brew update
         brew install readline
+        cabal install readline --extra-include-dirs=/opt/local/include --extra-lib-dirs=/opt/local/lib --configure-option=--with-readline-includes=/opt/local/include --configure-option=--with-readline-libraries=/opt/local/lib
         cabal build --only-dependencies --enable-tests --enable-benchmarks
         brew install alex happy
     - name: Build
