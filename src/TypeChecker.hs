@@ -20,39 +20,51 @@ lookup s  (_:l)                 = TypeChecker.lookup s l
 typeChecker :: E AST -> TypeEnv -> TypeExp
 
 -- Constants
-typeChecker (Ok (Boolean _) ) _ = BoolType
-typeChecker (Ok (Integer _) ) _ = IntType
-typeChecker (Ok (Float _) ) _   = FloatType
+typeChecker (Ok (Boolean _)) _ = BoolType
+typeChecker (Ok (Integer _)) _ = IntType
+
+-- *Additional types
+typeChecker (Ok (Float _)) _   = FloatType
 
 -- Variables
 typeChecker (Ok (Variable s) ) env = TypeChecker.lookup s env
 
 -- Operations
-typeChecker (Ok(Plus e1 e2)) env 
- | t1 == IntType && t2 == IntType = IntType 
- | t1 == FloatType && t2 == FloatType = FloatType 
- | otherwise = error ("type mismatch:\n\t" ++(show t1) ++ "\n\t" ++ (show t2))
- where
-  t1 = typeChecker (Ok e1) env
-  t2 = typeChecker (Ok e2) env
+typeChecker (Ok(Plus e1 e2)) env =
+   let t1 = typeChecker (Ok e1) env
+       t2 = typeChecker (Ok e2) env
+   in
+   if t1 == IntType && t2 == IntType 
+   then IntType 
+   else if t1 == FloatType && t2 == FloatType
+   then FloatType 
+   else error $ "type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2
 
-typeChecker (Ok(Minus e1 e2)) env 
- | t1 == IntType && t2 == IntType = IntType 
- | t1 == FloatType && t2 == FloatType = FloatType
- where
-  t1 = typeChecker (Ok e1) env
-  t2 = typeChecker (Ok e2) env
 
-typeChecker (Ok(Times e1 e2)) env 
- | t1 == IntType && t2 == IntType = IntType 
- | t1 == FloatType && t2 == FloatType = FloatType
- where
-  t1 = typeChecker (Ok e1) env
-  t2 = typeChecker (Ok e2) env
+typeChecker (Ok(Minus e1 e2)) env =
+   let t1 = typeChecker (Ok e1) env
+       t2 = typeChecker (Ok e2) env
+   in
+   if t1 == IntType && t2 == IntType 
+   then IntType 
+   else if t1 == FloatType && t2 == FloatType
+   then FloatType 
+   else error $ "type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2
+
+typeChecker (Ok(Times e1 e2)) env =
+   let t1 = typeChecker (Ok e1) env
+       t2 = typeChecker (Ok e2) env
+   in
+   if t1 == IntType && t2 == IntType 
+   then IntType 
+   else if t1 == FloatType && t2 == FloatType
+   then FloatType 
+   else error $ "type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2
 
 -- Returns a float no matter what
 typeChecker (Ok(Divide e1 e2)) env 
  | t1 == FloatType && t2 == FloatType = FloatType 
+ | otherwise = error "Only supports use with Floats."
  where
   t1 = typeChecker (Ok e1) env
   t2 = typeChecker (Ok e2) env
@@ -96,35 +108,52 @@ typeChecker (Ok(Or e1 e2)) env
 
 
 -- Predicates
-typeChecker (Ok(Equals e1 e2)) env
- | t1 == t2 = BoolType
- | otherwise = error ("Mismatch types at `" ++ (show t1) ++ " == " ++ (show t2) ++ "`.")
- where
-  t1 = typeChecker (Ok (e1)) env
-  t2 = typeChecker (Ok (e2)) env
+typeChecker (Ok(Equals e1 e2)) env =
+ let t1 = typeChecker (Ok (e1)) env
+     t2 = typeChecker (Ok (e2)) env
+ in
+   if t1 == t2
+   then BoolType
+   else error $ "Mismatch types `" ++ (show t1) ++ " == " ++ (show t2) ++ "`."
 
-typeChecker (Ok(Gt e1 e2)) env
- | t1 == t2 = BoolType
- | otherwise = error "Mismatch types >." 
- where
-  t1 = typeChecker (Ok (e1)) env
-  t2 = typeChecker (Ok (e2)) env
 
-typeChecker (Ok(Lt e1 e2)) env
- | t1 == t2 = BoolType
- | otherwise = error "Mismatch types <." 
- where
-  t1 = typeChecker (Ok (e1)) env
-  t2 = typeChecker (Ok (e2)) env
+typeChecker (Ok(Gt e1 e2)) env =
+ let t1 = typeChecker (Ok (e1)) env
+     t2 = typeChecker (Ok (e2)) env
+ in
+   if t1 == t2
+   then BoolType
+   else error $ "Mismatch types `" ++ (show t1) ++ " == " ++ (show t2) ++ "`."
+
+typeChecker (Ok(Lt e1 e2)) env =
+ let t1 = typeChecker (Ok (e1)) env
+     t2 = typeChecker (Ok (e2)) env
+ in
+   if t1 == t2
+   then BoolType
+   else error $ "Mismatch types `" ++ (show t1) ++ " == " ++ (show t2) ++ "`."
 
 
 
 -- Let expressions
-typeChecker (Ok(Let x e1 e2)) env 
- | typeChecker (Ok (Variable x)) env == s = typeChecker (Ok e2) env
- where
-  s = typeChecker (Ok e1) env
-  env = (x, s) : env
+typeChecker (Ok(Let x e1 e2)) env = 
+   let s = typeChecker (Ok e1) env
+       env = (x, s) : env
+   in
+      if typeChecker (Ok (Variable x)) env == s 
+      then typeChecker (Ok e2) env
+      else error $ "Type mismatch in let: expected " ++ show s ++ ", got " ++ show (typeChecker (Ok e2) env)
+
+-- Recursive Let expressions
+typeChecker (Ok(LetRec x e1 e2)) env =
+    case e1 of
+        Lambda y body t1 t2 -> 
+            let fnType = Arrow t1 t2
+                env' = (x, fnType) : env
+            in if typeChecker (Ok body) ((y, t1) : env') == t2
+               then typeChecker (Ok e2) env'
+               else error "Type mismatch in recursive function body"
+        _ -> error "LetRec only supports function definitions"
 
 -- If expressions
 typeChecker (Ok(If e1 e2 e3)) env
@@ -138,7 +167,7 @@ typeChecker (Ok(If e1 e2 e3)) env
 -- Lambda expressions
 typeChecker (Ok(Lambda x e s t1)) env
  | t2 == t1 = (Arrow s t1)
- | otherwise = error ("Couldn't match expected: \n\t" ++ (show s) ++ "\n With actual type: \n\t" ++ (show t2) )
+ | otherwise = error ("Couldn't match expected: \n\t" ++ (show t1) ++ "\n With actual type: \n\t" ++ (show t2) )
  where
   t2 = typeChecker (Ok e) env
   env = (x, s) : env
@@ -146,7 +175,7 @@ typeChecker (Ok(Lambda x e s t1)) env
 -- Function application
 typeChecker (Ok(App e1 e2)) env
  | s1 == s2 = t
- | otherwise = error ((show s1) ++ " " ++ (show s2))
+ | otherwise = error $ (show s1) ++ " != " ++ (show s2)
  where
   (Arrow s1 t) = typeChecker (Ok e1) env
   s2 = typeChecker(Ok e2) env
@@ -189,12 +218,30 @@ typeChecker (Ok(Concat e1 e2)) env
   t1 = typeChecker (Ok (e1)) env
   t2 = typeChecker (Ok (e2)) env
 
+typeChecker (Ok(Head e)) env 
+ | t == ListType IntType = IntType
+ | t == ListType FloatType = FloatType
+ | t == ListType BoolType = BoolType
+ 
+ | otherwise = error "List head."
+ where 
+  t = typeChecker (Ok (e)) env
+
+typeChecker (Ok(Tail e)) env 
+ | t == ListType IntType = ListType IntType
+ | t == ListType FloatType = ListType FloatType
+ | t == ListType BoolType = ListType BoolType
+ 
+ | otherwise = error "List tail."
+ where 
+  t = typeChecker (Ok (e)) env
 
 
 
 
 
-typeChecker e _ = error ("Unknown type: " ++ show(e))
+
+typeChecker e _ = error $ "Unknown type: " ++ show e
 
 -- http://www.zvon.org/other/haskell/Outputprelude/all_f.html
 -- Rewrote `all`, just passes a condition to all children

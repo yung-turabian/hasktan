@@ -17,7 +17,7 @@ type OpEnv = [(String,AST)]
 
 -- (remove_var x sigma) computes sigma_x.
 
-remove_var:: String -> OpEnv -> OpEnv
+remove_var :: String -> OpEnv -> OpEnv
 remove_var x [] = []
 remove_var x ((y,_):env) | x == y =
     remove_var x env
@@ -71,9 +71,14 @@ subst_var x e (Cons ast1 ast2) =
     Cons (subst_var x e ast1) (subst_var x e ast2)
 subst_var x e (Concat ast1 ast2) =
     Concat (subst_var x e ast1) (subst_var x e ast2)
+subst_var x e (Head ast) =
+    Head (subst_var x e ast)
+subst_var x e (Tail ast) =
+    Tail (subst_var x e ast)
+
+
 
 -- Treat an environment as a variable substitution.
-
 subst :: OpEnv -> AST -> AST
 subst [] ast = ast
 subst ((x,e):env) ast =
@@ -237,6 +242,14 @@ interpreter (Ok(Let x e1 e2)) env =
    Ok interpE1 = interpreter (Ok e1) env
    env = (x, interpE1) : env
 
+interpreter (Ok(LetRec x e1 e2)) env =
+   case e1 of
+      Lambda y e s t ->
+         let env' = (x, Lambda y (subst [(x, e1)] e) s t) : env
+         in interpreter (Ok e2) env'
+      _ -> error "LetRec only supports function definitions"
+
+
 -- Function Application
 interpreter (Ok(App e1 e2)) env = 
   interpreter (Ok(subst [(x, interpE2)] e)) env
@@ -265,6 +278,20 @@ interpreter (Ok(Concat e1 e2)) env =
     in Ok (List (l1 ++ l2))
 
 
+interpreter (Ok(Head e)) env =
+   let
+      Ok (List l) = interpreter (Ok e) env
+   in
+      Ok (head l)
+
+interpreter (Ok(Tail e)) env =
+   let
+      Ok (List l) = interpreter (Ok e) env
+   in
+      Ok (List(tail l))
+
+
+
 interpreter e _ = error ("Unable to interpret: " ++ show(e))
 
 prettyPrint :: AST -> String
@@ -283,6 +310,12 @@ version = putStrLn "Hasktan -- An interpreted language - 0.1"
 exit = exitWith ExitSuccess
 exitBad = exitWith (ExitFailure 1)
 
+
+typeCheck :: String -> IO ()
+typeCheck s = do
+   let ast = parseHasquelito (scanTokens s)
+   let t = typeChecker ast []
+   print t 
 
 interpret :: String -> IO ()
 interpret s = do
@@ -305,11 +338,9 @@ interpret s = do
             then return ()
             else putStrLn (prettyPrint val)
 
-
-
 repl :: IO ()
 repl = do
-   maybeLine <- readline "ח> "
+   maybeLine <- readline "🌿> "
    case maybeLine of
       Nothing -> return () -- EOF / Ctrl-d
       Just "" -> repl
@@ -329,6 +360,12 @@ main = do
       ["-i"] -> do
                   putStrLn "Welcome to Hasktan REPL. Type ':q' to exit or 'Ctrl-D'."
                   repl 
+      ["-t", file] | hasExtension file -> do
+         if takeExtension file == ".hs" 
+         then do 
+            contents <- readFile file
+            typeCheck contents
+         else die "Please use a .hs file."
       [file] | hasExtension file -> do
          if takeExtension file == ".hs" 
          then do 

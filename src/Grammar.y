@@ -26,6 +26,7 @@ bool { BOOLVAL p $$ }
 
 -- Keywords
 let { LET p }
+letrec { LET_REC p }
 in  { IN p }
 if { IF p}
 then { THEN p }
@@ -74,11 +75,13 @@ var { VAR p $$ }
 ':' { COLON p }
 ',' { COMMA p }
 "++"{ PLUSPLUS p } 
+head { HEAD p }
+tail { TAIL p }
 
 
 
 %right in "->" else
-%right "++" ':'
+%right "++" ':' head tail
 %nonassoc "&&" "||"
 %nonassoc '>' '<' "==" ">=" "<=" "/="
 %nonassoc ')' "::"
@@ -93,6 +96,7 @@ var { VAR p $$ }
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
 Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
+     | letrec var '=' Expr in Expr { LetRec $2 $4 $6 }
      | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   { Lambda $3 $5 $8 $10 }
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
      
@@ -108,6 +112,8 @@ Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
 
      | Expr ':' Expr               { Cons $1 $3 }
      | Expr "++" Expr              { Concat $1 $3 }
+     | head Expr                   { Head $2 }
+     | tail Expr                   { Tail $2 }
      | List                        { $1 }
      
      | Form                        { $1 }
@@ -154,7 +160,7 @@ ListMembers : {- empty -} { [] }
 
 {
 
-data E a = Ok a | Failed String 
+data E a = Ok a | Failed String
  deriving(Eq,Show)
 
 thenE :: E a -> (a -> E b) -> E b
@@ -169,14 +175,9 @@ returnE a = Ok a
 failE :: String -> E a
 failE err = Failed err
 
-catchE :: E a -> (String -> E a) -> E a
-catchE m k =
-  case m of
-    Ok a      -> Ok a
-    Failed e  -> k e
-
 parseError :: [Token] -> E a
-parseError tokens = failE "Parse Error"
+parseError [] = failE "Parse Error: Unexpected end of input"
+parseError (t:_) = failE $ "Parse Error: Unexpected token " ++ show t
 
 
 data TypeExp
@@ -196,6 +197,7 @@ data AST
   | Float Float
   
   | Let String AST AST
+  | LetRec String AST AST
   | If AST AST AST
 
   | Lambda String AST TypeExp TypeExp
@@ -223,6 +225,8 @@ data AST
   | List [AST]
   | Cons AST AST
   | Concat AST AST
+  | Head AST
+  | Tail AST
 
   | Not
   deriving (Eq,Ord,Show)

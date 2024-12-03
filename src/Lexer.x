@@ -47,6 +47,7 @@ tokens :-
  then 	                    { \p s -> THEN p }
  else 		                   { \p s -> ELSE p }
  let	                      { \p s -> LET p }
+ letrec                    {\p s -> LET_REC p }
  in                        { \p s -> IN p }
 
  -- Arithmetic operators
@@ -86,6 +87,9 @@ tokens :-
  "."			                    { \p s -> PERIOD p }
  "++"                      { \p s -> PLUSPLUS p }
 
+ head                      { \p s -> HEAD p }
+ tail                      { \p s -> TAIL p }
+
 
  @id   			                 { \p s -> VAR p s }
 
@@ -103,6 +107,7 @@ data Token
  | THEN     AlexPosn
  | ELSE     AlexPosn
  | LET      AlexPosn
+ | LET_REC  AlexPosn
  | IN       AlexPosn
  
  -- Types
@@ -148,6 +153,8 @@ data Token
  | LBRACK   AlexPosn
  | RBRACK   AlexPosn
  | PLUSPLUS AlexPosn
+ | HEAD     AlexPosn
+ | TAIL     AlexPosn
 
  -- Identifiers
  | VAR      AlexPosn String

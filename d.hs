@@ -1,1 +1,3 @@
-((\y -> y + 3) :: Int -> Int) (((\y -> if y == True then 4 else 2) :: Bool -> Int) (((\y -> y /= 7) :: Int → Bool) 3))
+letrec f =
+  (\x -> if x == 0 then 1 else f (x - 1) * x) :: Int -> Int
+in f 5
