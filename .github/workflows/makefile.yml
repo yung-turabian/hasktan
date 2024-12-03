@@ -26,11 +26,10 @@ jobs:
       run: cabal install alex happy
 
     - name: Install GNU readline
-      run: |
-           brew install with-readline
+      run: brew install readline
 
     - name: Install readline
-      run: cabal install --lib readline -v
+      run: cabal install --lib readline --extra-include-dirs=/usr/local/Cellar/readline/8.2.13/include --extra-lib-dirs=/usr/local/Cellar/readline/8.2.13/lib --configure-option=--with-readline-includes=/usr/local/Cellar/readline/8.2.13/include --configure-option=--with-readline-libraries=/usr/local/Cellar/readline/8.2.13/lib
 
 
     - name: Install dependencies (lab5)
