@@ -20,6 +20,6 @@ executable hasktan
   main-is:             Interpreter.hs
   other-modules:       Src.Lexer, Src.Grammar, Src.TypeChecker
   -- other-extensions:
-  build-depends:       base >=4.13 && <4.14, array, filepath, readline
+  build-depends:       base, array, filepath, readline
   -- hs-source-dirs:
   default-language:    Haskell2010
