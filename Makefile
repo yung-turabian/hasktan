@@ -7,7 +7,7 @@ ALEX_OPTS = -g
 HAPPY = happy
 HAPPY_OPTS=-agc
 
-SRC = src
+SRC = Src
 
 ifeq ($(OS),Windows_NT)
 	PROG = interpreterWIN64
@@ -32,7 +32,7 @@ TESTS := $(wildcard tests/*.hs)
 %.happy.hs : $(SRC)/%.y
 	$(HAPPY) $(HAPPY_OPTS) $< -o $@
 
-$(PROG) : Lexer.alex.hs Grammar.happy.hs $(SRC)/TypeChecker.hs $(SRC)/Interpreter.hs
+$(PROG) : Lexer.alex.hs Grammar.happy.hs $(SRC)/TypeChecker.hs Interpreter.hs
 	$(HC) $(HC_OPTS) -o $@ $^
 
 
