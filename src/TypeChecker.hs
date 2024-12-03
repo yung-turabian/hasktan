@@ -136,33 +136,34 @@ typeChecker (Ok(Lt e1 e2)) env =
 
 
 -- Let expressions
+typeChecker (Ok(Let x (Lambda _ _ _ _) e2)) env =
+   error $ "\x1b[1;31mUse `letrec` for recursion via anonymous function.\x1b[0;0m" 
 typeChecker (Ok(Let x e1 e2)) env = 
    let s = typeChecker (Ok e1) env
        env = (x, s) : env
    in
       if typeChecker (Ok (Variable x)) env == s 
       then typeChecker (Ok e2) env
-      else error $ "Type mismatch in let: expected " ++ show s ++ ", got " ++ show (typeChecker (Ok e2) env)
+      else error $ "\x1b[1;31mType mismatch in let: expected " ++ show s ++ ", got " ++ show (typeChecker (Ok e2) env) ++ "\x1b[0;0m"
 
 -- Recursive Let expressions
-typeChecker (Ok(LetRec x e1 e2)) env =
-    case e1 of
-        Lambda y body t1 t2 -> 
-            let fnType = Arrow t1 t2
-                env' = (x, fnType) : env
-            in if typeChecker (Ok body) ((y, t1) : env') == t2
-               then typeChecker (Ok e2) env'
-               else error "Type mismatch in recursive function body"
-        _ -> error "LetRec only supports function definitions"
+-- letrec only supports function definitions
+typeChecker (Ok(LetRec x (Lambda y body s t) e2)) env =
+   let env = (x, (Arrow s t)) : env
+   in if typeChecker (Ok body) ((y, s) : env) == t
+      then typeChecker (Ok e2) env
+      else error $ "Type mismatch in function"
 
 -- If expressions
-typeChecker (Ok(If e1 e2 e3)) env
- | t1 == BoolType && t2 == t3 = t2
- | otherwise = error "Check your IfThenElse formatting."
- where
-  t1 = typeChecker (Ok e1) env
-  t2 = typeChecker (Ok e2) env
-  t3 = typeChecker (Ok e3) env
+typeChecker (Ok(If e1 e2 e3)) env =
+   let t1 = typeChecker (Ok e1) env
+       t2 = typeChecker (Ok e2) env
+       t3 = typeChecker (Ok e3) env
+   in
+      if t1 == BoolType && t2 == t3
+      then t2
+      else error $ "\x1b[1;31mCheck your if...then...else formatting.\x1b[0;0m"
+
 
 -- Lambda expressions
 typeChecker (Ok(Lambda x e s t1)) env
@@ -175,7 +176,7 @@ typeChecker (Ok(Lambda x e s t1)) env
 -- Function application
 typeChecker (Ok(App e1 e2)) env
  | s1 == s2 = t
- | otherwise = error $ (show s1) ++ " != " ++ (show s2)
+ | otherwise = error $ show s1 ++ " != " ++ show s2
  where
   (Arrow s1 t) = typeChecker (Ok e1) env
   s2 = typeChecker(Ok e2) env

@@ -5,7 +5,10 @@
 -- CMSC 305
 -- Due: October 18th, 2024
 -- Note: For extens, added strings, deliminited comments, lists and line/character numbers
+
 module Lexer where
+
+
 }
 
 %wrapper "posn"
@@ -19,6 +22,7 @@ $ascii       = [\n \32] -- \32 is ASCII code for a space
 $all         = [$alpha $digit $punc $symbol $ascii]
 
 @id          = $alpha [$alpha $digit \_ \']*
+@reservedid  = if|else|then|let|let|letrec|in|type
 
 @string      = \" [$all # \"]* \" -- No double-quote within a string that isnt end | Empty string
 
@@ -158,7 +162,6 @@ data Token
 
  -- Identifiers
  | VAR      AlexPosn String
-
 
 
  | COMMENT  

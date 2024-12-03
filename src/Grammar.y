@@ -95,7 +95,8 @@ tail { TAIL p }
 -- Then Juxtaposed atoms have the next highest precidence, functions, applications and negation
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
-Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
+Expr 
+     : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      | letrec var '=' Expr in Expr { LetRec $2 $4 $6 }
      | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   { Lambda $3 $5 $8 $10 }
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
@@ -118,7 +119,8 @@ Expr : let var '=' Expr in Expr                         { Let $2 $4 $6 }
      
      | Form                        { $1 }
 
-Form : Form '+' Form               { Plus $1 $3 }
+Form 
+     : Form '+' Form               { Plus $1 $3 }
      | Form '-' Form               { Minus $1 $3 }
      | Form '*' Form               { Times $1 $3 }
      | Form '/' Form               { Divide $1 $3 }
@@ -126,36 +128,43 @@ Form : Form '+' Form               { Plus $1 $3 }
      
      | Juxt                        { $1 }
 
-Juxt : Juxt Atom                   { App $1 $2 }
+Juxt 
+     : Juxt Atom                   { App $1 $2 }
      | quot Atom Atom              { Quot $2 $3 }
      | rem Atom Atom               { Rem $2 $3 }
      | '-' Atom                    { Minus (Integer 0) $2 }
 
      | Atom                        { $1 }
 
-Atom : '(' Expr ')'                { $2 }
+Atom 
+     : '(' Expr ')'                { $2 }
      | int                         { Integer $1 }
      | bool                        { Boolean $1 }
      | float                       { Float $1 }
      | var                         { Variable $1 }
      
 
-
-TypeExp : PrimType { $1 }
-| TypeExp "->" TypeExp {Arrow $1 $3}
-| '(' TypeExp ')' { $2 }
-| '[' TypeExp ']' { ListType $2 }
-| '[' {- empty -} ']' { EmptyList }
-
-
-PrimType : Bool { BoolType } | Int { IntType } | Float { FloatType }
+TypeExp 
+     : PrimType { $1 }
+     | TypeExp "->" TypeExp {Arrow $1 $3}
+     | '(' TypeExp ')' { $2 }
+     | '[' TypeExp ']' { ListType $2 }
+     | '[' {- empty -} ']' { EmptyList }
 
 
-List : '[' ListMembers ']'          { List $2 }
+PrimType 
+     : Bool { BoolType } 
+     | Int { IntType } 
+     | Float { FloatType }
 
-ListMembers : {- empty -} { [] }
-| Atom  { [$1] }
-| Atom ',' ListMembers { $1 : $3 }
+
+List 
+     : '[' ListMembers ']'    { List $2 }
+
+ListMembers 
+     : {- empty -} { [] }
+     | Atom  { [$1] }
+     | Atom ',' ListMembers { $1 : $3 }
 
 
 {

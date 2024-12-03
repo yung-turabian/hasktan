@@ -8,7 +8,7 @@ Grammar
 -----------------------------------------------------------------------------
 	%start_parseHasquelito -> Expr                     (0)
 	Expr -> let var '=' Expr in Expr                   (1)
-	Expr -> "let rec" var '=' Expr in Expr             (2)
+	Expr -> letrec var '=' Expr in Expr                (2)
 	Expr -> '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   (3)
 	Expr -> if Expr then Expr else Expr                (4)
 	Expr -> Expr "==" Expr                             (5)
@@ -64,7 +64,7 @@ Terminals
 	float          { FLOATVAL p $$ }
 	bool           { BOOLVAL p $$ }
 	let            { LET p }
-	"let rec"      { LET_REC p }
+	letrec         { LET_REC p }
 	in             { IN p }
 	if             { IF p }
 	then           { THEN p }
@@ -122,7 +122,7 @@ State 0
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -396,7 +396,7 @@ State 10
 
 State 11
 
-	Expr -> "let rec" . var '=' Expr in Expr            (rule 2)
+	Expr -> letrec . var '=' Expr in Expr               (rule 2)
 
 	var            shift, and enter state 32
 
@@ -409,7 +409,7 @@ State 12
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -471,7 +471,7 @@ State 16
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'\\'           shift, and enter state 27
 	'-'            shift, and enter state 13
@@ -544,7 +544,7 @@ State 19
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -569,7 +569,7 @@ State 20
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -672,7 +672,7 @@ State 25
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -807,7 +807,7 @@ State 31
 
 State 32
 
-	Expr -> "let rec" var . '=' Expr in Expr            (rule 2)
+	Expr -> letrec var . '=' Expr in Expr               (rule 2)
 
 	'='            shift, and enter state 66
 
@@ -936,7 +936,7 @@ State 39
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -961,7 +961,7 @@ State 40
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -986,7 +986,7 @@ State 41
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1011,7 +1011,7 @@ State 42
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1036,7 +1036,7 @@ State 43
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1061,7 +1061,7 @@ State 44
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1086,7 +1086,7 @@ State 45
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1111,7 +1111,7 @@ State 46
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1136,7 +1136,7 @@ State 47
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1161,7 +1161,7 @@ State 48
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1193,7 +1193,7 @@ State 50
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1677,13 +1677,13 @@ State 65
 
 State 66
 
-	Expr -> "let rec" var '=' . Expr in Expr            (rule 2)
+	Expr -> letrec var '=' . Expr in Expr               (rule 2)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1708,7 +1708,7 @@ State 67
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1877,7 +1877,7 @@ State 75
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -1923,7 +1923,7 @@ State 76
 
 State 77
 
-	Expr -> "let rec" var '=' Expr . in Expr            (rule 2)
+	Expr -> letrec var '=' Expr . in Expr               (rule 2)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
@@ -1983,7 +1983,7 @@ State 79
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -2002,13 +2002,13 @@ State 79
 
 State 80
 
-	Expr -> "let rec" var '=' Expr in . Expr            (rule 2)
+	Expr -> letrec var '=' Expr in . Expr               (rule 2)
 
 	int            shift, and enter state 8
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -2033,7 +2033,7 @@ State 81
 	float          shift, and enter state 9
 	bool           shift, and enter state 10
 	let            shift, and enter state 2
-	"let rec"      shift, and enter state 11
+	letrec         shift, and enter state 11
 	if             shift, and enter state 12
 	'-'            shift, and enter state 13
 	quot           shift, and enter state 14
@@ -2117,7 +2117,7 @@ State 84
 
 State 85
 
-	Expr -> "let rec" var '=' Expr in Expr .            (rule 2)
+	Expr -> letrec var '=' Expr in Expr .               (rule 2)
 	Expr -> Expr . "==" Expr                            (rule 5)
 	Expr -> Expr . ">=" Expr                            (rule 6)
 	Expr -> Expr . "<=" Expr                            (rule 7)
