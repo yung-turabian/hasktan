@@ -31,8 +31,8 @@ jobs:
     - name: Install dependencies
       run: |
         cabal update
+        cabal install alex happy
         cabal build --only-dependencies --enable-tests --enable-benchmarks
-        sudo apt install alex happy
     - name: Build
       run: cabal build --enable-tests --enable-benchmarks all
     - name: Run tests
