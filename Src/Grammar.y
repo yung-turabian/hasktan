@@ -3,9 +3,9 @@
 -- CMSC 305, Lab 4
 -- Due: Friday, Nov. 8th 2024
 
-module Grammar where
+module Src.Grammar where
   
-import Lexer
+import Src.Lexer
 }
 
 %name parseHasquelito

@@ -8,32 +8,31 @@ on:
 
 jobs:
   build:
-
     runs-on: macos-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Install Haskell toolchain
-      uses: haskell-actions/setup@v2
+    - uses: actions/checkout@v4
+    - uses: haskell-actions/setup@v2
       with:
         ghc-version: 'latest'
         cabal-version: 'latest'
-    - run: cabal update
+
+    - name: Cache
+      uses: actions/cache@v3
+      env:
+        cache-name: cache-cabal
+      with:
+        path: ~/.cabal
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-
+          ${{ runner.os }}-build-
+          ${{ runner.os }}-
       
-    - name: Install Alex & Happy
-      run: cabal install alex happy
-
-    - name: Install GNU readline
-      run: brew install readline
-
-    - name: Install readline
-      run: cabal install --lib readline --extra-include-dirs=/usr/local/Cellar/readline/8.2.13/include --extra-lib-dirs=/usr/local/Cellar/readline/8.2.13/lib --configure-option=--with-readline-includes=/usr/local/Cellar/readline/8.2.13/include --configure-option=--with-readline-libraries=/usr/local/Cellar/readline/8.2.13/lib
-
-
-    - name: Install dependencies (lab5)
-      run: make
-
-    - name: Run check (lab5)
-      run: make test
+    - name: Install dependencies
+      run: |
+        cabal update
+        cabal build --only-dependencies --enable-tests --enable-benchmarks
+    - name: Build
+      run: cabal build --enable-tests --enable-benchmarks all
+    - name: Run tests
+      run: cabal test all

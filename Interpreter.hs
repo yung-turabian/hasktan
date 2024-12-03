@@ -9,9 +9,9 @@ import System.IO
 -- External dependency
 import System.Console.Readline
 
-import TypeChecker
-import Grammar
-import Lexer
+import Src.TypeChecker
+import Src.Grammar
+import Src.Lexer
 
 type OpEnv = [(String,AST)]
 
@@ -94,7 +94,7 @@ interpreter (Ok(Float f)) _ = Ok(Float f)
 
 interpreter (Ok(Variable v)) env =
     let
-        e = TypeChecker.lookup v env
+        e = Src.TypeChecker.lookup v env
     in
         interpreter (Ok e) env
 

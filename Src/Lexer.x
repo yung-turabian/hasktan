@@ -6,7 +6,7 @@
 -- Due: October 18th, 2024
 -- Note: For extens, added strings, deliminited comments, lists and line/character numbers
 
-module Lexer where
+module Src.Lexer where
 
 
 }

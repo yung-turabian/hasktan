@@ -1,6 +1,6 @@
-module TypeChecker where
-import Grammar
-import Lexer
+module Src.TypeChecker where
+import Src.Grammar
+import Src.Lexer
 
 -- Type alias for type environments.
 
@@ -11,7 +11,7 @@ type TypeEnv = [(String,TypeExp)]
 lookup::String -> [(String,a)] -> a
 lookup s  []                    = error ("Type " ++ s ++ " not defined in the current environment")
 lookup s1 ((s2,t):l) | s1 == s2 = t
-lookup s  (_:l)                 = TypeChecker.lookup s l
+lookup s  (_:l)                 = Src.TypeChecker.lookup s l
 
 
 
@@ -27,7 +27,7 @@ typeChecker (Ok (Integer _)) _ = IntType
 typeChecker (Ok (Float _)) _   = FloatType
 
 -- Variables
-typeChecker (Ok (Variable s) ) env = TypeChecker.lookup s env
+typeChecker (Ok (Variable s) ) env = Src.TypeChecker.lookup s env
 
 -- Operations
 typeChecker (Ok(Plus e1 e2)) env =
