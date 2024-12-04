@@ -1,17 +1,9 @@
-module Main where
+module Hasktan where
 import Control.Exception
-import System.Environment
 
-import System.Exit
-import System.FilePath (takeExtension, hasExtension)
-import System.IO
-
--- External dependency
-import System.Console.Readline
-
-import Src.TypeChecker
-import Src.Grammar
-import Src.Lexer
+import TypeChecker
+import Grammar
+import Lexer
 
 type OpEnv = [(String,AST)]
 
@@ -94,7 +86,7 @@ interpreter (Ok(Float f)) _ = Ok(Float f)
 
 interpreter (Ok(Variable v)) env =
     let
-        e = Src.TypeChecker.lookup v env
+        e = TypeChecker.lookup v env
     in
         interpreter (Ok e) env
 
@@ -290,10 +282,27 @@ interpreter (Ok(Tail e)) env =
    in
       Ok (List(tail l))
 
-
-
 interpreter e _ = error ("Unable to interpret: " ++ show(e))
 
+{- MAYBE LATER, implement type classes and types.
+ -
+ - class HasktanNum a where
+   (+) :: a -> a -> a
+   (-) :: a -> a -> a
+   fromInteger :: Integer -> a
+
+data HasktanType = 
+     HaskInt Int 
+   | HaskFloat Float 
+   | HaskBool Bool 
+   | HaskList [AST]
+   deriving (Eq,Show)-}
+
+getActualValue :: AST -> Int
+getActualValue (Integer i) = i
+
+
+-- Makes it easy to print lists all nice and pretty.
 prettyPrint :: AST -> String
 prettyPrint (Boolean b) = show b
 prettyPrint (Integer n) = show n
@@ -305,11 +314,6 @@ prettyPrint (List l) = "[" ++ prettyList l ++ "]"
    prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
 prettyPrint _ = "Unsupported for pretty print :("
 
-usage = putStrLn "Usage: hasktan <file.hs>"
-version = putStrLn "Hasktan -- An interpreted language - 0.1"
-exit = exitWith ExitSuccess
-exitBad = exitWith (ExitFailure 1)
-
 
 typeCheck :: String -> IO ()
 typeCheck s = do
@@ -317,8 +321,8 @@ typeCheck s = do
    let t = typeChecker ast []
    print t 
 
-interpret :: String -> IO ()
-interpret s = do
+interpretPrint :: String -> IO ()
+interpretPrint s = do
     let handler :: SomeException -> IO Bool
         handler e = do
             putStrLn "Exception caught: "
@@ -338,44 +342,9 @@ interpret s = do
             then return ()
             else putStrLn (prettyPrint val)
 
-repl :: IO ()
-repl = do
-   maybeLine <- readline "🌿> "
-   case maybeLine of
-      Nothing -> return () -- EOF / Ctrl-d
-      Just "" -> repl
-      Just ":q" -> putStrLn "Exiting REPL." >> return ()
-
-      Just line -> do addHistory line
-                      interpret line 
-                      repl
-
-
-main = do
-    args <- getArgs
-    ret <- case args of
-      ["-h"] -> usage >> exit 
-      ["--version"] -> version >> exit
-      ["-v"] -> version >> exit
-      ["-i"] -> do
-                  putStrLn "Welcome to Hasktan REPL. Type ':q' to exit or 'Ctrl-D'."
-                  repl 
-      ["-t", file] | hasExtension file -> do
-         if takeExtension file == ".hs" 
-         then do 
-            contents <- readFile file
-            typeCheck contents
-         else die "Please use a .hs file."
-      [file] | hasExtension file -> do
-         if takeExtension file == ".hs" 
-         then do 
-            contents <- readFile file
-            interpret contents
-         else die "Please use a .hs file."
-      _ -> usage >> exitBad
-
-
-    
-
-    return ()
-
+interpret :: String -> Int
+interpret s = do
+    let ast = parseHasquelito (scanTokens s)
+    let t = typeChecker ast []
+    let Ok val = interpreter ast []
+    getActualValue (val)

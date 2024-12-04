@@ -4,22 +4,36 @@ cabal-version:       >=1.10
 
 name:                hasktan
 version:             0.1.0.0
--- synopsis:
+synopsis:            A toy functional language based on Haskell.
 -- description:
 -- bug-reports:
--- license:
+license:             BSD3
 license-file:        LICENSE
 author:              Henry Wandover
 maintainer:          henrywandover@gmail.com
 -- copyright:
--- category:
+category:            Programming Languages
 build-type:          Simple
 extra-source-files:  README.md, CHANGELOG.md
 
+
+library hasktan-lib
+   exposed-modules:    Hasktan
+   other-modules:      Grammar, Lexer, TypeChecker
+   hs-source-dirs:     lib
+   build-depends:      base, array
+   default-language:   Haskell2010
+
 executable hasktan
-  main-is:             Interpreter.hs
-  other-modules:       Src.Lexer, Src.Grammar, Src.TypeChecker
+  main-is:             Main.hs
   -- other-extensions:
-  build-depends:       base, array, filepath, readline
-  -- hs-source-dirs:
+  build-depends:       hasktan-lib, base, filepath, readline
+  hs-source-dirs:      src
   default-language:    Haskell2010
+
+test-suite tests
+   type:               exitcode-stdio-1.0
+   main-is:            BasicTest.hs
+   hs-source-dirs:     tests
+   build-depends:      hasktan-lib, GHUT, base, HUnit
+   default-language:   Haskell2010
