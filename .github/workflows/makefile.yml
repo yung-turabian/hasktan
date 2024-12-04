@@ -6,11 +6,20 @@ on:
   pull_request:
     branches: [ "trunk" ]
 
-jobs:
+jobs:  
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     steps:
     - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Git Submodule Update
+      run: |
+        git pull --recurse-submodules
+        git submodule update --remote --recursive
     - uses: haskell-actions/setup@v2
       with:
         ghc-version: 'latest'
