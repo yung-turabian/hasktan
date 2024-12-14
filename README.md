@@ -14,6 +14,12 @@ Build with make and spits out the executable.
 $ make
 ```
 
+## Or...
+
+```bash
+$ cabal build
+```
+
 To interpret a file.
 ```bash
 $ hasktan file.hs
