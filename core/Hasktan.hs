@@ -312,8 +312,18 @@ prettyPrint (List l) = "[" ++ prettyList l ++ "]"
    prettyList [] = ""
    prettyList [l] = prettyPrint l
    prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
-prettyPrint _ = "Unsupported for pretty print :("
+prettyPrint _ = "Unsupported by pretty print"
 
+prettyPrintWitType :: AST -> String
+prettyPrintWitType (Boolean b) = (show b) ++ " : Bool" 
+prettyPrintWitType (Integer i) = (show i) ++ " : Int"
+prettyPrintWitType (Float f) = (show f) ++ " : Float"
+prettyPrintWitType (List l) = "[" ++ prettyList l ++ "]"
+ where
+   prettyList [] = ""
+   prettyList [l] = prettyPrint l
+   prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
+prettyPrintWitType _ = "Unsupported by pretty print"
 
 typeCheck :: String -> IO ()
 typeCheck s = do
@@ -340,7 +350,7 @@ interpretPrint s = do
          res <- (evaluate (val) >> return True) `catch` handler
          if not res
             then return ()
-            else putStrLn (prettyPrint val)
+            else putStrLn (prettyPrintWitType val)
 
 interpret :: String -> Int
 interpret s = do

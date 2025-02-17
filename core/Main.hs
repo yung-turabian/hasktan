@@ -18,7 +18,7 @@ exitBad = exitWith (ExitFailure 1)
 
 repl :: IO ()
 repl = do
-   maybeLine <- readline "🌿> "
+   maybeLine <- readline "hasktan> "
    case maybeLine of
       Nothing -> return () -- EOF / Ctrl-d
       Just "" -> repl
