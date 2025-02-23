@@ -1,8 +1,8 @@
-# hasktan 
+# hasqtan 
 
 # About
 
-Hasktan is a small, interpreted Haskell-derived toy language. From Hebrew it would translate to 'small has\[kell\].' Currently there are very few keywords, those being **if**, **then**, **else**, **hd**, **tl**, (+, -, /, *, ^), **rem**, **quot**, ::, ++ and \\ .
+hasqtan is a small, interpreted Haskell-derived toy language. From Hebrew it would translate to 'small has\[kell\].' Currently there are very few keywords, those being **if**, **then**, **else**, **hd**, **tl**, (+, -, /, *, ^), **rem**, **quot**, ::, ++ and \\ .
 
 # Usage
 
@@ -18,11 +18,11 @@ $ cabal build
 
 
 # To interpret a file.
-$ hasktan file.hs
+$ hasqtan file.hs
 
 
 # Open REPL mode.
-$ hasktan -i
+$ hasqtan -i
 ```
 
 # External Libraries

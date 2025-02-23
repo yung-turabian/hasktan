@@ -1,4 +1,4 @@
-module Hasktan where
+module Hasqtan where
 import Control.Exception
 
 import TypeChecker

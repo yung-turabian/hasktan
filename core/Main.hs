@@ -8,17 +8,17 @@ import System.IO
 -- External dependency
 import System.Console.Readline
 
-import Hasktan
+import Hasqtan
 
-usage = putStrLn "Usage: hasktan <file.hs>"
-version = putStrLn "Hasktan -- An interpreted language - 0.1"
+usage = putStrLn "Usage: hasqtan <file.hs>"
+version = putStrLn "hasqtan -- An interpreted language - 0.1"
 exit = exitWith ExitSuccess
 exitBad = exitWith (ExitFailure 1)
 
 
 repl :: IO ()
 repl = do
-   maybeLine <- readline "hasktan> "
+   maybeLine <- readline "hasqtan> "
    case maybeLine of
       Nothing -> return () -- EOF / Ctrl-d
       Just "" -> repl
@@ -36,7 +36,7 @@ main = do
       ["--version"] -> version >> exit
       ["-v"] -> version >> exit
       ["-i"] -> do
-                  putStrLn "Welcome to Hasktan REPL. Type ':q' to exit or 'Ctrl-D'."
+                  putStrLn "Welcome to hasqtan REPL. Type ':q' to exit or 'Ctrl-D'."
                   repl 
       ["-t", file] | hasExtension file -> do
          if takeExtension file == ".hs" 
