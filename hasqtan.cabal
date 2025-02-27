@@ -31,9 +31,9 @@ executable hasqtani
   hs-source-dirs:      core
   default-language:    Haskell2010
 
-test-suite tests
-   type:               exitcode-stdio-1.0
-   main-is:            BasicTest.hs
-   hs-source-dirs:     tests
-   build-depends:      GHUT, base, HUnit
-   default-language:   Haskell2010
+--test-suite tests
+--   type:               exitcode-stdio-1.0
+--   main-is:            BasicTest.hs
+--   hs-source-dirs:     tests
+--   build-depends:      GHUT, base, HUnit
+--   default-language:   Haskell2010

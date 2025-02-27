@@ -1,5 +1,5 @@
 module Main where
-import Hasktan
+import Hasqtan 
 import Test.GHUT
 import Test.HUnit
 import qualified System.Exit as Exit
