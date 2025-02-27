@@ -1,4 +1,4 @@
-name: Build hasktan on MacOS
+name: Build hasktan on Linux
 
 on:
   push:
