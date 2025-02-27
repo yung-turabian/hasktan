@@ -39,7 +39,7 @@ jobs:
       
     - name: Install dependencies
       run: |
-        sudo apt install readline
+        sudo apt install libreadline6 libreadline6-dev
         cabal update
         cabal install alex happy readline
         cabal build --only-dependencies --enable-tests --enable-benchmarks
