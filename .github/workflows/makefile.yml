@@ -39,7 +39,7 @@ jobs:
       
     - name: Install dependencies
       run: |
-        apt install libreadline
+        sudo apt install libreadline-dev
         cabal update
         cabal install alex happy
         cabal build --only-dependencies --enable-tests --enable-benchmarks
