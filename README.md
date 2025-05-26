@@ -1,10 +1,14 @@
 # hasqtan 
 
-# About
+## About
 
 hasqtan is a small, interpreted Haskell-derived toy language. From Hebrew it would translate to 'small has\[kell\].' Currently there are very few keywords, those being **if**, **then**, **else**, **hd**, **tl**, (+, -, /, *, ^), **rem**, **quot**, ::, ++ and \\ .
 
-# Usage
+## Reference
+
+- [Hasqtan reference site](www.henrywandover.com/hasqtan)
+
+## Building From Source
 
 ```bash
 # Configure your enviroment with this script, or setup GHC along with Alex and Happy.
@@ -25,13 +29,13 @@ $ hasqtan file.hs
 $ hasqtan -i
 ```
 
-# External Libraries
+## External Libraries
 
 + [Haskell](https://www.haskell.org/)
 + [Alex Manual](https://haskell-alex.readthedocs.io/en/latest/introduction.html)
 + [Happy Manual](https://haskell-happy.readthedocs.io/en/latest/using.html)
 + [Readline library](https://hackage.haskell.org/package/readline-1.0.3.0/docs/System-Console-Readline.html)
 
-# License
+## License
 
 [BSD-3 License](LICENSE)
