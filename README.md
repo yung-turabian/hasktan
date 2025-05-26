@@ -6,7 +6,7 @@ hasqtan is a small, interpreted Haskell-derived toy language. From Hebrew it wou
 
 ## Reference
 
-- [Hasqtan reference site](www.henrywandover.com/hasqtan)
+- [Hasqtan reference site](https://www.henrywandover.com/hasqtan)
 
 ## Building From Source
 
