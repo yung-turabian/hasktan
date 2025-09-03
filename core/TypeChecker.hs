@@ -6,42 +6,40 @@ import Lexer
 
 type TypeEnv = [(String,TypeExp)]
 
+-- | Helper for binary arithmetic ops
+{-checkBinOp :: (E AST,  E AST) -> TypeEnv -> E TypeExp
+checkBinOp (l, r) env = do
+   t1 <- Ok (typeChecker l env)
+   t2 <- Ok (typeChecker r env)
+   case (t1, t2) of
+      (IntType, IntType)     -> Ok IntType
+      (FloatType, FloatType) -> Ok FloatType
+      _ -> Failed ("type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2)-}
+
 -- Function for retrieving types of variables form the environment.
 
-lookup::String -> [(String,a)] -> a
-lookup s  []                    = error ("Type " ++ s ++ " not defined in the current environment")
-lookup s1 ((s2,t):l) | s1 == s2 = t
-lookup s  (_:l)                 = TypeChecker.lookup s l
+lookup :: String -> [(String,a)] -> E a
+lookup s  []   = Failed ("Type " ++ s ++ " not defined in the current environment")
+lookup s1 ((s2,t):l) 
+   | s1 == s2  = Ok t
+   | otherwise = TypeChecker.lookup s1 l
 
 
+typeChecker :: E AST -> TypeEnv -> E TypeExp
 
--- Please complete the definition of typeChecker for the rest of the abstract syntax.
-
-typeChecker :: E AST -> TypeEnv -> TypeExp
-
--- Constants
-typeChecker (Ok (Boolean _)) _ = BoolType
-typeChecker (Ok (Integer _)) _ = IntType
-
--- *Additional types
-typeChecker (Ok (Float _)) _   = FloatType
+-- Types
+typeChecker (Ok (Boolean _)) _ = Ok BoolType
+typeChecker (Ok (Integer _)) _ = Ok IntType
+typeChecker (Ok (Float _)) _   = Ok FloatType
 
 -- Variables
 typeChecker (Ok (Variable s) ) env = TypeChecker.lookup s env
 
--- Operations
-typeChecker (Ok(Plus e1 e2)) env =
-   let t1 = typeChecker (Ok e1) env
-       t2 = typeChecker (Ok e2) env
-   in
-   if t1 == IntType && t2 == IntType 
-   then IntType 
-   else if t1 == FloatType && t2 == FloatType
-   then FloatType 
-   else error $ "type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2
+-- Binary Operations
+--typeChecker (Ok(Plus e1 e2)) env = checkBinOp ((Ok e1), (Ok e2)) env
 
 
-typeChecker (Ok(Minus e1 e2)) env =
+{-typeChecker (Ok(Minus e1 e2)) env =
    let t1 = typeChecker (Ok e1) env
        t2 = typeChecker (Ok e2) env
    in
@@ -205,7 +203,7 @@ typeChecker (Ok(Cons e1 e2)) env
   t2 = typeChecker (Ok(e2)) env
 
 
-typeChecker (Ok(Concat e1 e2)) env 
+typeChecker (Ok(Concat e1 e2)) env = do
  | t1 == EmptyList && t2 == EmptyList = EmptyList
  | (t1 == BoolType || t1 == EmptyList) && (t2 == BoolType || t2 == EmptyList) = ListType BoolType
  | (t1 == ListType IntType || t1 == EmptyList) && (t2 == ListType IntType || t2 == EmptyList) = ListType IntType
@@ -219,30 +217,28 @@ typeChecker (Ok(Concat e1 e2)) env
   t1 = typeChecker (Ok (e1)) env
   t2 = typeChecker (Ok (e2)) env
 
-typeChecker (Ok(Head e)) env 
- | t == ListType IntType = IntType
- | t == ListType FloatType = FloatType
- | t == ListType BoolType = BoolType
- 
- | otherwise = error "List head."
- where 
-  t = typeChecker (Ok (e)) env
+typeChecker (Ok (Head e)) env = do
+  t <- typeChecker (Ok e) env
+  case t of
+    ListType IntType   -> Right (ListType IntType)
+    ListType FloatType -> Right (ListType FloatType)
+    ListType BoolType  -> Right (ListType BoolType)
+    _                  -> Left "List head: invalid type"
 
-typeChecker (Ok(Tail e)) env 
- | t == ListType IntType = ListType IntType
- | t == ListType FloatType = ListType FloatType
- | t == ListType BoolType = ListType BoolType
- 
- | otherwise = error "List tail."
- where 
-  t = typeChecker (Ok (e)) env
+typeChecker (Ok (Tail e)) env = do
+  t <- typeChecker (Ok e) env
+  case t of
+    ListType IntType   -> Right (ListType IntType)
+    ListType FloatType -> Right (ListType FloatType)
+    ListType BoolType  -> Right (ListType BoolType)
+    _                  -> Left "List tail: invalid type"-}
 
 
 
 
 
 
-typeChecker e _ = error $ "Unknown type: " ++ show e
+typeChecker e _ = Failed $ "Unknown type: " ++ show e
 
 -- http://www.zvon.org/other/haskell/Outputprelude/all_f.html
 -- Rewrote `all`, just passes a condition to all children

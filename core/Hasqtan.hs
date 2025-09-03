@@ -76,7 +76,7 @@ subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (subst_var x e ast)
 
-interpreter:: E AST -> OpEnv -> E AST
+interpreter :: E AST -> OpEnv -> E AST
 interpreter (Ok(Boolean b)) _ = Ok(Boolean b)
 interpreter (Ok(Integer n)) _ = Ok(Integer n)
 
@@ -88,7 +88,7 @@ interpreter (Ok(Variable v)) env =
     let
         e = TypeChecker.lookup v env
     in
-        interpreter (Ok e) env
+        interpreter e env
 
 
 
@@ -282,7 +282,7 @@ interpreter (Ok(Tail e)) env =
    in
       Ok (List(tail l))
 
-interpreter e _ = error ("Unable to interpret: " ++ show(e))
+interpreter e _ = Failed ("Unable to interpret: " ++ show(e))
 
 {- MAYBE LATER, implement type classes and types.
  -
@@ -298,23 +298,12 @@ data HasktanType =
    | HaskList [AST]
    deriving (Eq,Show)-}
 
-getActualValue :: AST -> Int
-getActualValue (Integer i) = i
-
-
 -- Makes it easy to print lists all nice and pretty.
-prettyPrint :: AST -> String
-prettyPrint (Boolean b) = show b
-prettyPrint (Integer n) = show n
-prettyPrint (Float f) = show f
-prettyPrint (List l) = "[" ++ prettyList l ++ "]"
- where
-   prettyList [] = ""
-   prettyList [l] = prettyPrint l
-   prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
-prettyPrint _ = "Unsupported by pretty print"
+prettyPrint :: E AST -> String
+prettyPrint (Ok lit) = show $ lit
+prettyPrint (Failed ast) = show $ ast
 
-prettyPrintWitType :: AST -> String
+{-prettyPrintWitType :: E AST -> String
 prettyPrintWitType (Boolean b) = (show b) ++ " : Bool" 
 prettyPrintWitType (Integer i) = (show i) ++ " : Int"
 prettyPrintWitType (Float f) = (show f) ++ " : Float"
@@ -350,11 +339,11 @@ interpretPrint s = do
          res <- (evaluate (val) >> return True) `catch` handler
          if not res
             then return ()
-            else putStrLn (prettyPrintWitType val)
+            else putStrLn (prettyPrintWitType val)-}
 
-interpret :: String -> Int
+interpret :: String -> String
 interpret s = do
     let ast = parseHasquelito (scanTokens s)
     let t = typeChecker ast []
-    let Ok val = interpreter ast []
-    getActualValue (val)
+    let val = interpreter ast []
+    prettyPrint val

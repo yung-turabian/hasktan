@@ -1,4 +1,6 @@
 {
+{-# LANGUAGE DeriveDataTypeable #-}
+
 -- Henry Wandover
 -- CMSC 305, Lab 4
 -- Due: Friday, Nov. 8th 2024
@@ -6,6 +8,8 @@
 module Grammar where
   
 import Lexer
+
+import Data.Data (Data, Typeable, toConstr, showConstr)
 }
 
 %name parseHasquelito
@@ -198,46 +202,60 @@ data TypeExp
   
   | EmptyList
   | ListType TypeExp
-  deriving (Eq,Ord,Show)
+  deriving (Eq,Ord,Show,Data)
 
 data AST
-  = Boolean Bool
-  | Integer Int
-  | Float Float
-  
-  | Let String AST AST
-  | LetRec String AST AST
-  | If AST AST AST
+     = Boolean Bool
+     | Integer Int
+     | Float Float
+     
+     | Let String AST AST
+     | LetRec String AST AST
+     | If AST AST AST
 
-  | Lambda String AST TypeExp TypeExp
+     | Lambda String AST TypeExp TypeExp
 
-  | App AST AST
+     | App AST AST
 
-  | And AST AST
-  | Or AST AST
-  
-  | Plus AST AST
-  | Minus AST AST
-  | Times AST AST
-  | Divide AST AST
-	| Power AST AST
+     | And AST AST
+     | Or AST AST
+     
+     | Plus AST AST
+     | Minus AST AST
+     | Times AST AST
+     | Divide AST AST
+          | Power AST AST
 
-  | Quot AST AST
-  | Rem AST AST
+     | Quot AST AST
+     | Rem AST AST
 
-  | Equals AST AST
-  | Lt AST AST
-  | Gt AST AST
+     | Equals AST AST
+     | Lt AST AST
+     | Gt AST AST
 
-  | Variable String
+     | Variable String
 
-  | List [AST]
-  | Cons AST AST
-  | Concat AST AST
-  | Head AST
-  | Tail AST
+     | List [AST]
+     | Cons AST AST
+     | Concat AST AST
+     | Head AST
+     | Tail AST
 
-  | Not
-  deriving (Eq,Ord,Show)
+     | Not
+     deriving (Eq, Ord, Data)
+
+showList :: [AST] -> String 
+showList [] = ""
+showList [l] = show $ l
+showList (it:l) = (show it) ++ ", " ++ Grammar.showList l
+
+instance Show AST where
+     show (Integer n) = show n
+     show (Boolean b) = show b
+     show (Float f)   = show f
+     show (List l) = "[" ++ Grammar.showList l ++ "]"
+
+     -- catch-all fallback
+     show other       = "<AST:" ++ showConstr (toConstr other) ++ ">"
 
 }

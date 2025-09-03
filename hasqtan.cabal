@@ -16,18 +16,22 @@ category:            Programming Languages
 build-type:          Simple
 extra-source-files:  README.md, CHANGELOG.md
 
+library
+  exposed-modules:     Hasqtan, Grammar, Lexer, TypeChecker 
+  hs-source-dirs:      core
+  build-depends:       base, filepath, readline, array
+  default-language:    Haskell2010
+
 executable hasqtan
   main-is:             Main.hs
-  other-modules:       Hasqtan, Grammar, Lexer, TypeChecker
-  build-depends:       base, filepath, readline, array
+  build-depends:       base, filepath, readline, array, hasqtan
   hs-source-dirs:      core
   default-language:    Haskell2010
 
 executable hasqtani
   main-is:             Interactive.hs
   -- other-extensions:
-  other-modules:       Hasqtan, Grammar, Lexer, TypeChecker
-  build-depends:       base, filepath, readline, array
+  build-depends:       base, filepath, readline, array, hasqtan
   hs-source-dirs:      core
   default-language:    Haskell2010
 
