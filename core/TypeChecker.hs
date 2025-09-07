@@ -19,7 +19,7 @@ checkBinOp (l, r) env = do
 -- Function for retrieving types of variables form the environment.
 
 lookup :: String -> [(String,a)] -> E a
-lookup s  []   = Failed ("Type " ++ s ++ " not defined in the current environment")
+lookup s  []   = Failed ("type] Type `" ++ s ++ "` is not a member of this environment")
 lookup s1 ((s2,t):l) 
    | s1 == s2  = Ok t
    | otherwise = TypeChecker.lookup s1 l

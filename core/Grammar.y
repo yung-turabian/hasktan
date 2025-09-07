@@ -78,7 +78,8 @@ var { VAR p $$ }
 ']' { RBRACK p }
 ':' { COLON p }
 ',' { COMMA p }
-"++"{ PLUSPLUS p } 
+"++"{ PLUSPLUS p }
+
 head { HEAD p }
 tail { TAIL p }
 
@@ -117,8 +118,12 @@ Expr
 
      | Expr ':' Expr               { Cons $1 $3 }
      | Expr "++" Expr              { Concat $1 $3 }
+
+
      | head Expr                   { Head $2 }
      | tail Expr                   { Tail $2 }
+
+
      | List                        { $1 }
      
      | Form                        { $1 }
@@ -174,7 +179,11 @@ ListMembers
 {
 
 data E a = Ok a | Failed String
- deriving(Eq,Show)
+ deriving(Eq)
+
+instance Show a => Show (E a) where
+     show (Ok a) = show a
+     show (Failed str) = str
 
 thenE :: E a -> (a -> E b) -> E b
 m `thenE` k =
@@ -224,7 +233,7 @@ data AST
      | Minus AST AST
      | Times AST AST
      | Divide AST AST
-          | Power AST AST
+     | Power AST AST
 
      | Quot AST AST
      | Rem AST AST
@@ -238,6 +247,7 @@ data AST
      | List [AST]
      | Cons AST AST
      | Concat AST AST
+
      | Head AST
      | Tail AST
 

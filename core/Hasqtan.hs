@@ -1,9 +1,10 @@
 module Hasqtan where
-import Control.Exception
 
 import TypeChecker
 import Grammar
 import Lexer
+
+import Control.Exception
 
 type OpEnv = [(String,AST)]
 
@@ -67,7 +68,6 @@ subst_var x e (Head ast) =
     Head (subst_var x e ast)
 subst_var x e (Tail ast) =
     Tail (subst_var x e ast)
-
 
 
 -- Treat an environment as a variable substitution.
@@ -241,16 +241,12 @@ interpreter (Ok(LetRec x e1 e2)) env =
          in interpreter (Ok e2) env'
       _ -> error "LetRec only supports function definitions"
 
-
 -- Function Application
 interpreter (Ok(App e1 e2)) env = 
   interpreter (Ok(subst [(x, interpE2)] e)) env
    where
       Ok (Lambda x e _ _) = interpreter (Ok e1) env
       Ok interpE2 = interpreter (Ok e2) env
-
-interpreter (Ok(Not)) env = Ok(Lambda "b" (If (Variable "b") (Boolean False) (Boolean True)) BoolType BoolType)
-
 
 
 -- List manipulation
@@ -282,7 +278,7 @@ interpreter (Ok(Tail e)) env =
    in
       Ok (List(tail l))
 
-interpreter e _ = Failed ("Unable to interpret: " ++ show(e))
+interpreter e _ = Failed ("error: [HSQ-" ++ show(e))
 
 {- MAYBE LATER, implement type classes and types.
  -
@@ -301,7 +297,7 @@ data HasktanType =
 -- Makes it easy to print lists all nice and pretty.
 prettyPrint :: E AST -> String
 prettyPrint (Ok lit) = show $ lit
-prettyPrint (Failed ast) = show $ ast
+prettyPrint (Failed errorMsg) = errorMsg
 
 {-prettyPrintWitType :: E AST -> String
 prettyPrintWitType (Boolean b) = (show b) ++ " : Bool" 
