@@ -1,4 +1,7 @@
-module Hasqtan where
+module Hasqtan(
+    interp,
+    typeCheckAndPrint
+) where
 
 import TypeChecker
 import Grammar
@@ -17,8 +20,7 @@ remove_var x ((y,_):env) | x == y =
 remove_var x ((y,ast):env) =
     (y,ast) : remove_var x env
 
--- Substitute an AST for a variable in an AST.
-
+-- | Substitute an AST for a variable in an AST.
 subst_var :: String -> AST -> AST -> AST
 subst_var _ _ (Boolean b) = Boolean b
 subst_var _ _ (Integer n) = Integer n
@@ -70,43 +72,36 @@ subst_var x e (Tail ast) =
     Tail (subst_var x e ast)
 
 
--- Treat an environment as a variable substitution.
+-- | NOTE: Treat an environment as a variable substitution.
 subst :: OpEnv -> AST -> AST
 subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (subst_var x e ast)
 
+interpBiOp :: (AST, AST) -> (Int -> Int -> Int) -> OpEnv -> AST
+interpBiOp (v1, v2) op env =
+    let
+        Ok t1 = interpreter (Ok v1) env
+        Ok t2 = interpreter (Ok v2) env
+    in case (t1, t2) of
+        (Integer i1, Integer i2) -> Integer (op i1 i2)
+
 interpreter :: E AST -> OpEnv -> E AST
-interpreter (Ok(Boolean b)) _ = Ok(Boolean b)
-interpreter (Ok(Integer n)) _ = Ok(Integer n)
+interpreter (Failed errMsg) _ = Failed ("error: [HSQ-" ++ errMsg)
+interpreter (Ok ast) env = 
+    case ast of
+        Boolean b  -> Ok (Boolean b)
+        Integer n  -> Ok (Integer n)
+        List l     -> Ok (List l)
+        Float f    -> Ok (Float f)
 
--- Extra types
-interpreter (Ok(List l)) _ = Ok(List l)
-interpreter (Ok(Float f)) _ = Ok(Float f)
+        Variable v -> 
+            let val = TypeChecker.lookup v env
+            in
+                interpreter val env
 
-interpreter (Ok(Variable v)) env =
-    let
-        e = TypeChecker.lookup v env
-    in
-        interpreter e env
-
-
-
-interpreter (Ok(Plus e1 e2)) env =
-    let
-       Ok t1 = interpreter (Ok e1) env
-       Ok t2 = interpreter (Ok e2) env
-    in case (t1, t2) of
-      (Integer n1, Integer n2) -> Ok (Integer (n1 + n2))
-      (Float n1, Float n2) -> Ok (Float (n1 + n2))
-
-interpreter (Ok(Minus e1 e2)) env =
-    let
-       Ok t1 = interpreter (Ok e1) env
-       Ok t2 = interpreter (Ok e2) env
-    in case (t1, t2) of
-      (Integer n1, Integer n2) -> Ok (Integer (n1 - n2))
-      (Float n1, Float n2) -> Ok (Float (n1 - n2))
+        Plus v1 v2 -> Ok (interpBiOp (v1, v2) (+) env)
+        Minus v1 v2 -> Ok (interpBiOp (v1, v2) (-) env)
 
 interpreter (Ok(Times e1 e2)) env =
     let
@@ -308,15 +303,15 @@ prettyPrintWitType (List l) = "[" ++ prettyList l ++ "]"
    prettyList [] = ""
    prettyList [l] = prettyPrint l
    prettyList (l:it) = prettyPrint l ++ ", " ++ prettyList it
-prettyPrintWitType _ = "Unsupported by pretty print"
+prettyPrintWitType _ = "Unsupported by pretty print"-}
 
-typeCheck :: String -> IO ()
-typeCheck s = do
+typeCheckAndPrint :: String -> IO ()
+typeCheckAndPrint s = do
    let ast = parseHasquelito (scanTokens s)
    let t = typeChecker ast []
    print t 
 
-interpretPrint :: String -> IO ()
+{-interpretPrint :: String -> IO ()
 interpretPrint s = do
     let handler :: SomeException -> IO Bool
         handler e = do
@@ -337,8 +332,8 @@ interpretPrint s = do
             then return ()
             else putStrLn (prettyPrintWitType val)-}
 
-interpret :: String -> String
-interpret s = do
+interp :: String -> String
+interp s = do
     let ast = parseHasquelito (scanTokens s)
     let t = typeChecker ast []
     let val = interpreter ast []

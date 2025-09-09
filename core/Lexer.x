@@ -28,7 +28,7 @@ $all         = [$alpha $digit $punc $symbol $ascii]
 
 tokens :-
 
- $white+		;
+ $white+		        ;
 
  -- Comments
  "--".*                	;
@@ -93,7 +93,6 @@ tokens :-
 
  head                      { \p s -> HEAD p }
  tail                      { \p s -> TAIL p }
-
 
  @id   			           { \p s -> VAR p s }
 
@@ -163,7 +162,6 @@ data Token
 
  -- Identifiers
  | VAR      AlexPosn String
-
 
  | COMMENT  
  deriving (Eq, Show)

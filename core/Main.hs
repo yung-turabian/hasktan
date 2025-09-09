@@ -6,17 +6,15 @@ import System.FilePath (takeExtension, hasExtension)
 import System.IO
 
 -- External dependency
-import System.Console.Readline
+--import System.Console.Readline
 
 import Hasqtan
 
 usage = putStrLn "Usage: hasqtan <file.hs>"
 version = putStrLn "hasqtan -- An interpreted language - 0.1"
-exit = exitWith ExitSuccess
 exitBad = exitWith (ExitFailure 1)
 
-
-repl :: IO ()
+{-repl :: IO ()
 repl = do
    maybeLine <- readline "hasqtan> "
    case maybeLine of
@@ -27,33 +25,29 @@ repl = do
       Just line -> do addHistory line
                       interpretPrint line 
                       repl
-
+-}
 
 main = do
     args <- getArgs
     ret <- case args of
-      ["-h"] -> usage >> exit 
-      ["--version"] -> version >> exit
-      ["-v"] -> version >> exit
-      ["-i"] -> do
+      ["-h"] -> usage >> exitSuccess
+      ["--version"] -> version >> exitSuccess
+      ["-v"] -> version >> exitSuccess
+      {-["-i"] -> do
                   putStrLn "Welcome to hasqtan REPL. Type ':q' to exit or 'Ctrl-D'."
-                  repl 
+                  repl-}
       ["-t", file] | hasExtension file -> do
          if takeExtension file == ".hs" 
          then do 
             contents <- readFile file
-            typeCheck contents
+            typeCheckAndPrint contents
          else die "Please use a .hs file."
       [file] | hasExtension file -> do
          if takeExtension file == ".hs" 
          then do 
             contents <- readFile file
-            interpretPrint contents
+            putStrLn (interp contents)
          else die "Please use a .hs file."
       _ -> usage >> exitBad
 
-
-    
-
     return ()
-
