@@ -1,6 +1,8 @@
 module TypeChecker where
+
 import Grammar
 import Lexer
+import Util
 
 -- Type alias for type environments.
 

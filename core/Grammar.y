@@ -8,6 +8,7 @@
 module Grammar where
   
 import Lexer
+import Util
 
 import Data.Data (Data, Typeable, toConstr, showConstr)
 }
@@ -80,13 +81,13 @@ var { VAR p $$ }
 ',' { COMMA p }
 "++"{ PLUSPLUS p }
 
-head { HEAD p }
-tail { TAIL p }
+hd { HEAD p }
+tl { TAIL p }
 
 
 
 %right in "->" else
-%right "++" ':' head tail
+%right "++" ':' hd tl
 %nonassoc "&&" "||"
 %nonassoc '>' '<' "==" ">=" "<=" "/="
 %nonassoc ')' "::"
@@ -105,27 +106,19 @@ Expr
      | letrec var '=' Expr in Expr { LetRec $2 $4 $6 }
      | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   { Lambda $3 $5 $8 $10 }
      | if Expr then Expr else Expr                      { If $2 $4 $6 }
-     
      | Expr "==" Expr              { Equals $1 $3 }
      | Expr ">=" Expr              { Or (Equals $1 $3) (Gt $1 $3) }
      | Expr "<=" Expr              { Or (Equals $1 $3) (Lt $1 $3) }
      | Expr "/=" Expr              { App (Not) (Equals $1 $3) } 
      | Expr '>' Expr               { Gt $1 $3 }
      | Expr '<' Expr               { Lt $1 $3 }
-
      | Expr "&&" Expr              { And $1 $3 }
      | Expr "||" Expr              { Or $1 $3 }
-
      | Expr ':' Expr               { Cons $1 $3 }
      | Expr "++" Expr              { Concat $1 $3 }
-
-
-     | head Expr                   { Head $2 }
-     | tail Expr                   { Tail $2 }
-
-
+     | hd Expr                   { Head $2 }
+     | tl Expr                   { Tail $2 }
      | List                        { $1 }
-     
      | Form                        { $1 }
 
 Form 
@@ -133,8 +126,7 @@ Form
      | Form '-' Form               { Minus $1 $3 }
      | Form '*' Form               { Times $1 $3 }
      | Form '/' Form               { Divide $1 $3 }
-		 | Form '^' Form               { Power $1 $3 }
-     
+	 | Form '^' Form               { Power $1 $3 }
      | Juxt                        { $1 }
 
 Juxt 
@@ -142,7 +134,6 @@ Juxt
      | quot Atom Atom              { Quot $2 $3 }
      | rem Atom Atom               { Rem $2 $3 }
      | '-' Atom                    { Minus (Integer 0) $2 }
-
      | Atom                        { $1 }
 
 Atom 
@@ -152,7 +143,6 @@ Atom
      | float                       { Float $1 }
      | var                         { Variable $1 }
      
-
 TypeExp 
      : PrimType { $1 }
      | TypeExp "->" TypeExp {Arrow $1 $3}
@@ -160,12 +150,10 @@ TypeExp
      | '[' TypeExp ']' { ListType $2 }
      | '[' {- empty -} ']' { EmptyList }
 
-
 PrimType 
      : Bool { BoolType } 
      | Int { IntType } 
      | Float { FloatType }
-
 
 List 
      : '[' ListMembers ']'    { List $2 }
@@ -177,9 +165,6 @@ ListMembers
 
 
 {
-
-data E a = Ok a | Failed String
- deriving(Eq)
 
 instance Show a => Show (E a) where
      show (Ok a) = show a
@@ -198,9 +183,9 @@ failE :: String -> E a
 failE err = Failed err
 
 parseError :: [Token] -> E a
-parseError [] = failE "Parse Error: Unexpected end of input"
-parseError (t:_) = failE $ "Parse Error: Unexpected token " ++ show t
-
+parseError [] = failE "1] Parse Error: Unexpected end of input"
+-- TODO: Would ideally use Alex's monad wrapper, this works for now.
+parseError (t:_) = failE $ "2] Parse Error: Unexpected token: '" ++ show t ++ "'."
 
 data TypeExp
   = BoolType

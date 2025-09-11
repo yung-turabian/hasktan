@@ -8,7 +8,7 @@
 
 module Lexer where
 
-
+import Util
 }
 
 %wrapper "posn"
@@ -91,10 +91,12 @@ tokens :-
  "."			           { \p s -> PERIOD p }
  "++"                      { \p s -> PLUSPLUS p }
 
- head                      { \p s -> HEAD p }
- tail                      { \p s -> TAIL p }
+ hd                        { \p s -> HEAD p }
+ tl                        { \p s -> TAIL p }
 
  @id   			           { \p s -> VAR p s }
+
+ .                         { \p s -> ERROR p s }
 
 {
 
@@ -160,12 +162,17 @@ data Token
  | HEAD     AlexPosn
  | TAIL     AlexPosn
 
- -- Identifiers
  | VAR      AlexPosn String
 
- | COMMENT  
- deriving (Eq, Show)
+ | ERROR    AlexPosn String
 
+ | COMMENT  
+ deriving (Eq)
+
+instance Show Token where
+    show (ERROR _ s) = s
+    show tok = show tok
 
 scanTokens = alexScanTokens
+
 }

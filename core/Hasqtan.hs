@@ -6,6 +6,7 @@ module Hasqtan(
 import TypeChecker
 import Grammar
 import Lexer
+import Util
 
 import Control.Exception
 
@@ -87,44 +88,7 @@ interpBiOp (v1, v2) op env =
         (Integer i1, Integer i2) -> Integer (op i1 i2)
 
 interpreter :: E AST -> OpEnv -> E AST
-interpreter (Failed errMsg) _ = Failed ("error: [HSQ-" ++ errMsg)
-interpreter (Ok ast) env = 
-    case ast of
-        Boolean b  -> Ok (Boolean b)
-        Integer n  -> Ok (Integer n)
-        List l     -> Ok (List l)
-        Float f    -> Ok (Float f)
 
-        Variable v -> 
-            let val = TypeChecker.lookup v env
-            in
-                interpreter val env
-
-        Plus v1 v2 -> Ok (interpBiOp (v1, v2) (+) env)
-        Minus v1 v2 -> Ok (interpBiOp (v1, v2) (-) env)
-
-interpreter (Ok(Times e1 e2)) env =
-    let
-       Ok t1 = interpreter (Ok e1) env
-       Ok t2 = interpreter (Ok e2) env
-    in case (t1, t2) of
-      (Integer n1, Integer n2) -> Ok (Integer (n1 * n2))
-      (Float n1, Float n2) -> Ok (Float (n1 * n2))
-
-interpreter (Ok(Divide e1 e2)) env =
-    let
-       Ok (Float n1) = interpreter (Ok e1) env
-       Ok (Float n2) = interpreter (Ok e2) env
-    in 
-      Ok (Float (n1 / n2))
-
-interpreter (Ok(Power e1 e2)) env =
-    let
-       Ok t1 = interpreter (Ok e1) env
-       Ok t2 = interpreter (Ok e2) env
-    in case (t1, t2) of
-      (Integer n1, Integer n2) -> Ok (Integer (n1 ^ n2))
-      (Float n1, Integer n2) -> Ok (Float (n1 ^ n2))
 
 interpreter (Ok(Quot e1 e2)) env =
     let
@@ -273,7 +237,27 @@ interpreter (Ok(Tail e)) env =
    in
       Ok (List(tail l))
 
-interpreter e _ = Failed ("error: [HSQ-" ++ show(e))
+interpreter (Ok ast) env = 
+    case ast of
+        Boolean b  -> Ok (Boolean b)
+        Integer n  -> Ok (Integer n)
+        List l     -> Ok (List l)
+        Float f    -> Ok (Float f)
+
+        Variable v -> 
+            let val = TypeChecker.lookup v env
+            in
+                interpreter val env
+
+        Plus v1 v2 -> Ok (interpBiOp (v1, v2) (+) env)
+        Minus v1 v2 -> Ok (interpBiOp (v1, v2) (-) env)
+        Times v1 v2 -> Ok (interpBiOp (v1, v2) (*) env)
+        --Divide v1 v2 -> Ok (interpBiOp (v1, v2) (/) env)
+        Power v1 v2 -> Ok (interpBiOp (v1, v2) (^) env)
+        e -> Failed ("error: [HSQ-uncaught] " ++ (show e))
+
+interpreter (Failed errMsg) _ = Failed ("error: [HSQ-" ++ errMsg)
+interpreter e _ = Failed ("error: [HSQ-uncaught] " ++ (show e))
 
 {- MAYBE LATER, implement type classes and types.
  -
