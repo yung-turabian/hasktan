@@ -166,6 +166,9 @@ ListMembers
 
 {
 
+data E a = Ok a | Failed String
+    deriving(Eq)
+
 instance Show a => Show (E a) where
      show (Ok a) = show a
      show (Failed str) = str

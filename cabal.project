@@ -1,2 +1,5 @@
 packages: .
-          ./GHUT
+
+source-repository-package 
+  type: git
+  location: https://github.com/hew02/ghut
