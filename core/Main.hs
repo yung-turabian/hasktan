@@ -37,17 +37,17 @@ main = do
                   putStrLn "Welcome to hasqtan REPL. Type ':q' to exit or 'Ctrl-D'."
                   repl-}
       ["-t", file] | hasExtension file -> do
-         if takeExtension file == ".hs" 
+         if takeExtension file == ".hq" 
          then do 
             contents <- readFile file
             typeCheckAndPrint contents
-         else die "Please use a .hs file."
+         else die "Please use a .hq file."
       [file] | hasExtension file -> do
-         if takeExtension file == ".hs" 
+         if takeExtension file == ".hq" 
          then do 
             contents <- readFile file
             putStrLn (interp contents)
-         else die "Please use a .hs file."
+         else die "Please use a .hq file."
       _ -> usage >> exitBad
 
     return ()

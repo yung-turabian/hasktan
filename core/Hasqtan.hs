@@ -291,7 +291,7 @@ prettyPrintWitType _ = "Unsupported by pretty print"-}
 
 typeCheckAndPrint :: String -> IO ()
 typeCheckAndPrint s = do
-   let ast = parseHasquelito (scanTokens s)
+   let ast = parseHasqtan (scanTokens s)
    let t = typeChecker ast []
    print t 
 
@@ -303,7 +303,7 @@ interpretPrint s = do
             print e
             return False
 
-    let ast = parseHasquelito (scanTokens s)
+    let ast = parseHasqtan (scanTokens s)
     let t = typeChecker ast []
     let Ok val = interpreter ast []
 
@@ -318,7 +318,7 @@ interpretPrint s = do
 
 interp :: String -> String
 interp s = do
-    let ast = parseHasquelito (scanTokens s)
+    let ast = parseHasqtan (scanTokens s)
     let t = typeChecker ast []
     let val = interpreter ast []
     prettyPrint val

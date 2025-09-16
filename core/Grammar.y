@@ -13,7 +13,7 @@ import Util
 import Data.Data (Data, Typeable, toConstr, showConstr)
 }
 
-%name parseHasquelito
+%name parseHasqtan
 %tokentype { Token }
 %error { parseError }
 %monad { E } { thenE } { returnE }
@@ -35,7 +35,8 @@ letrec { LET_REC p }
 in  { IN p }
 if { IF p}
 then { THEN p }
-else { ELSE p } 
+else { ELSE p }
+data { DATA p }
 
 
 '\\' { LAMBDA p }
@@ -71,6 +72,9 @@ rem  { REM p }
 '(' { LPAREN p }
 ')' { RPAREN p }
 
+'{' { LCURL p }
+'}' { RCURL p }
+
 -- Identifiers
 var { VAR p $$ }
 
@@ -84,7 +88,9 @@ var { VAR p $$ }
 hd { HEAD p }
 tl { TAIL p }
 
+tycon { TYCON p $$ }
 
+'\n' { NEWLINE p }
 
 %right in "->" else
 %right "++" ':' hd tl
@@ -101,11 +107,20 @@ tl { TAIL p }
 -- Then Juxtaposed atoms have the next highest precidence, functions, applications and negation
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
+-- Top-level declarations, not available in interactive mode.
+Program
+     : var "::" TypeExp '\n' var '=' Expr
+                                   { Binding $1 $3 $5 $7 }
+
 Expr 
-     : let var '=' Expr in Expr                         { Let $2 $4 $6 }
-     | letrec var '=' Expr in Expr { LetRec $2 $4 $6 }
-     | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   { Lambda $3 $5 $8 $10 }
-     | if Expr then Expr else Expr                      { If $2 $4 $6 }
+     : let var '=' Expr in Expr    
+                                   { Let $2 $4 $6 }
+     | letrec var '=' Expr in Expr 
+                                   { LetRec $2 $4 $6 }
+     | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   
+                                   { Lambda $3 $5 $8 $10 }
+     | if Expr then Expr else Expr                      
+                                   { If $2 $4 $6 }
      | Expr "==" Expr              { Equals $1 $3 }
      | Expr ">=" Expr              { Or (Equals $1 $3) (Gt $1 $3) }
      | Expr "<=" Expr              { Or (Equals $1 $3) (Lt $1 $3) }
@@ -116,8 +131,14 @@ Expr
      | Expr "||" Expr              { Or $1 $3 }
      | Expr ':' Expr               { Cons $1 $3 }
      | Expr "++" Expr              { Concat $1 $3 }
-     | hd Expr                   { Head $2 }
-     | tl Expr                   { Tail $2 }
+
+--     | data tycon '=' tycon '{' RecordTypeFields '}' 
+--                                   { RecordType $2 $4 $6 }
+
+     -- Function calls, TODO abstract these kinds
+     | hd Expr                     { Head $2 }
+     | tl Expr                     { Tail $2 }
+
      | List                        { $1 }
      | Form                        { $1 }
 
@@ -126,7 +147,7 @@ Form
      | Form '-' Form               { Minus $1 $3 }
      | Form '*' Form               { Times $1 $3 }
      | Form '/' Form               { Divide $1 $3 }
-	 | Form '^' Form               { Power $1 $3 }
+	| Form '^' Form               { Power $1 $3 }
      | Juxt                        { $1 }
 
 Juxt 
@@ -142,6 +163,7 @@ Atom
      | bool                        { Boolean $1 }
      | float                       { Float $1 }
      | var                         { Variable $1 }
+--     | tycon                       { TypeConstructor $1 }
      
 TypeExp 
      : PrimType { $1 }
@@ -159,9 +181,12 @@ List
      : '[' ListMembers ']'    { List $2 }
 
 ListMembers 
-     : {- empty -} { [] }
-     | Atom  { [$1] }
+     : {- empty -}          { [] }
+     | Atom                 { [$1] }
      | Atom ',' ListMembers { $1 : $3 }
+
+RecordTypeFields
+     : {- empty -}            { [] }
 
 
 {
@@ -231,6 +256,7 @@ data AST
      | Gt AST AST
 
      | Variable String
+     -- | RecordType String String [AST]
 
      | List [AST]
      | Cons AST AST
@@ -238,6 +264,8 @@ data AST
 
      | Head AST
      | Tail AST
+
+     | Binding String TypeExp String AST
 
      | Not
      deriving (Eq, Ord, Data)

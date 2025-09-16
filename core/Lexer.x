@@ -15,13 +15,16 @@ import Util
 %encoding "utf-8"
 
 $digit       = [0-9]
-$alpha       = [a-zA-Z]
+$lower       = [a-z]
+$upper       = [A-Z]
+$alpha       = [$lower $upper]
 $punc        = [\{\}\[\]\;\:\"\'\,\.\`]
 $symbol      = [\!\@\#\$\%\^\&\*\(\)\-\_\+\=\~\?\/\<\>\\]
 $ascii       = [\n \32] -- \32 is ASCII code for a space
 $all         = [$alpha $digit $punc $symbol $ascii]
 
-@id          = $alpha [$alpha $digit \_ \']*
+@id          = $lower [$alpha $digit \_ \']*
+@tycon       = $upper [$alpha]*
 @reservedid  = if|else|then|let|let|letrec|in|type
 
 @string      = \" [$all # \"]* \" -- No double-quote within a string that isnt end | Empty string
@@ -30,15 +33,17 @@ tokens :-
 
  $white+		        ;
 
+ "\n"                      { \p s -> NEWLINE p }
+
  -- Comments
  "--".*                	;
  "{-" ($all | \n)* "-}"	;
 
 
  -- Type definitions
- Bool			            { \p s -> (BOOL) p }
- Int			            { \p s -> (INT) p }
- Float	                    { \p s -> (FLOAT) p }
+ Bool			           { \p s -> (BOOL) p }
+ Int			           { \p s -> (INT) p }
+ Float	                   { \p s -> (FLOAT) p }
 
  -- Constants
  True | False              { \p s -> BOOLVAL p (read s) }
@@ -51,8 +56,9 @@ tokens :-
  then 	                   { \p s -> THEN p }
  else 		               { \p s -> ELSE p }
  let	                   { \p s -> LET p }
- letrec                    {\p s -> LET_REC p }
+ letrec                    { \p s -> LET_REC p }
  in                        { \p s -> IN p }
+ data                      { \p s -> DATA p }
 
  -- Arithmetic operators
  \\			               { \p s -> LAMBDA p }
@@ -83,7 +89,9 @@ tokens :-
  -- Parenthesis
  "("			           { \p s -> (LPAREN) p }
  ")"			           { \p s -> (RPAREN) p }
- 
+ "{"                       { \p s -> LCURL p }
+ "}"                       { \p s -> RCURL p }
+
  -- Lists
  "["	     		       { \p s -> LBRACK p }
  "]"			           { \p s -> RBRACK p }
@@ -95,6 +103,7 @@ tokens :-
  tl                        { \p s -> TAIL p }
 
  @id   			           { \p s -> VAR p s }
+ @tycon                    { \p s -> TYCON p s }
 
  .                         { \p s -> ERROR p s }
 
@@ -114,6 +123,7 @@ data Token
  | LET      AlexPosn
  | LET_REC  AlexPosn
  | IN       AlexPosn
+ | DATA     AlexPosn
  
  -- Types
  | ARROW    AlexPosn
@@ -151,6 +161,8 @@ data Token
  -- Parenthesis
  | LPAREN   AlexPosn
  | RPAREN   AlexPosn
+ | LCURL    AlexPosn
+ | RCURL    AlexPosn
  
  -- Lists
  | COMMA    AlexPosn
@@ -163,9 +175,11 @@ data Token
  | TAIL     AlexPosn
 
  | VAR      AlexPosn String
+ | TYCON    AlexPosn String
 
  | ERROR    AlexPosn String
 
+ | NEWLINE AlexPosn
  | COMMENT  
  deriving (Eq)
 
