@@ -1,33 +1,32 @@
 {
-{-# LANGUAGE DeriveDataTypeable #-}
-
 -- Henry Wandover
 -- CMSC 305, Lab 4
 -- Due: Friday, Nov. 8th 2024
 
-module Grammar where
+module Hasqtan.Grammar where
   
-import Lexer
-import Util
+import Hasqtan.Lexer
+import Hasqtan.Util
 
-import Data.Data (Data, Typeable, toConstr, showConstr)
 }
 
-%name parseHasqtan
+%name parseHasqtan Program
 %tokentype { Token }
 %error { parseError }
 %monad { E } { thenE } { returnE }
 
 %token
 
-Int { INT p }
-Bool { BOOL p }
+Int   { INT p }
+Bool  { BOOL p }
 Float { FLOAT p }
+Char  { CHAR p }
 
 -- Constants
-int { INTVAL p $$ }
+int   { INTVAL p $$ }
 float { FLOATVAL p $$ }
-bool { BOOLVAL p $$ }
+bool  { BOOLVAL p $$ }
+char  { CHARVAL p $$ }
 
 -- Keywords
 let { LET p }
@@ -111,6 +110,8 @@ tycon { TYCON p $$ }
 Program
      : var "::" TypeExp '\n' var '=' Expr
                                    { Binding $1 $3 $5 $7 }
+     | var "::" TypeExp '=' Expr   { Binding $1 $3 $1 $5 } -- Interactive
+     | Expr                        { $1 }
 
 Expr 
      : let var '=' Expr in Expr    
@@ -162,6 +163,7 @@ Atom
      | int                         { Integer $1 }
      | bool                        { Boolean $1 }
      | float                       { Float $1 }
+     | char                        { Char $1 }
      | var                         { Variable $1 }
 --     | tycon                       { TypeConstructor $1 }
      
@@ -191,13 +193,6 @@ RecordTypeFields
 
 {
 
-data E a = Ok a | Failed String
-    deriving(Eq)
-
-instance Show a => Show (E a) where
-     show (Ok a) = show a
-     show (Failed str) = str
-
 thenE :: E a -> (a -> E b) -> E b
 m `thenE` k =
   case m of
@@ -214,74 +209,5 @@ parseError :: [Token] -> E a
 parseError [] = failE "1] Parse Error: Unexpected end of input"
 -- TODO: Would ideally use Alex's monad wrapper, this works for now.
 parseError (t:_) = failE $ "2] Parse Error: Unexpected token: '" ++ show t ++ "'."
-
-data TypeExp
-  = BoolType
-  | IntType
-  | FloatType
-   
-  | Arrow TypeExp TypeExp
-  
-  | EmptyList
-  | ListType TypeExp
-  deriving (Eq,Ord,Show,Data)
-
-data AST
-     = Boolean Bool
-     | Integer Int
-     | Float Float
-     
-     | Let String AST AST
-     | LetRec String AST AST
-     | If AST AST AST
-
-     | Lambda String AST TypeExp TypeExp
-
-     | App AST AST
-
-     | And AST AST
-     | Or AST AST
-     
-     | Plus AST AST
-     | Minus AST AST
-     | Times AST AST
-     | Divide AST AST
-     | Power AST AST
-
-     | Quot AST AST
-     | Rem AST AST
-
-     | Equals AST AST
-     | Lt AST AST
-     | Gt AST AST
-
-     | Variable String
-     -- | RecordType String String [AST]
-
-     | List [AST]
-     | Cons AST AST
-     | Concat AST AST
-
-     | Head AST
-     | Tail AST
-
-     | Binding String TypeExp String AST
-
-     | Not
-     deriving (Eq, Ord, Data)
-
-showList :: [AST] -> String 
-showList [] = ""
-showList [l] = show $ l
-showList (it:l) = (show it) ++ ", " ++ Grammar.showList l
-
-instance Show AST where
-     show (Integer n) = show n
-     show (Boolean b) = show b
-     show (Float f)   = show f
-     show (List l) = "[" ++ Grammar.showList l ++ "]"
-
-     -- catch-all fallback
-     show other       = "<AST:" ++ showConstr (toConstr other) ++ ">"
 
 }

@@ -18,25 +18,24 @@ extra-source-files:  README.md, CHANGELOG.md
 
 
 library
-  exposed-modules:     Hasqtan, Grammar, Lexer, TypeChecker, Util
-  hs-source-dirs:      core
-  build-depends:       base, filepath, array
+  exposed-modules:     Hasqtan
+  other-modules:       Hasqtan.Grammar, Hasqtan.Lexer, Hasqtan.TypeChecker, Hasqtan.Interpreter, Hasqtan.Util
+  hs-source-dirs:      core/lib-Hasqtan/
+  build-depends:       base, filepath, array, mtl
   default-language:    Haskell2010
 
 executable hasqtan
   main-is:             Main.hs
-  other-modules:       Hasqtan, TypeChecker, Util
   build-depends:       base, filepath, array, hasqtan
-  hs-source-dirs:      core
+  hs-source-dirs:      app
   default-language:    Haskell2010
   build-tool-depends: happy:happy >= 1.20 && < 1.21
 
---executable hasqtani
---  main-is:             Interactive.hs
-  -- other-extensions:
---  build-depends:       base, filepath, readline, array, hasqtan
---  hs-source-dirs:      core
---  default-language:    Haskell2010
+executable hasqtani
+  main-is:             Interactive.hs
+  build-depends:       base, filepath, readline, array, hasqtan
+  hs-source-dirs:      app
+  default-language:    Haskell2010
 
 --test-suite tests
 --   type:               exitcode-stdio-1.0

@@ -1,65 +1,92 @@
-module TypeChecker where
+module Hasqtan.TypeChecker (
+   lookup,
+   typeCheck
+) where
 
-import Grammar
-import Lexer
-import Util
+import Hasqtan.Grammar
+import Hasqtan.Lexer
+import Hasqtan.Util
 
--- Type alias for type environments.
+import Control.Monad.State
 
-type TypeEnv = [(String,TypeExp)]
+type Typechecker a = State TypeEnv a
+
+lookupVar :: String -> Typechecker (Maybe TypeExp)
+lookupVar x = do gets (lookup x)
+
+setVar :: String -> TypeExp -> Typechecker ()
+setVar x t = do
+    env <- get
+    let newEnv = (x, t) : env
+    put newEnv
+
+resetEnv :: Typechecker ()
+resetEnv = put []
 
 -- | Helper for binary arithmetic ops
-{-checkBinOp :: (E AST,  E AST) -> TypeEnv -> E TypeExp
-checkBinOp (l, r) env = do
-   t1 <- Ok (typeChecker l env)
-   t2 <- Ok (typeChecker r env)
+checkBinOp :: (AST,  AST) -> Typechecker (E TypeExp)
+checkBinOp (l, r) = do
+   t1 <- typeChecker $ Ok l
+   t2 <- typeChecker $ Ok r
    case (t1, t2) of
-      (IntType, IntType)     -> Ok IntType
-      (FloatType, FloatType) -> Ok FloatType
-      _ -> Failed ("type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2)-}
+      (Ok IntType, Ok IntType)     -> return $ Ok IntType
+      (Ok FloatType, Ok FloatType) -> return $ Ok FloatType
+      _ -> return $ Failed ("type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2)
 
--- Function for retrieving types of variables form the environment.
+-- TODO we need a monad state to track environments types too.
+typeChecker :: E AST -> Typechecker (E TypeExp)
+typeChecker (Ok ast) =
+    case ast of
+         Boolean b   -> return $ Ok BoolType
+         Integer n   -> return $ Ok IntType
+         Float f     -> return $ Ok FloatType
 
-lookup :: String -> [(String,a)] -> E a
-lookup s  []   = Failed ("type] Type `" ++ s ++ "` is not a member of this environment")
-lookup s1 ((s2,t):l) 
-   | s1 == s2  = Ok t
-   | otherwise = TypeChecker.lookup s1 l
-
-
-typeChecker :: E AST -> TypeEnv -> E TypeExp
-
--- Types
-typeChecker (Ok (Boolean _)) _ = Ok BoolType
-typeChecker (Ok (Integer _)) _ = Ok IntType
-typeChecker (Ok (Float _)) _   = Ok FloatType
-
--- Variables
-typeChecker (Ok (Variable s) ) env = TypeChecker.lookup s env
-
--- Binary Operations
---typeChecker (Ok(Plus e1 e2)) env = checkBinOp ((Ok e1), (Ok e2)) env
+         Variable v -> do
+            maybeType <- lookupVar v
+            case maybeType of
+                  Just t -> return $ Ok t
+                  Nothing  -> return $ Failed (formatErrorCode NotMemeberOfEnvironment $ "Type `" ++ v ++ "` is not a member of this environment")
 
 
-{-typeChecker (Ok(Minus e1 e2)) env =
-   let t1 = typeChecker (Ok e1) env
-       t2 = typeChecker (Ok e2) env
-   in
-   if t1 == IntType && t2 == IntType 
-   then IntType 
-   else if t1 == FloatType && t2 == FloatType
-   then FloatType 
-   else error $ "type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2
+         -- Binary Operations
+         Plus e1 e2  -> checkBinOp (e1, e2)
+         Minus e1 e2 -> checkBinOp (e1, e2)
+         Times e1 e2 -> checkBinOp (e1, e2)
+         Power e1 e2 -> checkBinOp (e1, e2)
 
-typeChecker (Ok(Times e1 e2)) env =
-   let t1 = typeChecker (Ok e1) env
-       t2 = typeChecker (Ok e2) env
-   in
-   if t1 == IntType && t2 == IntType 
-   then IntType 
-   else if t1 == FloatType && t2 == FloatType
-   then FloatType 
-   else error $ "type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2
+         Binding x _ _ v -> do
+               t_v <- typeChecker $ Ok v
+               case t_v of
+                  Ok t -> do
+                     setVar x t
+                     return $ Ok VoidType
+                  Failed msg ->
+                     return (Failed msg)
+
+         -- Function application
+         App e1 e2 -> do
+            t_func <- typeChecker $ Ok e1
+            case t_func of
+               Ok (Arrow s1 t_sig) -> do
+                  t_app <- typeChecker $ Ok e2
+                  case t_app of
+                     Ok t_ret -> do
+                        if t_sig == t_ret
+                           then return $ Ok t_ret
+                           else return $ Failed (show t_sig ++ " != " ++ show t_ret)
+                     Failed msg ->
+                        return (Failed msg)
+               Failed msg ->
+                     return (Failed msg)
+
+         --typeChecker (Ok(Not)) env = Arrow BoolType BoolType
+
+         e -> return $ Failed ("[HSQ-TypeChecker-UNCAUGHT] " ++ show e)
+
+{--- Variables
+-}
+
+{-
 
 -- Returns a float no matter what
 typeChecker (Ok(Divide e1 e2)) env 
@@ -90,23 +117,23 @@ typeChecker (Ok(Rem e1 e2)) env
  | otherwise = error "Only supports use with Integers."
  where
   t1 = typeChecker (Ok e1) env
-  t2 = typeChecker (Ok e2) env
+  t2 = typeChecker (Ok e2) env-}
 
 
 
-typeChecker (Ok(And e1 e2)) env 
- | t1 == BoolType && t2 == BoolType = BoolType
+{-typeChecker (Ok(And e1 e2)) env
+ | t1 == Ok BoolType && t2 == Ok BoolType = Ok BoolType
  where
   t1 = typeChecker (Ok e1) env
   t2 = typeChecker (Ok e2) env
 
-typeChecker (Ok(Or e1 e2)) env 
- | t1 == BoolType && t2 == BoolType = BoolType
+typeChecker (Ok(Or e1 e2)) env
+ | t1 == Ok BoolType && t2 == Ok BoolType = Ok BoolType
  where
   t1 = typeChecker (Ok e1) env
   t2 = typeChecker (Ok e2) env
-
-
+-}
+{-
 -- Predicates
 typeChecker (Ok(Equals e1 e2)) env =
  let t1 = typeChecker (Ok (e1)) env
@@ -131,11 +158,16 @@ typeChecker (Ok(Lt e1 e2)) env =
  in
    if t1 == t2
    then BoolType
-   else error $ "Mismatch types `" ++ (show t1) ++ " == " ++ (show t2) ++ "`."
+   else error $ "Mismatch types `" ++ (show t1) ++ " == " ++ (show t2) ++ "`."-}
 
+{-typeChecker (Ok (Binding x t x2 body)) env = do
+   if x /= x2 then
+      error "Binding names don't match"
+   else
+      typeChecker (Ok body) env
+-}
 
-
--- Let expressions
+{--- Let expressions
 typeChecker (Ok(Let x (Lambda _ _ _ _) e2)) env =
    error $ "\x1b[1;31mUse `letrec` for recursion via anonymous function.\x1b[0;0m" 
 typeChecker (Ok(Let x e1 e2)) env = 
@@ -163,25 +195,17 @@ typeChecker (Ok(If e1 e2 e3)) env =
       if t1 == BoolType && t2 == t3
       then t2
       else error $ "\x1b[1;31mCheck your if...then...else formatting.\x1b[0;0m"
-
+-}
 
 -- Lambda expressions
-typeChecker (Ok(Lambda x e s t1)) env
- | t2 == t1 = (Arrow s t1)
- | otherwise = error ("Couldn't match expected: \n\t" ++ (show t1) ++ "\n With actual type: \n\t" ++ (show t2) )
+{-typeChecker (Ok(Lambda x e s t1)) env
+ | t2 == Ok t1 = Ok $ Arrow s t1
+ | otherwise = error ("Couldn't match expected: \n\t" ++ show t1 ++ "\n With actual type: \n\t" ++ show t2 )
  where
   t2 = typeChecker (Ok e) env
   env = (x, s) : env
-
--- Function application
-typeChecker (Ok(App e1 e2)) env
- | s1 == s2 = t
- | otherwise = error $ show s1 ++ " != " ++ show s2
- where
-  (Arrow s1 t) = typeChecker (Ok e1) env
-  s2 = typeChecker(Ok e2) env
-
-typeChecker (Ok(Not)) env = Arrow BoolType BoolType
+-}
+{-
 
 
 -- List manipulation
@@ -233,22 +257,11 @@ typeChecker (Ok (Tail e)) env = do
     ListType IntType   -> Right (ListType IntType)
     ListType FloatType -> Right (ListType FloatType)
     ListType BoolType  -> Right (ListType BoolType)
-    _                  -> Left "List tail: invalid type"-}
+    _                  -> Left "List tail: invalid type"-}   
+
+--typeChecker (Failed errMsg) = return Failed ("error: [HSQ-" ++ errMsg)
 
 
-
-
-
-
-typeChecker e _ = Failed $ "Unknown type: " ++ show e
-
--- http://www.zvon.org/other/haskell/Outputprelude/all_f.html
--- Rewrote `all`, just passes a condition to all children
-hwAll :: (a -> Bool) -> [a] -> Bool
-hwAll _ [] = True
-hwAll cond (it:list) | cond it = hwAll cond list
-hwAll cond (it:list) = False
-
-len :: [a] -> Int
-len [] = 0
-len (_:list) = 1 + len list
+-- | Runs the type checker
+typeCheck :: E AST -> TypeEnv -> (E TypeExp, TypeEnv)
+typeCheck ast = runState (typeChecker ast)

@@ -6,9 +6,9 @@
 -- Due: October 18th, 2024
 -- Note: For extens, added strings, deliminited comments, lists and line/character numbers
 
-module Lexer where
+module Hasqtan.Lexer where
 
-import Util
+import Hasqtan.Util
 }
 
 %wrapper "posn"
@@ -28,6 +28,7 @@ $all         = [$alpha $digit $punc $symbol $ascii]
 @reservedid  = if|else|then|let|let|letrec|in|type
 
 @string      = \" [$all # \"]* \" -- No double-quote within a string that isnt end | Empty string
+@char        = \' [$all # \"\'] \'
 
 tokens :-
 
@@ -44,12 +45,14 @@ tokens :-
  Bool			           { \p s -> (BOOL) p }
  Int			           { \p s -> (INT) p }
  Float	                   { \p s -> (FLOAT) p }
+ Char                      { \p s -> CHAR p }
 
  -- Constants
  True | False              { \p s -> BOOLVAL p (read s) }
  $digit+       	           { \p s -> INTVAL p (read s) }
  $digit+ \. $digit+	       { \p s -> FLOATVAL p (read s) }
  @string		           { \p s -> STRING p (read s) }
+ @char                     { \p s -> CHARVAL p (read s) }
 
  -- Keywords
  if			               { \p s -> IF p }
@@ -115,6 +118,7 @@ data Token
  | INTVAL   AlexPosn Int
  | FLOATVAL AlexPosn Float
  | STRING   AlexPosn String
+ | CHARVAL  AlexPosn Char
  
  -- Keywords
  | IF       AlexPosn
@@ -157,6 +161,7 @@ data Token
  | BOOL     AlexPosn
  | INT      AlexPosn
  | FLOAT    AlexPosn
+ | CHAR     AlexPosn
  
  -- Parenthesis
  | LPAREN   AlexPosn

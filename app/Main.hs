@@ -33,9 +33,6 @@ main = do
       ["-h"] -> usage >> exitSuccess
       ["--version"] -> version >> exitSuccess
       ["-v"] -> version >> exitSuccess
-      {-["-i"] -> do
-                  putStrLn "Welcome to hasqtan REPL. Type ':q' to exit or 'Ctrl-D'."
-                  repl-}
       ["-t", file] | hasExtension file -> do
          if takeExtension file == ".hq" 
          then do 
@@ -46,8 +43,14 @@ main = do
          if takeExtension file == ".hq" 
          then do 
             contents <- readFile file
-            putStrLn (interp contents)
+            case interp contents ([],[]) conf of
+               (Just str, _) -> putStrLn str
+               (Nothing, _) -> return ()
          else die "Please use a .hq file."
       _ -> usage >> exitBad
 
     return ()
+   where
+      conf = Config {
+         shouldShowType = True
+      }
