@@ -1,0 +1,2 @@
+md :: Int -> Int -> Int
+md = ((\x -> x + 2) :: Int -> Int) 2

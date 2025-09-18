@@ -3,14 +3,14 @@
 -- CMSC 305, Lab 4
 -- Due: Friday, Nov. 8th 2024
 
-module Hasqtan.Grammar where
+module Orwell.Grammar where
   
-import Hasqtan.Lexer
-import Hasqtan.Util
+import Orwell.Lexer
+import Orwell.Util
 
 }
 
-%name parseHasqtan Program
+%name parseOrwell Program
 %tokentype { Token }
 %error { parseError }
 %monad { E } { thenE } { returnE }

@@ -1,7 +1,7 @@
 {-
-    Public API for the Hasqtan lib.
+    Public API for the Orwell lib.
 -}
-module Hasqtan(
+module Orwell(
     interp,
     typeCheckAndPrint,
     OpEnv(..),
@@ -13,14 +13,16 @@ module Hasqtan(
     TypeExp(..)
 ) where
 
-import qualified Hasqtan.TypeChecker as TC
-import Hasqtan.Interpreter
-import Hasqtan.Util
-import Hasqtan.Grammar
-import Hasqtan.Lexer
+import qualified Orwell.TypeChecker as TC
+import Orwell.Interpreter
+import Orwell.Util
+import Orwell.Grammar
+import Orwell.Lexer
 
 import Control.Exception
 import Data.Maybe
+
+foreign import ccall "max" c_max :: Int -> Int -> Int
 
 newtype Config = Config {
    shouldShowType :: Bool
@@ -36,13 +38,13 @@ formatResult (Failed errorMsg) _ = Just errorMsg
 
 typeCheckAndPrint :: String -> IO ()
 typeCheckAndPrint s = do
-   let ast = parseHasqtan (scanTokens s)
+   let ast = parseOrwell (scanTokens s)
    let (tExp, env) = TC.typeCheck ast []
    print tExp
 
 interp :: String -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
 interp s topEnv conf =
-    let ast = parseHasqtan (scanTokens s)
+    let ast = parseOrwell (scanTokens s)
         (oEnv, tEnv) = topEnv
         (tExp, tEnv') = TC.typeCheck ast tEnv
         (out, env) = case tExp of
@@ -67,4 +69,8 @@ injectVariable var_name var_ast var_typ maybeEnv =
             let opEnv' = [(var_name, var_ast)]
                 typeEnv' = [(var_name, var_typ)]
             in
+<<<<<<< HEAD:core/lib-Hasqtan/Hasqtan.hs
                 return (opEnv', typeEnv')
+=======
+                return (opEnv', typeEnv')
+>>>>>>> 7a73feb8b2adfb5c681340b25842d0b4c7560832:core/lib-Orwell/Orwell.hs

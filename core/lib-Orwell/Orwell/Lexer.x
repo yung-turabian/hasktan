@@ -6,9 +6,9 @@
 -- Due: October 18th, 2024
 -- Note: For extens, added strings, deliminited comments, lists and line/character numbers
 
-module Hasqtan.Lexer where
+module Orwell.Lexer where
 
-import Hasqtan.Util
+import Orwell.Util
 }
 
 %wrapper "posn"

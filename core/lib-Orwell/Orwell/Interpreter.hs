@@ -1,8 +1,8 @@
-module Hasqtan.Interpreter where
+module Orwell.Interpreter where
 
-import qualified Hasqtan.TypeChecker as TC
-import Hasqtan.Lexer
-import Hasqtan.Util
+import qualified Orwell.TypeChecker as TC
+import Orwell.Lexer
+import Orwell.Util
 
 import Control.Monad.State
 
