@@ -172,12 +172,6 @@ interpreter (Ok(If e1 e2 e3)) env
  where
    Ok v = interpreter (Ok e3) env
 
--- Lambda expressions
-interpreter (Ok(Lambda x e s t)) env =
- Ok (Lambda x e s t)
- where
-   env = removeVar x env
-
 -- Let expressions
 interpreter (Ok(Let x e1 e2)) env =
  interpreter (Ok e2) env
@@ -191,14 +185,6 @@ interpreter (Ok(LetRec x e1 e2)) env =
          let env' = (x, Lambda y (subst [(x, e1)] e) s t) : env
          in interpreter (Ok e2) env'
       _ -> error "LetRec only supports function definitions"
-
--- Function Application
-interpreter (Ok(App e1 e2)) env =
-  interpreter (Ok (subst [(x, interpE2)] e)) env
-   where
-      Ok (Lambda x e _ _) = interpreter (Ok e1) env
-      Ok interpE2 = interpreter (Ok e2) env
-
 
 -- List manipulation
 interpreter (Ok(Cons e1 e2)) env =
@@ -252,7 +238,7 @@ interpreter (Ok ast) =
 
 
         And e1 e2 -> do
-            result <- interpreter (Ok e1)
+            result <- interpreter $ Ok e1
             case result of
                 Ok (Boolean b1) ->
                     if not b1
@@ -260,15 +246,28 @@ interpreter (Ok ast) =
                         else interpreter (Ok e2)
                 err -> return err
 
-
-        Binding x _ _ v -> do
-            ev_v <- interpreter (Ok v)
-            case ev_v of
-                Ok v1 -> do
-                    setVar x v1
+        Binding var _ _ v -> do
+            var_val <- interpreter (Ok v)
+            case var_val of
+                Ok val -> do
+                    setVar var val
                     return $ Ok EOL
                 Failed msg ->
                     return (Failed msg)
+
+        -- Lambda expressions, first-class value
+        Lambda var body paramType retType -> return $ Ok (Lambda var body paramType retType)
+
+        -- Function Application
+        App func arg -> do
+            func_val <- interpreter $ Ok func
+            case func_val of
+                Ok (Lambda var body _ _) -> do
+                    arg_val <- interpreter $ Ok arg
+                    case arg_val of
+                        Ok val -> do
+                            interpreter $ Ok (subst [(var, val)] body)
+
 
         e -> return $ Failed ("[HSQ-Interp-uncaught] " ++ show e)
 

@@ -54,7 +54,7 @@ interp s topEnv conf =
     in
     (out, env)
 
-injectVariable :: String -> AST -> TypeExp -> Maybe (OpEnv, TypeEnv) -> (OpEnv, TypeEnv)
+injectVariable :: String -> AST -> TypeExp -> Maybe (OpEnv, TypeEnv) -> IO (OpEnv, TypeEnv)
 injectVariable var_name var_ast var_typ maybeEnv =
     case maybeEnv of
         Just env ->
@@ -62,9 +62,9 @@ injectVariable var_name var_ast var_typ maybeEnv =
                 opEnv' = (var_name, var_ast):opEnv
                 typeEnv' = (var_name, var_typ):typeEnv
             in
-                (opEnv', typeEnv')
+                return (opEnv', typeEnv')
         Nothing ->
             let opEnv' = [(var_name, var_ast)]
                 typeEnv' = [(var_name, var_typ)]
             in
-                (opEnv', typeEnv')
+                return (opEnv', typeEnv')

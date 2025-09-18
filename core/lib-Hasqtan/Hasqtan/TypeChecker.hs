@@ -54,14 +54,36 @@ typeChecker (Ok ast) =
          Times e1 e2 -> checkBinOp (e1, e2)
          Power e1 e2 -> checkBinOp (e1, e2)
 
-         Binding x _ _ v -> do
-               t_v <- typeChecker $ Ok v
-               case t_v of
-                  Ok t -> do
-                     setVar x t
-                     return $ Ok VoidType
-                  Failed msg ->
-                     return (Failed msg)
+         Binding x bind_typ maybe_x v ->
+            if maybe_x /= x
+               then 
+                  return $ Failed "Err"
+               else do
+                  t_v <- typeChecker $ Ok v
+                  case t_v of
+                     Ok t ->
+                        if t == bind_typ
+                           then do
+                              setVar x t
+                              return $ Ok VoidType
+                           else
+                              return $ Failed "Type mismatch in bind"
+                     Failed msg ->
+                        return $ Failed msg
+                        
+         -- Lambda expressions
+         Lambda x e s func_t -> do
+            body_t <- typeChecker $ Ok e
+            case body_t of
+               Ok t ->
+                  if t == func_t 
+                     then
+                        return $ Ok (Arrow s t)
+                     else
+                        return $ Failed ("Couldn't match expected: \n\t" ++ show t ++ "\n With actual type: \n\t" ++ show func_t )
+               Failed msg ->
+                  return $ Failed "ERR"
+
 
          -- Function application
          App e1 e2 -> do
@@ -197,14 +219,6 @@ typeChecker (Ok(If e1 e2 e3)) env =
       else error $ "\x1b[1;31mCheck your if...then...else formatting.\x1b[0;0m"
 -}
 
--- Lambda expressions
-{-typeChecker (Ok(Lambda x e s t1)) env
- | t2 == Ok t1 = Ok $ Arrow s t1
- | otherwise = error ("Couldn't match expected: \n\t" ++ show t1 ++ "\n With actual type: \n\t" ++ show t2 )
- where
-  t2 = typeChecker (Ok e) env
-  env = (x, s) : env
--}
 {-
 
 

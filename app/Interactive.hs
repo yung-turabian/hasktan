@@ -11,10 +11,11 @@ import Data.IORef
 import Data.Foldable
 
 repl :: Config -> IO ()
-repl conf =
-   let env = injectVariable "x" (Integer 3) IntType Nothing
-   in
-   loopREPL conf (env)
+repl conf = do
+   env <- injectVariable "x" (Integer 3) IntType Nothing
+   --env <- injectVariable "y" (Lambda "x" (Plus (Variable "x") (Variable "x")) (Arrow IntType IntType) (Arrow IntType IntType)) (Arrow IntType IntType) $ Just env
+   
+   loopREPL conf env
    where
       loopREPL :: Config -> (OpEnv, TypeEnv) -> IO ()
       loopREPL conf topEnv = do
