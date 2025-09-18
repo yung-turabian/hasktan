@@ -1,11 +1,11 @@
-module Hasqtan.TypeChecker (
+module Orwell.TypeChecker (
    lookup,
    typeCheck
 ) where
 
-import Hasqtan.Grammar
-import Hasqtan.Lexer
-import Hasqtan.Util
+import Orwell.Grammar
+import Orwell.Lexer
+import Orwell.Util
 
 import Control.Monad.State
 

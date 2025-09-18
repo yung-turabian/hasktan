@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Hasqtan.Util (
+module Orwell.Util (
     E(..),
     AST(..),
     TypeExp(..),
@@ -26,14 +26,22 @@ data TypeExp
   | IntType
   | FloatType
   | CharType
-
   | VoidType
    
   | Arrow TypeExp TypeExp
-  
   | EmptyList
   | ListType TypeExp
-  deriving (Eq,Ord,Show,Data)
+  deriving (Eq,Ord,Data)
+
+instance Show TypeExp where
+  show IntType       = "Int"
+  show BoolType      = "Bool"
+  show FloatType     = "Float"
+  show CharType      = "Char"
+  show VoidType      = "()"
+  show (Arrow t1 t2) = show t1 ++ " -> " ++ show t2
+  show EmptyList     = "[]"
+  show (ListType t)  = "[" ++ show t ++ "]"
 
 data AST
      = Boolean Bool
@@ -85,7 +93,7 @@ data AST
 showList :: [AST] -> String 
 showList [] = ""
 showList [l] = show l
-showList (it:l) = show it ++ ", " ++ Hasqtan.Util.showList l
+showList (it:l) = show it ++ ", " ++ Orwell.Util.showList l
 
 showType :: AST -> String
 showType (Integer _) = "Int"
@@ -94,14 +102,13 @@ showType (Char _) = "Char"
 showType (Boolean _) = "Bool"
 showType _ = "?"
 
-
 instance Show AST where
      show (Integer n) = show n
      show (Boolean b) = show b
      show (Float f)   = show f
-     show (List l) = "[" ++ Hasqtan.Util.showList l ++ "]"
+     show (List l) = "[" ++ Orwell.Util.showList l ++ "]"
 
-     show (Plus _ _) = "(+)"
+     show (Plus l r) = show l ++ "(+)" ++ show r
 
      -- catch-all fallback
      show other       = "<AST:" ++ showConstr (toConstr other) ++ ">"

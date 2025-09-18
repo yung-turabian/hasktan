@@ -1,7 +1,7 @@
 {-
-    Public API for the Hasqtan lib.
+    Public API for the Orwell lib.
 -}
-module Hasqtan(
+module Orwell(
     interp,
     typeCheckAndPrint,
     OpEnv(..),
@@ -13,14 +13,16 @@ module Hasqtan(
     TypeExp(..)
 ) where
 
-import qualified Hasqtan.TypeChecker as TC
-import Hasqtan.Interpreter
-import Hasqtan.Util
-import Hasqtan.Grammar
-import Hasqtan.Lexer
+import qualified Orwell.TypeChecker as TC
+import Orwell.Interpreter
+import Orwell.Util
+import Orwell.Grammar
+import Orwell.Lexer
 
 import Control.Exception
 import Data.Maybe
+
+foreign import ccall "max" c_max :: Int -> Int -> Int
 
 newtype Config = Config {
    shouldShowType :: Bool
@@ -36,13 +38,13 @@ formatResult (Failed errorMsg) _ = Just errorMsg
 
 typeCheckAndPrint :: String -> IO ()
 typeCheckAndPrint s = do
-   let ast = parseHasqtan (scanTokens s)
+   let ast = parseOrwell (scanTokens s)
    let (tExp, env) = TC.typeCheck ast []
    print tExp
 
 interp :: String -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
 interp s topEnv conf =
-    let ast = parseHasqtan (scanTokens s)
+    let ast = parseOrwell (scanTokens s)
         (oEnv, tEnv) = topEnv
         (tExp, tEnv') = TC.typeCheck ast tEnv
         (out, env) = case tExp of
@@ -54,7 +56,7 @@ interp s topEnv conf =
     in
     (out, env)
 
-injectVariable :: String -> AST -> TypeExp -> Maybe (OpEnv, TypeEnv) -> (OpEnv, TypeEnv)
+injectVariable :: String -> AST -> TypeExp -> Maybe (OpEnv, TypeEnv) -> IO (OpEnv, TypeEnv)
 injectVariable var_name var_ast var_typ maybeEnv =
     case maybeEnv of
         Just env ->
@@ -62,9 +64,9 @@ injectVariable var_name var_ast var_typ maybeEnv =
                 opEnv' = (var_name, var_ast):opEnv
                 typeEnv' = (var_name, var_typ):typeEnv
             in
-                (opEnv', typeEnv')
+                return (opEnv', typeEnv')
         Nothing ->
             let opEnv' = [(var_name, var_ast)]
                 typeEnv' = [(var_name, var_typ)]
             in
-                (opEnv', typeEnv')
+                return (opEnv', typeEnv')
