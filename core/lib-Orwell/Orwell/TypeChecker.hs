@@ -24,56 +24,76 @@ resetEnv :: Typechecker ()
 resetEnv = put []
 
 -- | Helper for binary arithmetic ops
-checkBinOp :: (AST,  AST) -> Typechecker (E TypeExp)
-checkBinOp (l, r) = do
-   t1 <- typeChecker $ Ok l
-   t2 <- typeChecker $ Ok r
+checkBinOp :: (AST,  AST) -> TypeEnv -> Typechecker (E TypeExp)
+checkBinOp (l, r) env = do
+   t1 <- typeChecker (Ok l) env
+   t2 <- typeChecker (Ok r) env
    case (t1, t2) of
       (Ok IntType, Ok IntType)     -> return $ Ok IntType
       (Ok FloatType, Ok FloatType) -> return $ Ok FloatType
       _ -> return $ Failed ("type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2)
 
--- TODO we need a monad state to track environments types too.
-typeChecker :: E AST -> Typechecker (E TypeExp)
-typeChecker (Ok ast) =
+typeCheckDecls :: [AST] -> TypeEnv -> Typechecker (E TypeExp)
+typeCheckDecls [] _ = return $ Ok VoidType
+typeCheckDecls (decl:decls) env = do 
+  res <- typeChecker (Ok decl) env
+  case res of
+    Failed msg -> return $ Failed msg
+    _ -> typeCheckDecls decls env
+
+typeChecker :: E AST -> TypeEnv -> Typechecker (E TypeExp)
+typeChecker (Ok ast) env =
     case ast of
+         Program dls mE ->
+          case mE of 
+            Just e -> do
+              res <- typeCheckDecls dls env
+              case res of
+                Failed msg -> return $ Failed msg
+                _ -> typeChecker (Ok e) env
+            Nothing ->
+              typeCheckDecls dls env
+
          Boolean b   -> return $ Ok BoolType
          Integer n   -> return $ Ok IntType
          Float f     -> return $ Ok FloatType
 
-         Variable v -> do
-            maybeType <- lookupVar v
-            case maybeType of
-                  Just t -> return $ Ok t
-                  Nothing  -> return $ Failed (formatErrorCode NotMemeberOfEnvironment $ "Type `" ++ v ++ "` is not a member of this environment")
+         Variable v ->
+            let localMaybeType = lookup v env
+            in case localMaybeType of
+                Just t -> return $ Ok t
+                Nothing -> do -- Try to find a top-level bind then
+                  maybeType <- lookupVar v
+                  case maybeType of
+                        Just t -> return $ Ok t
+                        Nothing  -> return $ Failed (formatErrorCode NotMemeberOfEnvironment $ "Type `" ++ v ++ "` is not a member of this environment")
 
 
          -- Binary Operations
-         Plus e1 e2  -> checkBinOp (e1, e2)
-         Minus e1 e2 -> checkBinOp (e1, e2)
-         Times e1 e2 -> checkBinOp (e1, e2)
-         Power e1 e2 -> checkBinOp (e1, e2)
+         Plus e1 e2  -> checkBinOp (e1, e2) env
+         Minus e1 e2 -> checkBinOp (e1, e2) env
+         Times e1 e2 -> checkBinOp (e1, e2) env
+         Power e1 e2 -> checkBinOp (e1, e2) env
 
-         Binding x bind_typ maybe_x v ->
-            if maybe_x /= x
-               then 
-                  return $ Failed "Err"
-               else do
-                  t_v <- typeChecker $ Ok v
-                  case t_v of
-                     Ok t ->
-                        if t == bind_typ
-                           then do
-                              setVar x t
-                              return $ Ok VoidType
-                           else
-                              return $ Failed "Type mismatch in bind"
-                     Failed msg ->
-                        return $ Failed msg
+         Binding x bind_typ val -> do
+            val_typ <- typeChecker (Ok val) env
+            case val_typ of
+               Ok typ ->
+                  if typ == bind_typ
+                     then do
+                        setVar x typ
+                        return $ Ok typ
+                     else
+                        return $ Failed (formatErrorCode 
+                            MismatchTypeInBind $ 
+                            "Bind type `" ++ show bind_typ ++ "` does not match body type: `" ++ show typ ++ "`" 
+                          )
+               Failed msg -> do
+                  return $ Failed msg
                         
          -- Lambda expressions
          Lambda x e s func_t -> do
-            body_t <- typeChecker $ Ok e
+            body_t <- typeChecker (Ok e) ((x, func_t) : env)
             case body_t of
                Ok t ->
                   if t == func_t 
@@ -82,15 +102,15 @@ typeChecker (Ok ast) =
                      else
                         return $ Failed ("Couldn't match expected: \n\t" ++ show t ++ "\n With actual type: \n\t" ++ show func_t )
                Failed msg ->
-                  return $ Failed "ERR"
+                  return $ Failed (show body_t)
 
 
          -- Function application
          App e1 e2 -> do
-            t_func <- typeChecker $ Ok e1
+            t_func <- typeChecker (Ok e1) env
             case t_func of
                Ok (Arrow s1 t_sig) -> do
-                  t_app <- typeChecker $ Ok e2
+                  t_app <- typeChecker (Ok e2) env
                   case t_app of
                      Ok t_ret -> do
                         if t_sig == t_ret
@@ -100,11 +120,14 @@ typeChecker (Ok ast) =
                         return (Failed msg)
                Failed msg ->
                      return (Failed msg)
+               _ ->
+                return $ Failed ("Attempting to apply " ++ show e2 ++ " to " ++ show e1)
 
          --typeChecker (Ok(Not)) env = Arrow BoolType BoolType
 
          e -> return $ Failed ("[HSQ-TypeChecker-UNCAUGHT] " ++ show e)
 
+typeChecker (Failed errMsg) _ = return $ Failed ("error: [HSQ-" ++ errMsg)
 {--- Variables
 -}
 
@@ -181,13 +204,6 @@ typeChecker (Ok(Lt e1 e2)) env =
    if t1 == t2
    then BoolType
    else error $ "Mismatch types `" ++ (show t1) ++ " == " ++ (show t2) ++ "`."-}
-
-{-typeChecker (Ok (Binding x t x2 body)) env = do
-   if x /= x2 then
-      error "Binding names don't match"
-   else
-      typeChecker (Ok body) env
--}
 
 {--- Let expressions
 typeChecker (Ok(Let x (Lambda _ _ _ _) e2)) env =
@@ -278,4 +294,4 @@ typeChecker (Ok (Tail e)) env = do
 
 -- | Runs the type checker
 typeCheck :: E AST -> TypeEnv -> (E TypeExp, TypeEnv)
-typeCheck ast = runState (typeChecker ast)
+typeCheck ast = runState (typeChecker ast []) -- The AST and a local bindings.

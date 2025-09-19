@@ -44,7 +44,9 @@ instance Show TypeExp where
   show (ListType t)  = "[" ++ show t ++ "]"
 
 data AST
-     = Boolean Bool
+     = Program [AST] (Maybe AST) -- Decl. list and main expr
+
+     | Boolean Bool
      | Integer Int
      | Float Float
      | Char Char
@@ -66,9 +68,6 @@ data AST
      | Divide AST AST
      | Power AST AST
 
-     | Quot AST AST
-     | Rem AST AST
-
      | Equals AST AST
      | Lt AST AST
      | Gt AST AST
@@ -83,7 +82,7 @@ data AST
      | Head AST
      | Tail AST
 
-     | Binding String TypeExp String AST
+     | Binding String TypeExp AST
 
      | Not
 
@@ -122,9 +121,11 @@ type TypeEnv = [(String,TypeExp)]
 
 data ErrorCode
      = NotMemeberOfEnvironment
+     | MismatchTypeInBind
 
 instance Show ErrorCode where
      show NotMemeberOfEnvironment = "3"
+     show MismatchTypeInBind = "4"
 
 formatErrorCode :: ErrorCode -> String -> String
 formatErrorCode errcode msg = "[HSQ-" ++ show errcode ++ "] " ++ msg

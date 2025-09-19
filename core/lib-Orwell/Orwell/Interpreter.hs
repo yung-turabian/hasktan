@@ -40,10 +40,6 @@ substVar x e (Minus ast1 ast2) =
     Minus (substVar x e ast1) (substVar x e ast2)
 substVar x e (Times ast1 ast2) =
     Times (substVar x e ast1) (substVar x e ast2)
-substVar x e (Rem ast1 ast2) =
-    Rem (substVar x e ast1) (substVar x e ast2)
-substVar x e (Quot ast1 ast2) =
-    Quot (substVar x e ast1) (substVar x e ast2)
 substVar x e (And ast1 ast2) =
     And (substVar x e ast1) (substVar x e ast2)
 substVar x e Not =
@@ -87,11 +83,17 @@ subst ((x,e):env) ast =
 
 interpBiOp :: (AST, AST) -> (Int -> Int -> Int) -> Interpreter (E AST)
 interpBiOp (v1, v2) op = do
-    ev1 <- interpreter (Ok v1)
-    ev2 <- interpreter (Ok v2)
+    ev1 <- interpreter $ Ok v1
+    ev2 <- interpreter $ Ok v2
     case (ev1, ev2) of
         (Ok (Integer i1), Ok (Integer i2)) ->
             return $ Ok (Integer (op i1 i2))
+
+interpDecls :: [AST] -> Interpreter (E AST)
+interpDecls [] = return $ Ok EOL
+interpDecls (decl:decls) = do 
+  interpreter $ Ok decl
+  interpDecls decls
 
 interpreter :: E AST -> Interpreter (E AST)
 {-interpreter (Ok(Quot e1 e2)) env =
@@ -220,6 +222,14 @@ interpreter (Ok EOL) = return $ Ok EOL
 -- TODO New, cleaner function. Still goes through above first
 interpreter (Ok ast) =
     case ast of
+        Program dls mE -> 
+          case mE of 
+            Just e -> do
+              interpDecls dls
+              interpreter $ Ok e
+            Nothing ->
+              interpDecls dls
+
         Boolean b  -> return $ Ok (Boolean b)
         Integer n  -> return $ Ok (Integer n)
         List l     -> return $ Ok (List l)
@@ -246,7 +256,7 @@ interpreter (Ok ast) =
                         else interpreter (Ok e2)
                 err -> return err
 
-        Binding var _ _ v -> do
+        Binding var _ v -> do
             var_val <- interpreter (Ok v)
             case var_val of
                 Ok val -> do

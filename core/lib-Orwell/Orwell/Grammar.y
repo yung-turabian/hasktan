@@ -4,20 +4,20 @@
 -- Due: Friday, Nov. 8th 2024
 
 module Orwell.Grammar where
-  
 import Orwell.Lexer
 import Orwell.Util
 
 }
 
 %name parseOrwell Program
-%tokentype { Token }
+%name parseInteractiveOrwell Interactive
 %error { parseError }
 %monad { E } { thenE } { returnE }
 
+%tokentype { Token }
 %token
 
-Int   { INT p }
+Int   { T_Int p }
 Bool  { BOOL p }
 Float { FLOAT p }
 Char  { CHAR p }
@@ -54,11 +54,6 @@ data { DATA p }
 '/' { DIVIDE p }
 '^' { POWER p }
 
---
-quot { QUOT p }
-rem  { REM p }
-
-
 -- Comparison
 "==" { EQUALS p }
 ">=" { GTEQ p }
@@ -89,7 +84,7 @@ tl { TAIL p }
 
 tycon { TYCON p $$ }
 
-'\n' { NEWLINE p }
+'\n' { T_Newline p }
 
 %right in "->" else
 %right "++" ':' hd tl
@@ -99,73 +94,98 @@ tycon { TYCON p $$ }
 %left '+' '-'
 %left '*' '/'
 %left '^'
+
 %%
 
--- I preferred this way because it shows precidence in its structure.
 -- Atoms are primitive types and are acted upon
 -- Then Juxtaposed atoms have the next highest precidence, functions, applications and negation
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
--- Top-level declarations, not available in interactive mode.
-Program
-     : var "::" TypeExp '\n' var '=' Expr
-                                   { Binding $1 $3 $5 $7 }
-     | var "::" TypeExp '=' Expr   { Binding $1 $3 $1 $5 } -- Interactive
-     | Expr                        { $1 }
+Program :: { AST }
+  : DeclList MainExpr           { Program $1 $2 }
 
-Expr 
-     : let var '=' Expr in Expr    
-                                   { Let $2 $4 $6 }
-     | letrec var '=' Expr in Expr 
-                                   { LetRec $2 $4 $6 }
-     | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   
-                                   { Lambda $3 $5 $8 $10 }
-     | if Expr then Expr else Expr                      
-                                   { If $2 $4 $6 }
-     | Expr "==" Expr              { Equals $1 $3 }
-     | Expr ">=" Expr              { Or (Equals $1 $3) (Gt $1 $3) }
-     | Expr "<=" Expr              { Or (Equals $1 $3) (Lt $1 $3) }
-     | Expr "/=" Expr              { App (Not) (Equals $1 $3) } 
-     | Expr '>' Expr               { Gt $1 $3 }
-     | Expr '<' Expr               { Lt $1 $3 }
-     | Expr "&&" Expr              { And $1 $3 }
-     | Expr "||" Expr              { Or $1 $3 }
-     | Expr ':' Expr               { Cons $1 $3 }
-     | Expr "++" Expr              { Concat $1 $3 }
+MainExpr :: { Maybe AST }
+  : Newlines Expr Newlines      { Just $2 }
+  |                             { Nothing }
 
---     | data tycon '=' tycon '{' RecordTypeFields '}' 
---                                   { RecordType $2 $4 $6 }
+Newlines
+  : '\n' Newlines               { () }
+  |                             { () }
 
-     -- Function calls, TODO abstract these kinds
-     | hd Expr                     { Head $2 }
-     | tl Expr                     { Tail $2 }
+Interactive
+  : Expr                        { $1 }
+  | var "::" TypeExp '=' Expr   { Binding $1 $3 $5 }
 
-     | List                        { $1 }
-     | Form                        { $1 }
+DeclList
+  : DeclList Decl               { $1 ++ [$2] }
+  | {- empty -}                 { [] }
 
-Form 
-     : Form '+' Form               { Plus $1 $3 }
-     | Form '-' Form               { Minus $1 $3 }
-     | Form '*' Form               { Times $1 $3 }
-     | Form '/' Form               { Divide $1 $3 }
-	| Form '^' Form               { Power $1 $3 }
-     | Juxt                        { $1 }
+Decl
+  : DeclSingle '\n'             { $1 }
+  | DeclFull '\n'               { $1 }
 
-Juxt 
-     : Juxt Atom                   { App $1 $2 }
-     | quot Atom Atom              { Quot $2 $3 }
-     | rem Atom Atom               { Rem $2 $3 }
-     | '-' Atom                    { Minus (Integer 0) $2 }
-     | Atom                        { $1 }
+DeclSingle
+  : var "::" TypeExp '=' Expr 
+                                { Binding $1 $3 $5 }
+DeclFull
+  : var "::" TypeExp '\n' var '=' Expr
+                                { if $1 == $5
+                                  then Binding $1 $3 $7
+                                  else error "sig var doesnt match def var" }
 
-Atom 
-     : '(' Expr ')'                { $2 }
-     | int                         { Integer $1 }
-     | bool                        { Boolean $1 }
-     | float                       { Float $1 }
-     | char                        { Char $1 }
-     | var                         { Variable $1 }
---     | tycon                       { TypeConstructor $1 }
+Expr :: { AST }
+  : let var '=' Expr in Expr    
+                                { Let $2 $4 $6 }
+  | letrec var '=' Expr in Expr 
+                                { LetRec $2 $4 $6 }
+  -- Requires input so we write an explicit arrow type.
+  | '(' '\\' var "->" Expr ')' "::" TypeExp "->" TypeExp   
+                                { Lambda $3 $5 $8 $10 }
+  | if Expr then Expr else Expr                      
+                                { If $2 $4 $6 }
+  | Expr "==" Expr              { Equals $1 $3 }
+  | Expr ">=" Expr              { Or (Equals $1 $3) (Gt $1 $3) }
+  | Expr "<=" Expr              { Or (Equals $1 $3) (Lt $1 $3) }
+  | Expr "/=" Expr              { App (Not) (Equals $1 $3) } 
+  | Expr '>' Expr               { Gt $1 $3 }
+  | Expr '<' Expr               { Lt $1 $3 }
+  | Expr "&&" Expr              { And $1 $3 }
+  | Expr "||" Expr              { Or $1 $3 }
+  | Expr ':' Expr               { Cons $1 $3 }
+  | Expr "++" Expr              { Concat $1 $3 }
+
+
+  --     | data tycon '=' tycon '{' RecordTypeFields '}' 
+  --                                   { RecordType $2 $4 $6 }
+
+   -- Function calls, TODO abstract these kinds
+  | hd Expr                     { Head $2 }
+  | tl Expr                     { Tail $2 }
+
+  | List                        { $1 }
+  | Form                        { $1 }
+
+Form :: { AST }
+     : Form '+' Form            { Plus $1 $3 }
+     | Form '-' Form            { Minus $1 $3 }
+     | Form '*' Form            { Times $1 $3 }
+     | Form '/' Form            { Divide $1 $3 }
+	   | Form '^' Form            { Power $1 $3 }
+     | Juxt %shift              { $1 }
+
+Juxt :: { AST }
+     : Juxt Atom                { App $1 $2 }
+--     | '-' Atom                 { Minus (Integer 0) $2 }
+     | Atom                     { $1 }
+
+Atom :: { AST }
+     : int                      { Integer $1 }
+     | bool                     { Boolean $1 }
+     | float                    { Float $1 }
+     | char                     { Char $1 }
+     | var                      { Variable $1 }
+     | '(' Expr ')'             { $2 }
+--     | tycon                  { TypeConstructor $1 }
      
 TypeExp 
      : PrimType { $1 }
@@ -185,7 +205,7 @@ List
 ListMembers 
      : {- empty -}          { [] }
      | Atom                 { [$1] }
-     | Atom ',' ListMembers { $1 : $3 }
+     | ListMembers ',' Atom { $1 ++ [$3] }
 
 RecordTypeFields
      : {- empty -}            { [] }

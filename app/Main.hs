@@ -18,19 +18,19 @@ main = do
       ["--version"] -> version >> exitSuccess
       ["-v"] -> version >> exitSuccess
       ["-t", file] | hasExtension file -> do
-         if takeExtension file == ".hq" 
+         if takeExtension file == ".orwell" 
          then do 
             contents <- readFile file
             typeCheckAndPrint contents
-         else die "Please use a .hq file."
+         else die "Please use a .orwell file."
       [file] | hasExtension file -> do
-         if takeExtension file == ".hq" 
+         if takeExtension file == ".orwell" 
          then do 
             contents <- readFile file
-            case interp contents ([],[]) conf of
+            case interp CMD contents ([],[]) conf of
                (Just str, _) -> putStrLn str
                (Nothing, _) -> return ()
-         else die "Please use a .hq file."
+         else die "Please use a .orwell file."
       _ -> usage >> exitBad
 
     return ()

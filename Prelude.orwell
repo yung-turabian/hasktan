@@ -1,2 +1,4 @@
-md :: Int -> Int -> Int
-md = ((\x -> x + 2) :: Int -> Int) 2
+addOne :: Int -> Int
+addOne = (\x -> x + 1) :: Int -> Int
+
+addOne 2

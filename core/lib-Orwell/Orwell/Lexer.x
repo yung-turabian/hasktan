@@ -22,6 +22,7 @@ $punc        = [\{\}\[\]\;\:\"\'\,\.\`]
 $symbol      = [\!\@\#\$\%\^\&\*\(\)\-\_\+\=\~\?\/\<\>\\]
 $ascii       = [\n \32] -- \32 is ASCII code for a space
 $all         = [$alpha $digit $punc $symbol $ascii]
+$white       = [\ \t\f\v\r]
 
 @id          = $lower [$alpha $digit \_ \']*
 @tycon       = $upper [$alpha]*
@@ -31,53 +32,51 @@ $all         = [$alpha $digit $punc $symbol $ascii]
 @char        = \' [$all # \"\'] \'
 
 tokens :-
+  
+ $white+		               ;
 
- $white+		        ;
-
- "\n"                      { \p s -> NEWLINE p }
+ \n                        { \p _ -> T_Newline p }
 
  -- Comments
- "--".*                	;
- "{-" ($all | \n)* "-}"	;
+ "--"[^\n]*                ;
+ "{-" ($all | \n)* "-}"	   ;
 
 
  -- Type definitions
- Bool			           { \p s -> (BOOL) p }
- Int			           { \p s -> (INT) p }
- Float	                   { \p s -> (FLOAT) p }
- Char                      { \p s -> CHAR p }
+ Bool			                 { \p _ -> (BOOL) p }
+ Int			                 { \p _ -> T_Int p }
+ Float	                   { \p _ -> (FLOAT) p }
+ Char                      { \p _ -> CHAR p }
 
  -- Constants
  True | False              { \p s -> BOOLVAL p (read s) }
  $digit+       	           { \p s -> INTVAL p (read s) }
  $digit+ \. $digit+	       { \p s -> FLOATVAL p (read s) }
- @string		           { \p s -> STRING p (read s) }
+ @string		               { \p s -> STRING p (read s) }
  @char                     { \p s -> CHARVAL p (read s) }
 
  -- Keywords
- if			               { \p s -> IF p }
+ if			                   { \p s -> IF p }
  then 	                   { \p s -> THEN p }
- else 		               { \p s -> ELSE p }
- let	                   { \p s -> LET p }
+ else 		                 { \p s -> ELSE p }
+ let	                     { \p s -> LET p }
  letrec                    { \p s -> LET_REC p }
  in                        { \p s -> IN p }
  data                      { \p s -> DATA p }
 
  -- Arithmetic operators
- \\			               { \p s -> LAMBDA p }
- "+"			           { \p s -> PLUS p }
- "-"			           { \p s -> MINUS p }
- "*"			           { \p s -> TIMES p }
- "/"			           { \p s -> DIVIDE p }
- "="			           { \p s -> BIND p }
- "^"			           { \p s -> POWER p }
- quot			           { \p s -> QUOT p }
- rem			           { \p s -> REM p }
+ \\			                   { \p s -> LAMBDA p }
+ "+"			                 { \p s -> PLUS p }
+ "-"			                 { \p s -> MINUS p }
+ "*"			                 { \p s -> TIMES p }
+ "/"			                 { \p s -> DIVIDE p }
+ "="			                 { \p s -> BIND p }
+ "^"			                 { \p s -> POWER p }
 
  -- Types
  "->" | "→"                { \p s -> ARROW p }
- ":"			           { \p s -> COLON p }
- "::"			           { \p s -> COLONS p }
+ ":"			                 { \p s -> COLON p }
+ "::"			                 { \p s -> COLONS p }
 
  -- Comparison
  "=="			           { \p s -> (EQUALS) p }
@@ -145,8 +144,6 @@ data Token
  | DIVIDE   AlexPosn
  | BIND     AlexPosn
  | POWER    AlexPosn
- | QUOT     AlexPosn
- | REM      AlexPosn
  | LAMBDA   AlexPosn
 
  -- Comparison operators
@@ -159,7 +156,7 @@ data Token
 
  -- Type definitions
  | BOOL     AlexPosn
- | INT      AlexPosn
+ | T_Int    AlexPosn
  | FLOAT    AlexPosn
  | CHAR     AlexPosn
  
@@ -184,7 +181,7 @@ data Token
 
  | ERROR    AlexPosn String
 
- | NEWLINE AlexPosn
+ | T_Newline AlexPosn
  | COMMENT  
  deriving (Eq)
 

@@ -15,28 +15,14 @@ printTypeEnv ((bind, typ):tEnv) =
 
 repl :: Config -> IO ()
 repl conf = do
-<<<<<<< HEAD
-   env <- injectVariable "x" (Integer 3) IntType Nothing
-   --env <- injectVariable "y" (Lambda "x" (Plus (Variable "x") (Variable "x")) (Arrow IntType IntType) (Arrow IntType IntType)) (Arrow IntType IntType) $ Just env
-   
-   loopREPL conf env
-   where
-      loopREPL :: Config -> (OpEnv, TypeEnv) -> IO ()
-      loopREPL conf topEnv = do
-         maybeLine <- readline "λ> "
-         case maybeLine of
-            Nothing -> exitSuccess -- EOF / Ctrl-d
-            Just "" -> loopREPL conf topEnv
-            Just ":q" -> putStrLn "Exiting REPL." >> exitSuccess
-            Just ":exit" -> putStrLn "Exiting REPL." >> exitSuccess
-            Just line -> do
-               addHistory line
-               let (out, env) = interp line topEnv conf
-               forM_ out putStrLn
-               loopREPL conf env
-=======
-  env <- injectVariable "x" (Integer 3) IntType Nothing 
-  runInputT defaultSettings (loopREPL conf (env))
+  contents <- readFile "./Prelude.orwell"
+  let (mOut, env) = interp CMD contents ([],[]) conf
+  {-case mOut of
+    Just out -> putStrLn out
+    Nothing -> return ()-}
+  --env <- injectVariable "x" (Integer 3) IntType Nothing 
+  --env <- injectVariable "y" (Lambda "x" (Plus (Variable "x") (Variable "x")) (Arrow IntType IntType) (Arrow IntType IntType)) (Arrow IntType IntType) $ Just env
+  runInputT defaultSettings (loopREPL conf env)
   where
     loopREPL :: Config -> (OpEnv, TypeEnv) -> InputT IO ()
     loopREPL conf topEnv = do
@@ -55,12 +41,9 @@ repl conf = do
         printTypeEnv tEnv
         loopREPL conf topEnv
       Just line    -> do
-       --addHistory line
-       let (out, env) = interp line topEnv conf
+       let (out, env) = interp REPL line topEnv conf
        forM_ out outputStrLn
        loopREPL conf env
->>>>>>> 7a73feb8b2adfb5c681340b25842d0b4c7560832
-
 
 main = do
    putStrLn "Welcome to orwell REPL. Type ':q' to exit or 'Ctrl-D'."
