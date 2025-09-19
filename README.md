@@ -1,12 +1,12 @@
-# Orwell
+# Reva
 
 ## About
 
-Orwell is a small, interpreted Haskell-derived toy language.
+Reva is a small, interpreted Haskell-derived toy language.
 
 ## Reference
 
-- [Orwell reference site](https://www.henrywandover.com/hasqtan)
+- [Reva reference site](https://www.henrywandover.com/hasqtan)
 
 ## Building From Source
 

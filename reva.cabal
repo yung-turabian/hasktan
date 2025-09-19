@@ -1,6 +1,6 @@
 cabal-version:       >=1.10
 
-name:                orwell 
+name:                reva 
 version:             0.1.1.2
 synopsis:            A toy functional language based on Haskell.
 -- description:
@@ -15,24 +15,24 @@ build-type:            Simple
 extra-source-files:    README.md, CHANGELOG.md
 
 library
-  exposed-modules:     Orwell 
-  other-modules:       Orwell.Grammar, Orwell.Lexer, Orwell.TypeChecker, Orwell.Interpreter, Orwell.Util
-  hs-source-dirs:      core/lib-Orwell/
+  exposed-modules:     Reva 
+  other-modules:       Reva.Grammar, Reva.Lexer, Reva.TypeChecker, Reva.Interpreter, Reva.Util
+  hs-source-dirs:      core/lib-reva/
   include-dirs:        include
-  c-sources:           c-src/orwell-curses.c
+  c-sources:           c-src/reva-curses.c
   build-depends:       base, filepath, array, mtl
   default-language:    Haskell2010
 
-executable orwl
+executable reva
   main-is:             Main.hs
-  build-depends:       base, filepath, array, orwell 
+  build-depends:       base, filepath, array, reva 
   hs-source-dirs:      app
   default-language:    Haskell2010
   build-tool-depends:  happy:happy >= 1.20 && < 1.21
 
-executable orwli
+executable revai
   main-is:             Interactive.hs
-  build-depends:       base, filepath, haskeline, array, orwell 
+  build-depends:       base, filepath, haskeline, array, reva 
   hs-source-dirs:      app
   default-language:    Haskell2010
 

@@ -1,4 +1,0 @@
-addOne :: Int -> Int
-addOne = (\x -> x + 1) :: Int -> Int
-
-addOne 2

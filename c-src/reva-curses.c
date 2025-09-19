@@ -1,4 +1,4 @@
-#include "orwell-curses.h"
+#include "reva-curses.h"
 
 int max( int x, int y ) {
   if ( x > y ) {

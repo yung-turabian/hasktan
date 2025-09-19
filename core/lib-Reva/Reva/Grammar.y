@@ -3,14 +3,14 @@
 -- CMSC 305, Lab 4
 -- Due: Friday, Nov. 8th 2024
 
-module Orwell.Grammar where
-import Orwell.Lexer
-import Orwell.Util
+module Reva.Grammar where
+import Reva.Lexer
+import Reva.Util
 
 }
 
-%name parseOrwell Program
-%name parseInteractiveOrwell Interactive
+%name parseReva Program
+%name parseInteractiveReva Interactive
 %error { parseError }
 %monad { E } { thenE } { returnE }
 
@@ -86,8 +86,9 @@ tycon { TYCON p $$ }
 
 '\n' { T_Newline p }
 
-%right in "->" else
+%right in else
 %right "++" ':' hd tl
+%left "->"
 %nonassoc "&&" "||"
 %nonassoc '>' '<' "==" ">=" "<=" "/="
 %nonassoc ')' "::"
@@ -132,6 +133,9 @@ DeclFull
                                 { if $1 == $5
                                   then Binding $1 $3 $7
                                   else error "sig var doesnt match def var" }
+Vars
+  : Vars var                    { $1 ++ [$2] }
+  |                             { [] }
 
 Expr :: { AST }
   : let var '=' Expr in Expr    

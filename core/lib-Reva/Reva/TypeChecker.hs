@@ -1,11 +1,11 @@
-module Orwell.TypeChecker (
+module Reva.TypeChecker (
    lookup,
    typeCheck
 ) where
 
-import Orwell.Grammar
-import Orwell.Lexer
-import Orwell.Util
+import Reva.Grammar
+import Reva.Lexer
+import Reva.Util
 
 import Control.Monad.State
 
@@ -40,6 +40,16 @@ typeCheckDecls (decl:decls) env = do
   case res of
     Failed msg -> return $ Failed msg
     _ -> typeCheckDecls decls env
+
+argTypeToList :: TypeExp -> [TypeExp]
+argTypeToList (Arrow arg1_t arg2_t) =
+  arg1_t : (argTypeToList arg2_t)
+argTypeToList arg_t = [arg_t]
+
+injectLocalVariables :: [String] -> [TypeExp] -> TypeEnv -> TypeEnv
+injectLocalVariables [] [] env = env
+injectLocalVariables (var:vars) (typ:typs) env =
+  injectLocalVariables vars typs ((var, typ) : env) 
 
 typeChecker :: E AST -> TypeEnv -> Typechecker (E TypeExp)
 typeChecker (Ok ast) env =
@@ -92,15 +102,16 @@ typeChecker (Ok ast) env =
                   return $ Failed msg
                         
          -- Lambda expressions
-         Lambda x e s func_t -> do
-            body_t <- typeChecker (Ok e) ((x, func_t) : env)
+         Lambda var body arg_t ret_t -> do
+            let typs = argTypeToList arg_t
+            body_t <- typeChecker (Ok body) (injectLocalVariables [var] typs env)
             case body_t of
                Ok t ->
-                  if t == func_t 
+                  if t == ret_t
                      then
-                        return $ Ok (Arrow s t)
+                        return $ Ok (Arrow arg_t t)
                      else
-                        return $ Failed ("Couldn't match expected: \n\t" ++ show t ++ "\n With actual type: \n\t" ++ show func_t )
+                        return $ Failed ("Couldn't match expected: \n\t" ++ show t ++ "\n With actual type: \n\t" ++ show ret_t )
                Failed msg ->
                   return $ Failed (show body_t)
 

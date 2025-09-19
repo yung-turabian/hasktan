@@ -6,9 +6,9 @@
 -- Due: October 18th, 2024
 -- Note: For extens, added strings, deliminited comments, lists and line/character numbers
 
-module Orwell.Lexer where
+module Reva.Lexer where
 
-import Orwell.Util
+import Reva.Util
 }
 
 %wrapper "posn"

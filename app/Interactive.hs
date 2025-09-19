@@ -1,6 +1,6 @@
 module Main where
 
-import Orwell
+import Reva
 
 import System.Environment
 import System.Exit
@@ -15,7 +15,7 @@ printTypeEnv ((bind, typ):tEnv) =
 
 repl :: Config -> IO ()
 repl conf = do
-  contents <- readFile "./Prelude.orwell"
+  contents <- readFile "./Prelude.reva"
   let (mOut, env) = interp CMD contents ([],[]) conf
   {-case mOut of
     Just out -> putStrLn out
@@ -46,7 +46,7 @@ repl conf = do
        loopREPL conf env
 
 main = do
-   putStrLn "Welcome to orwell REPL. Type ':q' to exit or 'Ctrl-D'."
+   putStrLn "Welcome to reva REPL. Type ':q' to exit or 'Ctrl-D'."
    repl conf
    where
       conf = Config {

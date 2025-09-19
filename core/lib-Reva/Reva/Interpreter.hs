@@ -1,8 +1,8 @@
-module Orwell.Interpreter where
+module Reva.Interpreter where
 
-import qualified Orwell.TypeChecker as TC
-import Orwell.Lexer
-import Orwell.Util
+import qualified Reva.TypeChecker as TC
+import Reva.Lexer
+import Reva.Util
 
 import Control.Monad.State
 
@@ -266,7 +266,8 @@ interpreter (Ok ast) =
                     return (Failed msg)
 
         -- Lambda expressions, first-class value
-        Lambda var body paramType retType -> return $ Ok (Lambda var body paramType retType)
+        Lambda var body paramType retType ->
+          return $ Ok (Lambda var body paramType retType)
 
         -- Function Application
         App func arg -> do

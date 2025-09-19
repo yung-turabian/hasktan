@@ -1,7 +1,7 @@
 {-
-    Public API for the Orwell lib.
+    Public API for the Reva lib.
 -}
-module Orwell(
+module Reva(
     interp,
     typeCheckAndPrint,
     OpEnv(..),
@@ -14,11 +14,11 @@ module Orwell(
     Mode(..)
 ) where
 
-import qualified Orwell.TypeChecker as TC
-import Orwell.Interpreter
-import Orwell.Util
-import Orwell.Grammar
-import Orwell.Lexer
+import qualified Reva.TypeChecker as TC
+import Reva.Interpreter
+import Reva.Util
+import Reva.Grammar
+import Reva.Lexer
 
 import Control.Exception
 import Data.Maybe
@@ -43,15 +43,15 @@ formatResult (Failed errorMsg) _ = Just errorMsg
 
 typeCheckAndPrint :: String -> IO ()
 typeCheckAndPrint s = do
-   let ast = parseOrwell (scanTokens s)
+   let ast = parseReva (scanTokens s)
    let (tExp, env) = TC.typeCheck ast []
    print tExp
 
 interp :: Mode -> String -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
 interp mode s topEnv conf =
     let ast = case mode of
-          CMD -> parseOrwell (scanTokens s)
-          REPL -> parseInteractiveOrwell (scanTokens s)
+          CMD -> parseReva (scanTokens s)
+          REPL -> parseInteractiveReva (scanTokens s)
         (oEnv, tEnv) = topEnv
         (tExp, tEnv') = TC.typeCheck ast tEnv
         (out, env) = case tExp of

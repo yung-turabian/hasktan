@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 
-module Orwell.Util (
+module Reva.Util (
     E(..),
     AST(..),
     TypeExp(..),
@@ -92,7 +92,7 @@ data AST
 showList :: [AST] -> String 
 showList [] = ""
 showList [l] = show l
-showList (it:l) = show it ++ ", " ++ Orwell.Util.showList l
+showList (it:l) = show it ++ ", " ++ Reva.Util.showList l
 
 showType :: AST -> String
 showType (Integer _) = "Int"
@@ -105,7 +105,7 @@ instance Show AST where
      show (Integer n) = show n
      show (Boolean b) = show b
      show (Float f)   = show f
-     show (List l) = "[" ++ Orwell.Util.showList l ++ "]"
+     show (List l) = "[" ++ Reva.Util.showList l ++ "]"
 
      show (Plus l r) = show l ++ "(+)" ++ show r
 
