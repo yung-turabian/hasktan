@@ -15,10 +15,10 @@ Reva is a small, interpreted Haskell-derived toy language.
 $ cabal build # Or cabal install to add to ~/.local/bin
 
 # To interpret a file.
-$ orwl file.hs
+$ reva file.hs
 
 # Open REPL mode.
-$ orwli
+$ revai
 ```
 
 ## External Libraries
