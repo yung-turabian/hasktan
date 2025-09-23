@@ -6,6 +6,7 @@ import System.Environment
 import System.Exit
 import System.FilePath (takeExtension, hasExtension)
 import System.IO
+import Data.ByteString.Lazy.Char8 (pack)
 
 usage = putStrLn "Usage: reva <file.hs>"
 version = putStrLn "reva -- An interpreted language - 0.0.1"
@@ -21,13 +22,13 @@ main = do
          if takeExtension file == ".reva" 
          then do 
             contents <- readFile file
-            typeCheckAndPrint contents
+            typeCheckAndPrint $ pack contents
          else die "Please use a .reva file."
       [file] | hasExtension file -> do
          if takeExtension file == ".reva" 
          then do 
             contents <- readFile file
-            case interp CMD contents ([],[]) conf of
+            case interp CMD (pack contents) ([],[]) conf of
                (Just str, _) -> putStrLn str
                (Nothing, _) -> return ()
          else die "Please use a .reva file."

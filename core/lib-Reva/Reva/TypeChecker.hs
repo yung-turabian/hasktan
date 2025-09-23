@@ -24,22 +24,27 @@ resetEnv :: Typechecker ()
 resetEnv = put []
 
 -- | Helper for binary arithmetic ops
-checkBinOp :: (AST,  AST) -> TypeEnv -> Typechecker (E TypeExp)
+{-checkBinOp :: (AST,  AST) -> TypeEnv -> Typechecker (E TypeExp)
 checkBinOp (l, r) env = do
    t1 <- typeChecker (Ok l) env
    t2 <- typeChecker (Ok r) env
    case (t1, t2) of
       (Ok IntType, Ok IntType)     -> return $ Ok IntType
       (Ok FloatType, Ok FloatType) -> return $ Ok FloatType
-      _ -> return $ Failed ("type mismatch:\n\t" ++ show t1 ++ "\n\t" ++ show t2)
+      _ -> return $ Failed (
+          formatErrorCode
+            MismatchTypeInBinaryOp
+            "type mismatch:\n\t" ++ show l ++ " + " ++ show r ++ "\n\n\t" ++ show t1 ++ "\n\t" ++ show t2
+        )
+  -}
 
-typeCheckDecls :: [AST] -> TypeEnv -> Typechecker (E TypeExp)
+{-typeCheckDecls :: [AST] -> TypeEnv -> Typechecker (E TypeExp)
 typeCheckDecls [] _ = return $ Ok VoidType
 typeCheckDecls (decl:decls) env = do 
   res <- typeChecker (Ok decl) env
   case res of
     Failed msg -> return $ Failed msg
-    _ -> typeCheckDecls decls env
+    _ -> typeCheckDecls decls env-}
 
 argTypeToList :: TypeExp -> [TypeExp]
 argTypeToList (Arrow arg1_t arg2_t) =
@@ -51,10 +56,13 @@ injectLocalVariables [] [] env = env
 injectLocalVariables (var:vars) (typ:typs) env =
   injectLocalVariables vars typs ((var, typ) : env) 
 
-typeChecker :: E AST -> TypeEnv -> Typechecker (E TypeExp)
-typeChecker (Ok ast) env =
+typeChecker :: Either String (Expr Range) -> TypeEnv -> Typechecker (Either String TypeExp)
+typeChecker (Right ast) env =
     case ast of
-         Program dls mE ->
+         E_Int _ _   -> return $ Right IntType
+         E_Bool _ _   -> return $ Right BoolType
+         E_Float _ _   -> return $ Right FloatType
+         {-Program dls mE ->
           case mE of 
             Just e -> do
               res <- typeCheckDecls dls env
@@ -63,10 +71,6 @@ typeChecker (Ok ast) env =
                 _ -> typeChecker (Ok e) env
             Nothing ->
               typeCheckDecls dls env
-
-         Boolean b   -> return $ Ok BoolType
-         Integer n   -> return $ Ok IntType
-         Float f     -> return $ Ok FloatType
 
          Variable v ->
             let localMaybeType = lookup v env
@@ -134,11 +138,11 @@ typeChecker (Ok ast) env =
                _ ->
                 return $ Failed ("Attempting to apply " ++ show e2 ++ " to " ++ show e1)
 
-         --typeChecker (Ok(Not)) env = Arrow BoolType BoolType
+         --typeChecker (Ok(Not)) env = Arrow BoolType BoolType-}
 
-         e -> return $ Failed ("[HSQ-TypeChecker-UNCAUGHT] " ++ show e)
+         e -> return $ Left $ "[HSQ-TypeChecker-UNCAUGHT] " ++ show e
 
-typeChecker (Failed errMsg) _ = return $ Failed ("error: [HSQ-" ++ errMsg)
+typeChecker (Left errMsg) _ = return $ Left ("error: [HSQ-" ++ errMsg)
 {--- Variables
 -}
 
@@ -304,5 +308,5 @@ typeChecker (Ok (Tail e)) env = do
 
 
 -- | Runs the type checker
-typeCheck :: E AST -> TypeEnv -> (E TypeExp, TypeEnv)
+typeCheck :: Either String (Expr Range) -> TypeEnv -> (Either String TypeExp, TypeEnv)
 typeCheck ast = runState (typeChecker ast []) -- The AST and a local bindings.

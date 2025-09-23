@@ -1,2 +1,10 @@
-addOne :: Int -> Int -> Int
+{- addOne :: Int -> Int
+addOne = (\y -> ((\x -> x + y) :: Int -> Int) 3) :: Int -> Int
 addOne = (\x y -> x + 1 + y) :: Int -> Int -> Int
+-}
+
+{-addTwo :: Int
+addTwo = 2
+-}
+
+True

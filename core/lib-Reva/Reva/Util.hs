@@ -3,6 +3,7 @@
 module Reva.Util (
     E(..),
     AST(..),
+    Expr(..),
     TypeExp(..),
     OpEnv(..),
     TypeEnv(..),
@@ -12,6 +13,7 @@ module Reva.Util (
 ) where
 
 import Data.Data (Data, Typeable, toConstr, showConstr)
+import Data.ByteString.Lazy.Char8 (ByteString)
 
 -- | Tracks successful AST or error codes if not.
 data E a = Ok a | Failed String
@@ -42,6 +44,29 @@ instance Show TypeExp where
   show (Arrow t1 t2) = show t1 ++ " -> " ++ show t2
   show EmptyList     = "[]"
   show (ListType t)  = "[" ++ show t ++ "]"
+
+data Name a
+  = Name a ByteString
+  deriving (Show)
+
+data Expr a
+  = E_App a (Expr a) (Expr a)
+
+  | E_Int a Int
+  | E_Float a Float
+  | E_Char a Char
+  | E_Bool a Bool
+  | E_Variable a (Name a)
+  | E_String a ByteString
+  | E_Paren a (Expr a)
+  | E_Unit a -- VoidType
+
+instance Show (Expr a) where
+  show (E_Int _ i)   = show i
+  show (E_Float _ f) = show f
+  show (E_Char _ c)  = show c
+  show (E_Bool _ b)  = show b
+  show e             = show e
 
 data AST
      = Program [AST] (Maybe AST) -- Decl. list and main expr
@@ -85,8 +110,6 @@ data AST
      | Binding String TypeExp AST
 
      | Not
-
-     | EOL
      deriving (Eq, Ord, Data)
 
 showList :: [AST] -> String 
@@ -94,20 +117,19 @@ showList [] = ""
 showList [l] = show l
 showList (it:l) = show it ++ ", " ++ Reva.Util.showList l
 
-showType :: AST -> String
-showType (Integer _) = "Int"
-showType (Float _) = "Float"
-showType (Char _) = "Char"
-showType (Boolean _) = "Bool"
+showType :: Expr a -> String
+showType (E_Int _ _) = "Int"
+showType (E_Float _ _) = "Float"
+showType (E_Char _ _) = "Char"
+showType (E_Bool _ _) = "Bool"
 showType _ = "?"
 
 instance Show AST where
-     show (Integer n) = show n
-     show (Boolean b) = show b
-     show (Float f)   = show f
+     show (Integer n)  = show n
+     show (Boolean b)  = show b
+     show (Float f)    = show f
+     show (Variable v) = v
      show (List l) = "[" ++ Reva.Util.showList l ++ "]"
-
-     show (Plus l r) = show l ++ "(+)" ++ show r
 
      -- catch-all fallback
      show other       = "<AST:" ++ showConstr (toConstr other) ++ ">"
@@ -122,10 +144,12 @@ type TypeEnv = [(String,TypeExp)]
 data ErrorCode
      = NotMemeberOfEnvironment
      | MismatchTypeInBind
+     | MismatchTypeInBinaryOp
 
 instance Show ErrorCode where
      show NotMemeberOfEnvironment = "3"
      show MismatchTypeInBind = "4"
+     show MismatchTypeInBinaryOp = "5"
 
 formatErrorCode :: ErrorCode -> String -> String
 formatErrorCode errcode msg = "[HSQ-" ++ show errcode ++ "] " ++ msg

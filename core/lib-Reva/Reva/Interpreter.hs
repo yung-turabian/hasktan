@@ -81,6 +81,7 @@ subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (substVar x e ast)
 
+{-
 interpBiOp :: (AST, AST) -> (Int -> Int -> Int) -> Interpreter (E AST)
 interpBiOp (v1, v2) op = do
     ev1 <- interpreter $ Ok v1
@@ -90,12 +91,14 @@ interpBiOp (v1, v2) op = do
             return $ Ok (Integer (op i1 i2))
 
 interpDecls :: [AST] -> Interpreter (E AST)
-interpDecls [] = return $ Ok EOL
+--interpDecls [] = return $ Ok EOL
 interpDecls (decl:decls) = do 
   interpreter $ Ok decl
   interpDecls decls
 
-interpreter :: E AST -> Interpreter (E AST)
+-}
+
+interpreter :: Either String (Expr Range) -> Interpreter (Either String (Expr ()))
 {-interpreter (Ok(Quot e1 e2)) env =
     let
        (Ok(Integer n1)) = interpreter (Ok e1) env
@@ -217,12 +220,14 @@ interpreter (Ok(Tail e)) env =
    in
       Ok (List (tail l))-}
 
-interpreter (Ok EOL) = return $ Ok EOL
+-- interpreter (Ok EOL) = return $ Ok EOL
 
 -- TODO New, cleaner function. Still goes through above first
-interpreter (Ok ast) =
+interpreter (Right ast) =
     case ast of
-        Program dls mE -> 
+       E_Int _ i -> return $ Right (E_Int () i)
+       E_Bool _ b -> return $ Right (E_Bool () b)
+       {- Program dls mE -> 
           case mE of 
             Just e -> do
               interpDecls dls
@@ -231,7 +236,6 @@ interpreter (Ok ast) =
               interpDecls dls
 
         Boolean b  -> return $ Ok (Boolean b)
-        Integer n  -> return $ Ok (Integer n)
         List l     -> return $ Ok (List l)
         Float f    -> return $ Ok (Float f)
 
@@ -256,14 +260,14 @@ interpreter (Ok ast) =
                         else interpreter (Ok e2)
                 err -> return err
 
-        Binding var _ v -> do
+        {-Binding var _ v -> do
             var_val <- interpreter (Ok v)
             case var_val of
                 Ok val -> do
                     setVar var val
                     return $ Ok EOL
                 Failed msg ->
-                    return (Failed msg)
+                    return (Failed msg)-}
 
         -- Lambda expressions, first-class value
         Lambda var body paramType retType ->
@@ -280,12 +284,12 @@ interpreter (Ok ast) =
                             interpreter $ Ok (subst [(var, val)] body)
 
 
-        e -> return $ Failed ("[HSQ-Interp-uncaught] " ++ show e)
+        e -> return $ Failed ("[HSQ-Interp-uncaught] " ++ show e)-}
 
-interpreter (Failed errMsg) = return $ Failed ("error: [HSQ-" ++ errMsg)
+--interpreter (Failed errMsg) = return $ Failed ("error: [HSQ-" ++ errMsg)
 
 
-runInterpreter :: E AST -> OpEnv -> (E AST, OpEnv)
+runInterpreter :: Either String (Expr Range) -> OpEnv -> (Either String (Expr ()), OpEnv)
 runInterpreter ast = runState (interpreter ast)
 
 {- MAYBE LATER, implement type classes and types.

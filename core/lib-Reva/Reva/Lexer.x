@@ -1,194 +1,284 @@
 {
--- Alex docs := https://haskell-alex.readthedocs.io/en/latest/syntax.html
-
 -- Henry Wandover
--- CMSC 305
--- Due: October 18th, 2024
--- Note: For extens, added strings, deliminited comments, lists and line/character numbers
+-- October 18th, 2024
 
-module Reva.Lexer where
+module Reva.Lexer
+  (
+    Alex,
+    AlexPosn(..),
+    alexGetInput,
+    alexError,
+    runAlex,
+    alexMonadScan,
+    Range(..),
+    RangedToken(..),
+    Token(..)
+  ) where
 
 import Reva.Util
+
+import Data.ByteString.Lazy.Char8 (ByteString)
+import qualified Data.ByteString.Lazy.Char8 as BS
+import Control.Monad (when)
 }
 
-%wrapper "posn"
+%wrapper "monadUserState-bytestring"
 %encoding "utf-8"
 
 $digit       = [0-9]
 $lower       = [a-z]
 $upper       = [A-Z]
 $alpha       = [$lower $upper]
+
 $punc        = [\{\}\[\]\;\:\"\'\,\.\`]
 $symbol      = [\!\@\#\$\%\^\&\*\(\)\-\_\+\=\~\?\/\<\>\\]
-$ascii       = [\n \32] -- \32 is ASCII code for a space
-$all         = [$alpha $digit $punc $symbol $ascii]
-$white       = [\ \t\f\v\r]
+$ascii       = [\n \ ]
+$all         = [$alpha $digit $punc $symbol]
 
-@id          = $lower [$alpha $digit \_ \']*
+$white_no_nl = [\ \t]
+
+@id          = ($lower | \_) ($alpha | $digit | \_ | \' | \?)*
+
 @tycon       = $upper [$alpha]*
 @reservedid  = if|else|then|let|let|letrec|in|type
+@reservedop  = ":" | "::" | "="
 
-@string      = \" [$all # \"]* \" -- No double-quote within a string that isnt end | Empty string
+@string      = \"[$all # \"]*\" -- No double-quote within a string that isnt end | Empty string
 @char        = \' [$all # \"\'] \'
 
+@eol = \n | \r \n | \n \r
+@empty_line = (($white_no_nl)*\n)
+
 tokens :-
-  
- $white+		               ;
 
- \n                        { \p _ -> T_Newline p }
+  <0> $white+              ;
 
- -- Comments
- "--"[^\n]*                ;
- "{-" ($all | \n)* "-}"	   ;
+  <0> "{-"                 { nestComment `andBegin` comment }
+  <0> "-}"                 { \_ _ -> alexError "error: unexpected closing comment" }
+  <comment> "{-"           { nestComment }
+  <comment> "-}"           { unnestComment }
+  <comment> .              ;
+  <comment> \n             ;
+
+  -- Keywords
+  <0> let                  { tok T_Let }
+  <0> letrec               { tok T_LetRec }
+  <0> in                   { tok T_In }
+  <0> if                   { tok T_If }
+  <0> then                 { tok T_Then }
+  <0> else                 { tok T_Else }
+  <0> data                 { tok T_Data }
+  -- Type defs
+  <0> Int                  { tok T_Int }
+  <0> Float                { tok T_Float }
+  <0> Bool                 { tok T_Bool }
+  -- Types
+  <0> "->"                 { tok T_Arrow }
+  <0> "::"                 { tok T_Colons }
+  -- Arithmetic ops
+  <0> "+"                  { tok T_Plus }
+  <0> "-"                  { tok T_Minus }
+  <0> "*"                  { tok T_Star }
+  <0> "/"                  { tok T_Divide }
+  <0> "^"                  { tok T_Power }
+  -- Binding ops
+  <0> \\                   { tok T_Lambda }
+  <0> "="                  { tok T_Bind }
+  -- Comparison ops
+  <0> "=="                 { tok T_Eq }
+  <0> "/="                 { tok T_NotEq }
+  <0> ">"                  { tok T_Gt }
+  <0> ">="                 { tok T_GtEq }
+  <0> "<"                  { tok T_Lt }
+  <0> "<="                 { tok T_LtEq }
+  -- Logical ops
+  <0> "&&"                 { tok T_And }
+  <0> "||"                 { tok T_Or }
+  -- Parenthesis
+  <0> "("			             { tok T_LParen }
+  <0> ")"			             { tok T_RParen }
+  <0> "{"                   { tok T_LCurl }
+  <0> "}"                   { tok T_RCurl }
+  -- Lists
+  <0> "["                   { tok T_LBrack }
+  <0> "]"                   { tok T_RBrack }
+  <0> ","                   { tok T_Comma }
+  <0> "++"                  { tok T_PlusPlus }
+  <0> ":"                   { tok T_Comma }
 
 
- -- Type definitions
- Bool			                 { \p _ -> (BOOL) p }
- Int			                 { \p _ -> T_Int p }
- Float	                   { \p _ -> (FLOAT) p }
- Char                      { \p _ -> CHAR p }
+  <0> @id                  { tokId }
 
- -- Constants
- True | False              { \p s -> BOOLVAL p (read s) }
- $digit+       	           { \p s -> INTVAL p (read s) }
- $digit+ \. $digit+	       { \p s -> FLOATVAL p (read s) }
- @string		               { \p s -> STRING p (read s) }
- @char                     { \p s -> CHARVAL p (read s) }
-
- -- Keywords
- if			                   { \p s -> IF p }
- then 	                   { \p s -> THEN p }
- else 		                 { \p s -> ELSE p }
- let	                     { \p s -> LET p }
- letrec                    { \p s -> LET_REC p }
- in                        { \p s -> IN p }
- data                      { \p s -> DATA p }
-
- -- Arithmetic operators
- \\			                   { \p s -> LAMBDA p }
- "+"			                 { \p s -> PLUS p }
- "-"			                 { \p s -> MINUS p }
- "*"			                 { \p s -> TIMES p }
- "/"			                 { \p s -> DIVIDE p }
- "="			                 { \p s -> BIND p }
- "^"			                 { \p s -> POWER p }
-
- -- Types
- "->" | "→"                { \p s -> ARROW p }
- ":"			                 { \p s -> COLON p }
- "::"			                 { \p s -> COLONS p }
-
- -- Comparison
- "=="			           { \p s -> (EQUALS) p }
- "&&"			           { \p s -> (AND) p }
- "||"			           { \p s -> (OR) p }
- "<=" | "≤"		           { \p s -> (LTEQ) p }
- ">=" | "≥" 		       { \p s -> (GTEQ) p }
- "/=" | "≠"		           { \p s -> (NOTEQ) p }
- "<"			           { \p s -> (LT') p }
- ">"			           { \p s -> (GT') p }
-
- -- Parenthesis
- "("			           { \p s -> (LPAREN) p }
- ")"			           { \p s -> (RPAREN) p }
- "{"                       { \p s -> LCURL p }
- "}"                       { \p s -> RCURL p }
-
- -- Lists
- "["	     		       { \p s -> LBRACK p }
- "]"			           { \p s -> RBRACK p }
- ","			           { \p s -> COMMA p }
- "."			           { \p s -> PERIOD p }
- "++"                      { \p s -> PLUSPLUS p }
-
- hd                        { \p s -> HEAD p }
- tl                        { \p s -> TAIL p }
-
- @id   			           { \p s -> VAR p s }
- @tycon                    { \p s -> TYCON p s }
-
- .                         { \p s -> ERROR p s }
+  -- Constants
+  <0> $digit+              { tokInteger }
+  <0> $digit* \. $digit+   { tokFloat }
+  <0> True | False         { tokBool }
+  <0> @string              { tokString }
+  <0> @char                { tokChar }
 
 {
 
+data AlexUserState = AlexUserState {
+  nestDepth :: Int
+}
+
+alexInitUserState :: AlexUserState
+alexInitUserState = AlexUserState
+  {
+    nestDepth = 0
+  }
+
+get :: Alex AlexUserState
+get = Alex $ \s -> Right (s, alex_ust s)
+
+put :: AlexUserState -> Alex ()
+put s' = Alex $ \s -> Right (s{alex_ust = s'}, ())
+
+modify :: (AlexUserState -> AlexUserState) -> Alex ()
+modify f = Alex $ \s -> Right (s{alex_ust = f (alex_ust s)}, ())
+
+data Range = Range {
+  start :: AlexPosn,
+  end :: AlexPosn
+} deriving (Eq,Show)
+
+data RangedToken = RangedToken {
+  rtToken :: Token,
+  rtRange :: Range
+} deriving (Eq,Show)
+
 data Token
--- Constants
- = BOOLVAL  AlexPosn Bool
- | INTVAL   AlexPosn Int
- | FLOATVAL AlexPosn Float
- | STRING   AlexPosn String
- | CHARVAL  AlexPosn Char
- 
+ = T_Ident     ByteString
+ -- Constants
+ | T_BoolVal   Bool
+ | T_IntVal    Int
+ | T_FloatVal     Float
+ | T_StringVal    ByteString
+ | T_CharVal   Char
  -- Keywords
- | IF       AlexPosn
- | THEN     AlexPosn
- | ELSE     AlexPosn
- | LET      AlexPosn
- | LET_REC  AlexPosn
- | IN       AlexPosn
- | DATA     AlexPosn
- 
- -- Types
- | ARROW    AlexPosn
- | COLON   AlexPosn
- | COLONS  AlexPosn
-
+ | T_If
+ | T_Then
+ | T_Else    
+ | T_Let
+ | T_LetRec
+ | T_In
+ | T_Data
  -- Logical operators
- | AND      AlexPosn
- | OR       AlexPosn
-
+ | T_And 
+ | T_Or    
  -- Arithmetic operators
- | PLUS     AlexPosn
- | MINUS    AlexPosn
- | TIMES    AlexPosn
- | DIVIDE   AlexPosn
- | BIND     AlexPosn
- | POWER    AlexPosn
- | LAMBDA   AlexPosn
-
+ | T_Plus  
+ | T_Minus   
+ | T_Star
+ | T_Divide  
+ | T_Bind 
+ | T_Power   
+ | T_Lambda 
  -- Comparison operators
- | EQUALS   AlexPosn
- | LTEQ     AlexPosn
- | GTEQ     AlexPosn
- | NOTEQ    AlexPosn
- | LT'      AlexPosn
- | GT'      AlexPosn
-
+ | T_Eq
+ | T_LtEq 
+ | T_GtEq   
+ | T_NotEq   
+ | T_Lt  
+ | T_Gt    
  -- Type definitions
- | BOOL     AlexPosn
- | T_Int    AlexPosn
- | FLOAT    AlexPosn
- | CHAR     AlexPosn
- 
+ | T_Bool
+ | T_Int    
+ | T_Float  
+ | T_Char
+ | T_Arrow
+ | T_Colon 
+ | T_Colons 
  -- Parenthesis
- | LPAREN   AlexPosn
- | RPAREN   AlexPosn
- | LCURL    AlexPosn
- | RCURL    AlexPosn
- 
+ | T_LParen 
+ | T_RParen
+ | T_LCurl
+ | T_RCurl  
  -- Lists
- | COMMA    AlexPosn
- | PERIOD   AlexPosn
- | LBRACK   AlexPosn
- | RBRACK   AlexPosn
- | PLUSPLUS AlexPosn
+ | T_Comma
+ | T_Period 
+ | T_LBrack 
+ | T_RBrack 
+ | T_PlusPlus 
+ | T_TyCon   ByteString
+ | T_EOF
+ deriving (Eq,Show)
 
- | HEAD     AlexPosn
- | TAIL     AlexPosn
+mkRange :: AlexInput -> Int64 -> Range
+mkRange (start, _, str, _) len = Range{ start=start, end = end }
+  where
+    end = BS.foldl' alexMove start $ BS.take len str
 
- | VAR      AlexPosn String
- | TYCON    AlexPosn String
+tokId :: AlexAction RangedToken
+tokId inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_Ident $ BS.take len str,
+    rtRange = mkRange inp len
+  }
 
- | ERROR    AlexPosn String
+tokInteger :: AlexAction RangedToken
+tokInteger inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_IntVal $ read $ BS.unpack $ BS.take len str,
+    rtRange = mkRange inp len
+  }
 
- | T_Newline AlexPosn
- | COMMENT  
- deriving (Eq)
+tokFloat:: AlexAction RangedToken
+tokFloat inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_FloatVal $ read $ BS.unpack $ BS.take len str,
+    rtRange = mkRange inp len
+  }
 
-instance Show Token where
-    show (ERROR _ s) = s
-    show tok = show tok
+tokString :: AlexAction RangedToken
+tokString inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_StringVal $ BS.take len str,
+    rtRange = mkRange inp len
+  }
 
-scanTokens = alexScanTokens
+tokChar :: AlexAction RangedToken
+tokChar inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_CharVal $ read $ BS.unpack $ BS.take len str,
+    rtRange = mkRange inp len
+  }
+
+tokBool :: AlexAction RangedToken
+tokBool inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_BoolVal $ read $ BS.unpack $ BS.take len str,
+    rtRange = mkRange inp len
+  }
+
+tok :: Token -> AlexAction RangedToken
+tok ctor inp len =
+  pure RangedToken {
+    rtToken = ctor,
+    rtRange = mkRange inp len
+  }
+
+nestComment :: AlexAction RangedToken
+nestComment input len = do
+  modify $ \s -> s{ nestDepth = nestDepth s + 1 }
+  skip input len
+
+unnestComment :: AlexAction RangedToken
+unnestComment input len = do
+  state <- get
+  let depth = nestDepth state - 1
+  put state{ nestDepth = depth }
+  when (depth == 0) $
+    alexSetStartCode 0
+  skip input len
+
+alexEOF :: Alex RangedToken
+alexEOF = do
+  startCode <- alexGetStartCode
+  when (startCode == comment) $
+    alexError "error: unclosed comment"
+  (pos, _, _, _) <- alexGetInput
+  pure $ RangedToken T_EOF (Range pos pos)
+
 
 }

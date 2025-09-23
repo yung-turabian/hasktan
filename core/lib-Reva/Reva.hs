@@ -20,6 +20,7 @@ import Reva.Util
 import Reva.Grammar
 import Reva.Lexer
 
+import Data.ByteString.Lazy.Char8 (ByteString)
 import Control.Exception
 import Data.Maybe
 
@@ -35,28 +36,28 @@ data Mode
   | REPL
 
 -- | Makes it easy to print lists all nice and pretty.
-formatResult :: E AST -> Bool -> Maybe String
-formatResult (Ok EOL) _ = Nothing
-formatResult (Ok lit) True = Just (show lit ++ " : " ++ showType lit)
-formatResult (Ok lit) False = Just (show lit)
-formatResult (Failed errorMsg) _ = Just errorMsg
+formatResult :: Either String (Expr ()) -> Bool -> Maybe String
+formatResult (Right lit) True = Just (show lit ++ " : " ++ showType lit)
+formatResult (Right lit) False = Just (show lit)
+formatResult (Left errorMsg) _ = Just errorMsg
 
-typeCheckAndPrint :: String -> IO ()
+typeCheckAndPrint :: ByteString -> IO ()
 typeCheckAndPrint s = do
-   let ast = parseReva (scanTokens s)
-   let (tExp, env) = TC.typeCheck ast []
-   print tExp
+  let ast = runAlex s parseReva
+  --let (tExp, env) = TC.typeCheck ast []
+  --print tExp
+  print $ show ast
 
-interp :: Mode -> String -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
+interp :: Mode -> ByteString -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
 interp mode s topEnv conf =
     let ast = case mode of
-          CMD -> parseReva (scanTokens s)
-          REPL -> parseInteractiveReva (scanTokens s)
+          CMD -> runAlex s parseReva
+          -- REPL -> runAlex s parseInteractiveReva
         (oEnv, tEnv) = topEnv
         (tExp, tEnv') = TC.typeCheck ast tEnv
         (out, env) = case tExp of
-            Failed msg -> (Just $ "error: " ++ msg, topEnv)
-            Ok _ -> 
+            Left msg -> (Just $ "error: " ++ msg, topEnv)
+            Right _ -> 
                 let (val, oEnv') = runInterpreter ast oEnv
                     newEnv = (oEnv', tEnv')
                 in (formatResult val (shouldShowType conf), newEnv)
