@@ -20,11 +20,11 @@ import Reva.Util
 import Reva.Grammar
 import Reva.Lexer
 
-import Data.ByteString.Lazy.Char8 (ByteString)
+import Data.ByteString.Lazy.Char8 (ByteString, pack)
 import Control.Exception
 import Data.Maybe
 
-foreign import ccall "max" c_max :: Int -> Int -> Int
+--foreign import ccall "max" c_max :: Int -> Int -> Int
 
 newtype Config = Config {
    shouldShowType :: Bool
@@ -48,10 +48,11 @@ typeCheckAndPrint s = do
   --print tExp
   print $ show ast
 
-interp :: Mode -> ByteString -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
+interp :: Mode -> String -> (OpEnv, TypeEnv) -> Config -> (Maybe String, (OpEnv, TypeEnv))
 interp mode s topEnv conf =
-    let ast = case mode of
-          CMD -> runAlex s parseReva
+    let inp = pack s
+        ast = case mode of
+          CMD -> runAlex inp parseReva
           -- REPL -> runAlex s parseInteractiveReva
         (oEnv, tEnv) = topEnv
         (tExp, tEnv') = TC.typeCheck ast tEnv
