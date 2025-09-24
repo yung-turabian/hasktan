@@ -28,7 +28,7 @@ main = do
          if takeExtension file == ".reva" 
          then do 
             contents <- readFile file
-            case interp CMD (pack contents) ([],[]) conf of
+            case interp CMD contents ([],[]) conf of
                (Just str, _) -> putStrLn str
                (Nothing, _) -> return ()
          else die "Please use a .reva file."
