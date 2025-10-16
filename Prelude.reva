@@ -3,9 +3,9 @@ addOne = (\y -> ((\x -> x + y) :: Int -> Int) 3) :: Int -> Int
 addOne = (\x y -> x + 1 + y) :: Int -> Int -> Int
 -}
 
-{-addTwo :: Int
-addTwo = 2
--}
+{- mySettings :: JuoSettings -}
+mySettings = JuoSettings { numbers = True, relative = False, tabWidth = 4 }
 
-{- 2 + 2 -}
-2
+addTwo = 10
+
+main = 5

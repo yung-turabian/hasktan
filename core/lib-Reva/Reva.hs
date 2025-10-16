@@ -53,7 +53,7 @@ interp mode s topEnv conf =
     let inp = pack s
         ast = case mode of
           CMD -> runAlex inp parseReva
-          -- REPL -> runAlex s parseInteractiveReva
+          REPL -> runAlex inp parseInteractiveReva
         (oEnv, tEnv) = topEnv
         (tExp, tEnv') = TC.typeCheck ast tEnv
         (out, env) = case tExp of
@@ -65,17 +65,17 @@ interp mode s topEnv conf =
     in
     (out, env)
 
-injectVariable :: String -> AST -> TypeExp -> Maybe (OpEnv, TypeEnv) -> IO (OpEnv, TypeEnv)
-injectVariable var_name var_ast var_typ maybeEnv =
+injectVariable :: String -> Expr () -> TypeExp -> Maybe (OpEnv, TypeEnv) -> IO (OpEnv, TypeEnv)
+injectVariable var_name expr var_typ maybeEnv =
     case maybeEnv of
         Just env ->
             let (opEnv, typeEnv) = env
-                opEnv' = (var_name, var_ast):opEnv
+                opEnv' = (var_name, expr):opEnv
                 typeEnv' = (var_name, var_typ):typeEnv
             in
                 return (opEnv', typeEnv')
         Nothing ->
-            let opEnv' = [(var_name, var_ast)]
+            let opEnv' = [(var_name, expr)]
                 typeEnv' = [(var_name, var_typ)]
             in
                 return (opEnv', typeEnv')

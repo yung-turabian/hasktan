@@ -54,14 +54,20 @@ argTypeToList arg_t = [arg_t]
 injectLocalVariables :: [String] -> [TypeExp] -> TypeEnv -> TypeEnv
 injectLocalVariables [] [] env = env
 injectLocalVariables (var:vars) (typ:typs) env =
-  injectLocalVariables vars typs ((var, typ) : env) 
+  injectLocalVariables vars typs ((var, typ) : env)
 
-typeChecker :: Either String (Ast Range) -> TypeEnv -> Typechecker (Either String TypeExp)
-typeChecker (Right ast) env =
-    case ast of
-         A_Expr (E_Int _ _)     -> return $ Right IntType
-         A_Expr (E_Bool _ _)    -> return $ Right BoolType
-         A_Expr (E_Float _ _)   -> return $ Right FloatType
+typeCheckDecl :: Decl Range -> TypeEnv -> Typechecker (Either String TypeExp)
+typeCheckDecl decl env =
+   case decl of
+      Decl _ _ _ _ _ -> return $ Right IntType
+      _ -> error "no decl"
+
+typeCheckExpr :: Expr Range -> TypeEnv -> Typechecker (Either String TypeExp)
+typeCheckExpr expr env =
+    case expr of
+         E_Int _ _     -> return $ Right IntType
+         E_Bool _ _    -> return $ Right BoolType
+         E_Float _ _   -> return $ Right FloatType
 
          {-Program dls mE ->
           case mE of 
@@ -143,7 +149,14 @@ typeChecker (Right ast) env =
 
          e -> return $ Left $ "[HSQ-TypeChecker-UNCAUGHT] " ++ show e
 
-typeChecker (Left errMsg) _ = return $ Left ("error: [HSQ-" ++ errMsg)
+typeChecker :: Either String [Ast Range] -> TypeEnv -> Typechecker (Either String TypeExp)
+typeChecker (Right (a:ast)) env =
+   case a of
+      A_Expr e -> typeCheckExpr e env
+      A_Decl d -> typeCheckDecl d env
+      _ -> error "idk"
+typeChecker (Left errMsg) _ = return $ Left ("[HSQ-" ++ errMsg)
+
 {--- Variables
 -}
 
@@ -309,5 +322,5 @@ typeChecker (Ok (Tail e)) env = do
 
 
 -- | Runs the type checker
-typeCheck :: Either String (Ast Range) -> TypeEnv -> (Either String TypeExp, TypeEnv)
+typeCheck :: Either String [Ast Range] -> TypeEnv -> (Either String TypeExp, TypeEnv)
 typeCheck ast = runState (typeChecker ast []) -- The AST and a local bindings.

@@ -97,17 +97,17 @@ tokens :-
   -- Parenthesis
   <0> "("			             { tok T_LParen }
   <0> ")"			             { tok T_RParen }
-  <0> "{"                   { tok T_LCurl }
-  <0> "}"                   { tok T_RCurl }
+  <0> "{"                  { tok T_LCurl }
+  <0> "}"                  { tok T_RCurl }
   -- Lists
-  <0> "["                   { tok T_LBrack }
-  <0> "]"                   { tok T_RBrack }
-  <0> ","                   { tok T_Comma }
-  <0> "++"                  { tok T_PlusPlus }
-  <0> ":"                   { tok T_Comma }
-
+  <0> "["                  { tok T_LBrack }
+  <0> "]"                  { tok T_RBrack }
+  <0> ","                  { tok T_Comma }
+  <0> "++"                 { tok T_PlusPlus }
+  <0> ":"                  { tok T_Comma }
 
   <0> @id                  { tokId }
+  <0> @tycon               { tokTyCon }
 
   -- Constants
   <0> $digit+              { tokInteger }
@@ -213,6 +213,13 @@ tokId :: AlexAction RangedToken
 tokId inp@(_, _, str, _) len =
   pure RangedToken {
     rtToken = T_Ident $ BS.take len str,
+    rtRange = mkRange inp len
+  }
+
+tokTyCon :: AlexAction RangedToken
+tokTyCon inp@(_, _, str, _) len =
+  pure RangedToken {
+    rtToken = T_TyCon $ BS.take len str,
     rtRange = mkRange inp len
   }
 

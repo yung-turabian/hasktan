@@ -8,10 +8,10 @@ import Control.Monad.State
 
 type Interpreter a = State OpEnv a
 
-lookupVar :: String -> Interpreter (Maybe AST)
+lookupVar :: String -> Interpreter (Maybe (Expr ()))
 lookupVar x = do gets (lookup x)
 
-setVar :: String -> AST -> Interpreter ()
+setVar :: String -> Expr () -> Interpreter ()
 setVar x val = do
     env <- get
     let newEnv = (x, val) : removeVar x env
@@ -28,6 +28,7 @@ removeVar x ((y,_):env) | x == y =
 removeVar x ((y,ast):env) =
     (y,ast) : removeVar x env
 
+{-
 -- | Substitute an AST for a variable in an AST.
 substVar :: String -> AST -> AST -> AST
 substVar _ _ (Boolean b) = Boolean b
@@ -80,6 +81,7 @@ subst :: OpEnv -> AST -> AST
 subst [] ast = ast
 subst ((x,e):env) ast =
     subst env (substVar x e ast)
+-}
 
 {-
 interpBiOp :: (AST, AST) -> (Int -> Int -> Int) -> Interpreter (E AST)
@@ -88,17 +90,22 @@ interpBiOp (v1, v2) op = do
     ev2 <- interpreter $ Ok v2
     case (ev1, ev2) of
         (Ok (Integer i1), Ok (Integer i2)) ->
-            return $ Ok (Integer (op i1 i2))
+            return $ Ok (Integer (op i1 i2))-}
 
-interpDecls :: [AST] -> Interpreter (E AST)
---interpDecls [] = return $ Ok EOL
-interpDecls (decl:decls) = do 
-  interpreter $ Ok decl
-  interpDecls decls
+stripAnnotation :: Expr Range -> Expr ()
+stripAnnotation expr =
+    case expr of
+        E_Int _ i -> E_Int () i
+        _ -> error "not finished"
 
--}
+interpDecl :: Decl Range -> Interpreter ()
+interpDecl decl = 
+    case decl of
+        Decl _ name _ _ expr -> setVar (show name) (stripAnnotation expr)
+        --Decl _ name _ _ _ -> interpreter $ Left $ show name
 
-interpreter :: Either String (Ast Range) -> Interpreter (Either String (Expr ()))
+
+interpExpr :: Expr a -> Interpreter (Either String (Expr ()))
 {-interpreter (Ok(Quot e1 e2)) env =
     let
        (Ok(Integer n1)) = interpreter (Ok e1) env
@@ -223,9 +230,11 @@ interpreter (Ok(Tail e)) env =
 -- interpreter (Ok EOL) = return $ Ok EOL
 
 -- TODO New, cleaner function. Still goes through above first
-interpreter (Right ast) =
-    case ast of
-      A_Expr (E_Int _ i) -> return $ Right (E_Int () i)
+interpExpr expr =
+    case expr of
+        E_Int _ i -> return $ Right (E_Int () i)
+        e -> return $ Left $ "[HSQ-Interp-uncaught] " ++ show e
+
        --E_Bool _ b -> return $ Right (E_Bool () b)
        {- Program dls mE -> 
           case mE of 
@@ -284,24 +293,24 @@ interpreter (Right ast) =
                             interpreter $ Ok (subst [(var, val)] body)
 
         -}
-      e -> return $ Left $ "[HSQ-Interp-uncaught] " ++ show e
 
 --interpreter (Failed errMsg) = return $ Failed ("error: [HSQ-" ++ errMsg)
 
+interpreter :: Either String [Ast Range] -> Interpreter (Either String (Expr ()))
+interpreter (Right []) = do
+    maybeMainExpr <- lookupVar "main"
+    case maybeMainExpr of
+        Just mainExpr -> interpExpr mainExpr
+        -- No
+        Nothing -> return $ Right (E_Unit ())
+interpreter (Right (a:ast)) =
+   case a of
+      A_Decl d -> do
+        interpDecl d
+        interpreter $ Right ast
+      A_Expr e -> interpExpr e
+interpreter (Left errMsg) = return $ Left ("[HSQ-" ++ errMsg)
 
-runInterpreter :: Either String (Ast Range) -> OpEnv -> (Either String (Expr ()), OpEnv)
+
+runInterpreter :: Either String [Ast Range] -> OpEnv -> (Either String (Expr ()), OpEnv)
 runInterpreter ast = runState (interpreter ast)
-
-{- MAYBE LATER, implement type classes and types.
- -
- - class HasktanNum a where
-   (+) :: a -> a -> a
-   (-) :: a -> a -> a
-   fromInteger :: Integer -> a
-
-data HasktanType = 
-     HaskInt Int 
-   | HaskFloat Float 
-   | HaskBool Bool 
-   | HaskList [AST]
-   deriving (Eq,Show)-}

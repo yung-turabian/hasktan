@@ -24,6 +24,7 @@ import Data.Monoid (First (..))
 
 -- Identifiers
 var { RangedToken (T_Ident _) _ }
+tycon { RangedToken (T_TyCon _) _ }
 
 -- Constants
 integer   { RangedToken (T_IntVal _) _ }
@@ -44,10 +45,10 @@ letrec { T_LetRec }
 in  { T_In p }
 if { T_If p}
 then { T_Then p }
-else { T_Else p }
-data { T_Data p }
+else { T_Else p }-}
+data      { RangedToken (T_Data) _ }
 
-'\\' { T_Lambda p }
+{-'\\' { T_Lambda p }
 "->" { T_Arrow p }-}
 "::" { RangedToken (T_Colons) _ }
 {-
@@ -86,9 +87,9 @@ data { T_Data p }
 -- Lists
 '[' { T_LBrack p }
 ']' { T_RBrack p }
-':' { T_Colon p }
-',' { T_Comman p }
-"++"{ T_PlusPlus p }
+':' { T_Colon p }-}
+',' { RangedToken (T_Comma) _ }
+{-"++"{ T_PlusPlus p }
 
 tycon { T_TyCon p $$ }
 
@@ -205,22 +206,24 @@ RecordTypeFields
 
 -}
 
-program :: { Ast Range }
-  :  mainExpr       { $1 }
+program :: { [Ast Range] }
+  : many(decl)      { $1 }
 
--- TODO maybe a main
-mainExpr :: { Ast Range }
-  : expr            { A_Expr $1 }
---  | {- empty -}     { unTok $1 (\range (T_)) }
-
-interactive :: { Ast Range }
-  : expr            { A_Expr $1 }
+interactive :: { [Ast Range] }
+  : expr            { [A_Expr $1] }
+  | decl            { [$1] }
 
 expr :: { Expr Range }
-  : form            { $1 }
+  : name '{' many_commasep(var_decl) '}' { Record (info $1 <-> rtRange $4) $1 $3 }
+  | form            { $1 }
 
 form
-  : juxt            { $1 }
+  {-: form '+' form   { Plus $1 $3 }
+  | form '-' form   { Minus $1 $3 }
+  | form '*' form   { Times $1 $3 }
+  | form '/' form   { Divide $1 $3 }
+	| form '^' form   { Power $1 $3 }
+  |-}: juxt            { $1 }
 
 juxt
   : atom            { $1 }
@@ -237,15 +240,38 @@ atom :: { Expr Range }
   {-
 --  | tycon                  { TypeConstructor $1 }-}
 
+var_decl :: { Decl Range }
+  : name '=' expr  { Decl (info $1 <-> info $3) $1 [] Nothing $3 }
+--  | data name '=' name '{' '}'
+--                   { Decl (info $1 <-> $6) $2 [] Nothing $}
+--  | name "::" type '=' expr { Decl (info $1 <-> info $3) $1 [] Nothing $3 }
+
 --type :: { TypeExp }
 --  : name { T_Ident (info $1) }
 
 name :: { Name Range }
   : var             { unTok $1 (\range (T_Ident name) -> Name range name) }
+  | tycon           { unTok $1 (\range (T_TyCon name) -> Name range name) }
 
-decl :: { Decl Range }
-  : name '=' expr { Decl (info $1 <-> info $3) $1 [] Nothing $3 }
---  | name "::" type '=' expr { Decl (info $1 <-> info $3) $1 [] Nothing $3 }
+decl :: { Ast Range }
+  : var_decl       { A_Decl $1 }
+
+many_rev(p)
+  :                { [] }
+  | many_rev(p) p  { $2 : $1 }
+
+many_commasep_rev(p)
+  :                { [] }
+  | p              { [$1] }
+  | many_commasep_rev(p) ',' p
+                   { $3 : $1 }
+
+many(p)
+  : many_rev(p)    { reverse $1 }
+
+many_commasep(p)
+  : many_commasep_rev(p)    
+                   { reverse $1 }
 
 {
 
@@ -265,7 +291,7 @@ Range a1 _ <-> Range _ b2 = Range a1 b2
 parseError :: RangedToken -> Alex a
 parseError _ = do
   (AlexPn _ line column, _, _, _) <- alexGetInput
-  alexError $ "Parser error at line " <> show line <> ", col " <> show column
+  alexError $ "Parser] error at line " <> show line <> ", col " <> show column
 
 lexer :: (RangedToken -> Alex a) -> Alex a
 lexer = (=<< alexMonadScan)

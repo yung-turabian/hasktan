@@ -17,7 +17,7 @@ module Reva.Util (
 ) where
 
 import Data.Data (Data, Typeable, toConstr, showConstr)
-import Data.ByteString.Lazy.Char8 (ByteString)
+import Data.ByteString.Lazy.Char8 (ByteString, unpack)
 
 -- | Tracks successful AST or error codes if not.
 data E a = Ok a | Failed String
@@ -51,7 +51,11 @@ instance Show TypeExp where
 
 data Name a
   = Name a ByteString
-  deriving (Foldable,Show)
+  deriving (Foldable)
+
+
+instance Show (Name a) where
+  show (Name _ bytestr) = unpack bytestr
 
 -- Use TypeExp with the polymorphic a
 
@@ -72,6 +76,7 @@ data Expr a
   | E_Variable a (Name a)
   | E_String a ByteString
   | E_Paren a (Expr a)
+  | Record a (Name a) [Decl a]
   | E_Unit a -- VoidType
   deriving (Foldable)
 
@@ -85,6 +90,7 @@ instance Show (Expr a) where
   show (E_Float _ f) = show f
   show (E_Char _ c)  = show c
   show (E_Bool _ b)  = show b
+  show (E_Unit _)    = "()"
   show e             = show e
 
 data AST
@@ -141,6 +147,7 @@ showType (E_Int _ _) = "Int"
 showType (E_Float _ _) = "Float"
 showType (E_Char _ _) = "Char"
 showType (E_Bool _ _) = "Bool"
+showType (E_Unit _) = "Unit"
 showType _ = "?"
 
 instance Show AST where
@@ -155,10 +162,10 @@ instance Show AST where
 
 
 -- | Operation environment
-type OpEnv = [(String,AST)]
+type OpEnv = [(String, Expr ())]
 
 -- | Type alias for type environments.
-type TypeEnv = [(String,TypeExp)]
+type TypeEnv = [(String, TypeExp)]
 
 data ErrorCode
      = NotMemeberOfEnvironment
