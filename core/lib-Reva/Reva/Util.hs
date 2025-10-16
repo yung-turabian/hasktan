@@ -1,9 +1,13 @@
 {-# LANGUAGE DeriveDataTypeable #-}
+{-# LANGUAGE DeriveFoldable #-}
 
 module Reva.Util (
     E(..),
     AST(..),
+    Ast(..),
     Expr(..),
+    Decl(..),
+    Name(..),
     TypeExp(..),
     OpEnv(..),
     TypeEnv(..),
@@ -47,11 +51,20 @@ instance Show TypeExp where
 
 data Name a
   = Name a ByteString
-  deriving (Show)
+  deriving (Foldable,Show)
+
+-- Use TypeExp with the polymorphic a
+
+data Argument a
+  = Argument (Name a) (Maybe TypeExp)
+  deriving (Foldable,Show)
+
+data Decl a
+  = Decl a (Name a) [Argument a] (Maybe TypeExp) (Expr a)
+  deriving (Foldable,Show)
 
 data Expr a
   = E_App a (Expr a) (Expr a)
-
   | E_Int a Int
   | E_Float a Float
   | E_Char a Char
@@ -60,6 +73,12 @@ data Expr a
   | E_String a ByteString
   | E_Paren a (Expr a)
   | E_Unit a -- VoidType
+  deriving (Foldable)
+
+data Ast a
+  = A_Expr (Expr a)
+  | A_Decl (Decl a)
+  deriving (Foldable,Show)
 
 instance Show (Expr a) where
   show (E_Int _ i)   = show i

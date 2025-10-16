@@ -11,9 +11,8 @@ import Data.Maybe (fromJust)
 import Data.Monoid (First (..))
 }
 
-%name parseReva
---%name parseReva Program
---%name parseInteractiveReva Interactive
+%name parseReva program
+%name parseInteractiveReva interactive
 %error { parseError }
 %monad { Alex } { >>= } { pure }
 %lexer { lexer } { RangedToken T_EOF _ }
@@ -49,8 +48,9 @@ else { T_Else p }
 data { T_Data p }
 
 '\\' { T_Lambda p }
-"->" { T_Arrow p }
-"::" { T_Colons p }
+"->" { T_Arrow p }-}
+"::" { RangedToken (T_Colons) _ }
+{-
 -- Logical ops
 "&&" { T_And p }
 "||" { T_Or p } -}
@@ -110,13 +110,6 @@ tycon { T_TyCon p $$ }
 -- Then following is form (arithematic operations) and expressions which have the lowest precidence.
 
 {-
-Program :: { AST }
-  :  MainExpr
-                             { Program [] $1 }
-
-MainExpr :: { Maybe AST }
-  : Expr { Just $1 }
-  |                          { Nothing }
 
 Interactive
   : Expr                     { $1 }
@@ -212,14 +205,25 @@ RecordTypeFields
 
 -}
 
+program :: { Ast Range }
+  :  mainExpr       { $1 }
+
+-- TODO maybe a main
+mainExpr :: { Ast Range }
+  : expr            { A_Expr $1 }
+--  | {- empty -}     { unTok $1 (\range (T_)) }
+
+interactive :: { Ast Range }
+  : expr            { A_Expr $1 }
+
 expr :: { Expr Range }
-  : form                     { $1 }
+  : form            { $1 }
 
 form
-  : juxt                     { $1 }
+  : juxt            { $1 }
 
 juxt
-  : atom                     { $1 }
+  : atom            { $1 }
 
 atom :: { Expr Range }
   : integer         { unTok $1 (\range (T_IntVal int) -> E_Int range int) }
@@ -227,11 +231,21 @@ atom :: { Expr Range }
   | float           { unTok $1 (\range (T_FloatVal float) -> E_Float range float) }
   | char            { unTok $1 (\range (T_CharVal char) -> E_Char range char) }
   | string          { unTok $1 (\range (T_StringVal string ) -> E_String range string) }
+  | name            { E_Variable (info $1) $1 }
   | '(' ')'         { E_Unit (rtRange $1 <-> rtRange $2) }
   | '(' expr ')'    { E_Paren (rtRange $1 <-> rtRange $3) $2 }
   {-
---  | var                      { Variable $1 }
 --  | tycon                  { TypeConstructor $1 }-}
+
+--type :: { TypeExp }
+--  : name { T_Ident (info $1) }
+
+name :: { Name Range }
+  : var             { unTok $1 (\range (T_Ident name) -> Name range name) }
+
+decl :: { Decl Range }
+  : name '=' expr { Decl (info $1 <-> info $3) $1 [] Nothing $3 }
+--  | name "::" type '=' expr { Decl (info $1 <-> info $3) $1 [] Nothing $3 }
 
 {
 

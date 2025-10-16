@@ -98,7 +98,7 @@ interpDecls (decl:decls) = do
 
 -}
 
-interpreter :: Either String (Expr Range) -> Interpreter (Either String (Expr ()))
+interpreter :: Either String (Ast Range) -> Interpreter (Either String (Expr ()))
 {-interpreter (Ok(Quot e1 e2)) env =
     let
        (Ok(Integer n1)) = interpreter (Ok e1) env
@@ -225,8 +225,8 @@ interpreter (Ok(Tail e)) env =
 -- TODO New, cleaner function. Still goes through above first
 interpreter (Right ast) =
     case ast of
-       E_Int _ i -> return $ Right (E_Int () i)
-       E_Bool _ b -> return $ Right (E_Bool () b)
+      A_Expr (E_Int _ i) -> return $ Right (E_Int () i)
+       --E_Bool _ b -> return $ Right (E_Bool () b)
        {- Program dls mE -> 
           case mE of 
             Just e -> do
@@ -283,13 +283,13 @@ interpreter (Right ast) =
                         Ok val -> do
                             interpreter $ Ok (subst [(var, val)] body)
 
-
-        e -> return $ Failed ("[HSQ-Interp-uncaught] " ++ show e)-}
+        -}
+      e -> return $ Left $ "[HSQ-Interp-uncaught] " ++ show e
 
 --interpreter (Failed errMsg) = return $ Failed ("error: [HSQ-" ++ errMsg)
 
 
-runInterpreter :: Either String (Expr Range) -> OpEnv -> (Either String (Expr ()), OpEnv)
+runInterpreter :: Either String (Ast Range) -> OpEnv -> (Either String (Expr ()), OpEnv)
 runInterpreter ast = runState (interpreter ast)
 
 {- MAYBE LATER, implement type classes and types.

@@ -152,8 +152,8 @@ data Token
  -- Constants
  | T_BoolVal   Bool
  | T_IntVal    Int
- | T_FloatVal     Float
- | T_StringVal    ByteString
+ | T_FloatVal  Float
+ | T_StringVal ByteString
  | T_CharVal   Char
  -- Keywords
  | T_If
